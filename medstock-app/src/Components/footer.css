@@ -1,0 +1,88 @@
+/* Footer Section */
+footer {
+    background-color: #007bff;
+    color: white;
+    padding: 20px 10px;  /* Reduced padding for a more compact footer */
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    height: 10%;
+    width: 100%;
+    font-size: 14px; /* Smaller font size */
+  }
+  
+  footer .content {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  footer .logo-details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;  /* Reduced margin */
+  }
+  
+  footer .logo-details img {
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;  /* Reduced margin */
+  }
+  
+  footer .logo_name {
+    font-size: 18px;  /* Smaller font size */
+    font-weight: bold;
+    color: white;
+  }
+  
+  footer .link-boxes {
+    display: flex;
+    justify-content: center;
+    gap: 20px;  /* Reduced space between boxes */
+    margin-top: 10px;  /* Reduced margin */
+  }
+  
+  footer .box {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  footer .box li {
+    margin: 5px 0;  /* Reduced space between links */
+  }
+  
+  footer .box li a {
+    text-decoration: none;
+    color: white;
+    font-size: 14px;  /* Smaller font size for links */
+    transition: color 0.3s ease;
+  }
+  
+  footer .box li a:hover {
+    color: #f8f9fa;
+  }
+  
+  footer .box li a:active {
+    color: #0056b3;
+  }
+  
+  /* Mobile Responsiveness */
+  @media screen and (max-width: 768px) {
+    footer .link-boxes {
+      flex-direction: column;
+      align-items: center;
+       padding-right: 70px;
+    }
+  
+    footer .box {
+      margin-bottom: 10px;
+    }
+  
+    footer .box li {
+      margin: 4px 0;
+    }
+  }
+  
