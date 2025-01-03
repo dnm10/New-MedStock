@@ -1,0 +1,53 @@
+import React from 'react';
+import '../App.css';
+
+function FormPopup() {
+  return (
+    <>
+      <div className="blur-bg"></div>
+      <div className="form-popup">
+        <span className="close-btn material-symbols-rounded">close</span>
+
+        {/* Login Form */}
+        <div className="form-box login">
+          <div className="form-details">
+            <div>
+              <img src="mslogoed.png" alt="logo" />
+            </div>
+          </div>
+          <div className="form-content">
+            <h2>LOGIN</h2>
+            <form id="loginForm">
+              <div className="input-field">
+                <input type="email" id="loginEmail" required placeholder=" " />
+                <label>Email</label>
+              </div>
+              <div className="input-field">
+                <input type="password" id="loginPassword" required placeholder=" " />
+                <label>Password</label>
+              </div>
+              <div className="login-type">
+                <input type="radio" id="loginAdmin" name="loginType" value="Admin" required />
+                <label htmlFor="loginAdmin">Login as Admin</label>
+                <input type="radio" id="loginUser" name="loginType" value="User" required />
+                <label htmlFor="loginUser">Login as User</label>
+              </div>
+              <a href="#" className="forgot-pass-link">Forgot password?</a>
+              <button type="submit">Log In</button>
+            </form>
+            <div className="bottom-link">
+              Don't have an account? <a href="#" id="signup-link">Register</a>
+            </div>
+          </div>
+        </div>
+
+        {/* Signup Form */}
+        <div className="form-box signup">
+          {/* Same structure as login form */}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default FormPopup;
