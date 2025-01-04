@@ -3,10 +3,8 @@ import Header from './Components/Header';
 import Notifications from "./Components/Notifications";
 import FormPopup from './Components/FormPopup';
 import Sidebar from './Components/Sidebar';
-import HeroSection from './Components/HeroSection';
-import OverviewSection from './Components/OverviewSection';
-import BenefitsSection from './Components/BenefitsSection';
-import Footer from './Components/Footer';
+import Home from './Components/Home';
+import Inventory from './Components/Inventory';
 import './App.css';
 import {
   BrowserRouter as Router,
@@ -19,15 +17,18 @@ function App() {
     <div className="App">
       <Router>
       <Header />
+      
       <Routes>
-        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/" element={<Home/>} />
+      </Routes>
+      <Routes>
+        <Route path="/Notifications" element={<Notifications />} />
       </Routes>
       <FormPopup />
       <Sidebar />
-      <HeroSection />
-      <OverviewSection />
-      <BenefitsSection />
-      <Footer />
+      <Routes> 
+        <Route exact path="/Inventory" element={<Inventory/>}/>
+      </Routes>
       </Router>
     </div>
   );

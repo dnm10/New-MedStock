@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import '../App.css';
 import './Sidebar.css';
 import mslogo from '../Assets/mslogo.png';
+import { Link } from 'react-router-dom';
 
 function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -23,9 +24,9 @@ function Sidebar() {
         <h2><b>MedStock</b></h2>
       </div>
       <ul className="sidebar-links">
-        <li><a href="#"><span className="material-symbols-outlined">overview</span>Inventory</a></li>
+        <li><Link to="/Inventory"><span className="material-symbols-outlined">overview</span>Inventory</Link></li>
 
-        <li><a href="../Medicine/medicine.html"><span className="material-symbols-outlined">pill</span>Medicines</a></li>
+        <li><Link to="/Medicine"><span className="material-symbols-outlined">pill</span>Medicines</Link></li>
 
         <li><a href="orders.html"><span className="material-symbols-outlined"> inventory </span>Orders</a></li>
         

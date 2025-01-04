@@ -5,7 +5,7 @@ header {
     width: 100%;
     z-index: 10;
     padding: 0 10px;
-    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+    background-color: #ffffff;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     transition: padding-left 0.3s ease;
 }
