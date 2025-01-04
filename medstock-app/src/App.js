@@ -1,6 +1,5 @@
 import React from 'react';
 import Header from './Components/Header';
-import Home from "./Components/Home";
 import Notifications from "./Components/Notifications";
 import FormPopup from './Components/FormPopup';
 import Sidebar from './Components/Sidebar';
@@ -21,7 +20,6 @@ function App() {
       <Router>
       <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/notifications" element={<Notifications />} />
       </Routes>
       <FormPopup />

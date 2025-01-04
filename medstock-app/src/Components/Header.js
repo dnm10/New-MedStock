@@ -10,7 +10,7 @@ function Header() {
      
       <a className="navbar-brand">Smart Inventory Solutions</a>
 
-      <Link to="/Home" className="home-link">
+      <Link to="/" className="home-link">
         <span className="material-symbols-outlined">home</span>
       </Link>
 
