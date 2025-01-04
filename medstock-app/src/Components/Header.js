@@ -13,6 +13,11 @@ function Header() {
         <span className="material-symbols-outlined">home</span>
       </a>
 
+      <div class="search-container">
+          <input type="text" id="search" placeholder="Search..." />
+          <button onclick="searchFunction()">🔍</button>
+      </div>
+
       <a href="notifications.html" className="notification-link">
         <span className="material-symbols-outlined">notifications</span>
       </a>
