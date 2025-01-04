@@ -1,5 +1,7 @@
 import React from 'react'
 import '../App.css';
+import  './OverviewSection.css';
+import hp2 from '../Assets/hp2.jpg';
 
 export default function OverviewSection() {
   return (
@@ -19,7 +21,7 @@ export default function OverviewSection() {
             </h3>
         </div>
         <div className="image1-box animated image-animated">
-            <img src="hp2.jpg" alt="img1" className="first-image"/>
+            <img src={hp2} alt="img1" className="first-image"/>
         </div>
     </section>
 

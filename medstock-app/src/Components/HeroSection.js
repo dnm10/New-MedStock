@@ -1,5 +1,7 @@
 import React from 'react';
 import '../App.css';
+import './HeroSection.css';
+import hp1 from '../Assets/hp1.jpg';
 
 function HeroSection() {
   return (
@@ -9,7 +11,7 @@ function HeroSection() {
         <h3>"Monitor stock levels, manage orders, and stay updated with notifications"</h3>
       </div>
       <div className="hero-box">
-        <img src="hp1.jpg" alt="heroimg" className="hero-image" />
+        <img src={hp1}alt="heroimg" className="hero-image" />
       </div>
     </section>
   );

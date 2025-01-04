@@ -1,13 +1,14 @@
 import React from 'react'
 import '../App.css';
 import './footer.css';
+import mslogoed from '../Assets/mslogoed.png';
 export default function Footer() {
   return (
     <footer>
     <div className="content">
         <div className="top">
             <div className="logo-details">
-              <img src="mslogoed.png" alt="logo"/>
+              <img src={mslogoed} alt="logo"/>
                 <span className="logo_name">MedStock</span>
             </div>
         </div>

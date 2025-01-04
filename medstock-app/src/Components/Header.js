@@ -4,29 +4,20 @@ import './Header.css';
 function Header() {
   return (
     <header>
-      <nav class="navbar bg-body-tertiary">
-      <div class="container-fluid">
+      <nav className="navbar bg-body-tertiary">
+      <div className="container-fluid">
      
-      <a class="navbar-brand">Smart Inventory Solutions</a>
+      <a className="navbar-brand">Smart Inventory Solutions</a>
 
-      <a href="#" class="home-link">
-        <span class="material-symbols-outlined">home</span>
+      <a href="#" className="home-link">
+        <span className="material-symbols-outlined">home</span>
       </a>
 
-      
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-
-      
-      <a href="notifications.html" class="notification-link">
-        <span class="material-symbols-outlined">notifications</span>
+      <a href="notifications.html" className="notification-link">
+        <span className="material-symbols-outlined">notifications</span>
       </a>
 
-     
-      <button class="btn btn-outline-primary" id="signup-btn">SIGNUP</button>
-      <button class="btn btn-outline-secondary" id="login-btn">LOGIN</button>
+      <button className="btn btn-outline-primary" id="signup-btn">SIGNUP</button>
     </div>
     </nav>
   </header>

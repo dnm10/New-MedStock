@@ -1,11 +1,25 @@
-import React from 'react';
+import React, {useState} from 'react';
 import '../App.css';
+import './Sidebar.css';
+import mslogo from '../Assets/mslogo.png';
 
 function Sidebar() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsExpanded(true);
+    document.body.classList.add('sidebar-expanded');
+  };
+
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+    document.body.classList.remove('sidebar-expanded');
+  };
+
   return (
     <aside className="sidebar" >
       <div className="sidebar-header">
-        <img url="../Assets/mslogo.png" alt="mslogo" />
+        <img src={mslogo} alt="mslogo" />
         <h2><b>MedStock</b></h2>
       </div>
       <ul className="sidebar-links">

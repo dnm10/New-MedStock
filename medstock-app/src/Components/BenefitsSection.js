@@ -1,5 +1,7 @@
 import React from 'react'
 import '../App.css';
+import './BenefitsSection.css';
+import hp3 from '../Assets/hp3.jpg';
 
 export default function BenefitsSection() {
   return (
@@ -17,7 +19,7 @@ export default function BenefitsSection() {
       </h3>
       </div>
     <div className="image3-box">
-      <img src="../Assets/hp3.jpg" alt="img1" className="third-image"/>
+      <img src={hp3} alt="img1" className="third-image"/>
     </div>
   </section>
   )
