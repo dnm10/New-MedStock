@@ -1,7 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Inventory.css';
 
 export default function Inventory() {
+  const [inventory, setInventory] = useState([
+    { id: 1, name: 'Sample Item 1', category: 'Category A', quantity: 40, expiryDate: '2024-12-31', supplier: 'Supplier X' },
+    { id: 2, name: 'Sample Item 2', category: 'Category B', quantity: 25, expiryDate: '2025-01-15', supplier: 'Supplier Y' },
+    { id: 3, name: 'Sample Item 3', category: 'Category C', quantity: 55, expiryDate: '2024-11-30', supplier: 'Supplier Z' },
+    { id: 4, name: 'Sample Item 4', category: 'Category D', quantity: 45, expiryDate: '2024-10-20', supplier: 'Supplier W' },
+  ]);
+
+  const [filteredInventory, setFilteredInventory] = useState(inventory);
+
+  const handleSort = () => {
+    const sortBy = document.getElementById('sortOptions').value;
+    const sortedInventory = [...filteredInventory].sort((a, b) => {
+      if (sortBy === 'quantity') {
+        return a[sortBy] - b[sortBy];
+      } else if (sortBy === 'expiryDate') {
+        return new Date(a[sortBy]) - new Date(b[sortBy]);
+      } else {
+        return a[sortBy].localeCompare(b[sortBy]);
+      }
+    });
+    setFilteredInventory(sortedInventory);
+  };
+
+  const handleSearch = () => {
+    const query = document.getElementById('searchBox').value.toLowerCase();
+    const filteredItems = inventory.filter(item =>
+      Object.values(item)
+        .join(' ') // Join all values of the item object into a single string
+        .toLowerCase()
+        .includes(query)
+    );
+    setFilteredInventory(filteredItems);
+  };
+
   return (
     <>
       <div className="container">
@@ -15,7 +49,12 @@ export default function Inventory() {
 
         <div className="top-row">
           <div className="search-sort">
-            <input type="text" id="searchBox" placeholder="Search..." />
+            <input
+              type="text"
+              id="searchBox"
+              placeholder="Search..."
+              onChange={handleSearch}
+            />
           </div>
           <div className="sort-options">
             <label>Sort By: </label>
@@ -26,7 +65,7 @@ export default function Inventory() {
               <option value="expiryDate">Expiry Date</option>
               <option value="supplier">Supplier</option>
             </select>
-            <button id="sortBtn">Sort</button>
+            <button id="sortBtn" onClick={handleSort}>Sort</button>
           </div>
         </div>
 
@@ -43,54 +82,20 @@ export default function Inventory() {
             </tr>
           </thead>
           <tbody id="inventoryList">
-            <tr>
-              <td>1</td>
-              <td>Sample Item</td>
-              <td>Category A</td>
-              <td>10</td>
-              <td>2024-12-31</td>
-              <td>Supplier X</td>
-              <td>
-                <button className="edit-btn">Edit</button>
-                <button className="delete-btn">Delete</button>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Sample Item 2</td>
-              <td>Category B</td>
-              <td>20</td>
-              <td>2025-01-15</td>
-              <td>Supplier Y</td>
-              <td>
-                <button className="edit-btn">Edit</button>
-                <button className="delete-btn">Delete</button>
-              </td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Sample Item 3</td>
-              <td>Category C</td>
-              <td>5</td>
-              <td>2024-11-30</td>
-              <td>Supplier Z</td>
-              <td>
-                <button className="edit-btn">Edit</button>
-                <button className="delete-btn">Delete</button>
-              </td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td>Sample Item 4</td>
-              <td>Category D</td>
-              <td>15</td>
-              <td>2024-10-20</td>
-              <td>Supplier W</td>
-              <td>
-                <button className="edit-btn">Edit</button>
-                <button className="delete-btn">Delete</button>
-              </td>
-            </tr>
+            {filteredInventory.map((item, index) => (
+              <tr key={item.id}>
+                <td>{index + 1}</td>
+                <td>{item.name}</td>
+                <td>{item.category}</td>
+                <td>{item.quantity}</td>
+                <td>{item.expiryDate}</td>
+                <td>{item.supplier}</td>
+                <td>
+                  <button className="edit-btn">Edit</button>
+                  <button className="delete-btn">Delete</button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

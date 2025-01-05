@@ -18,7 +18,8 @@ h1 {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 25px;
+    margin-top: 5px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -45,8 +46,9 @@ h1 {
 }
 
 .search-sort {
-    flex-grow: 1;
-    padding-left: 490px;
+    flex-grow: 0.7;
+    padding-left: 400px;
+    padding-right: 40px;
     font-size: 13px;
 }
 
@@ -56,6 +58,8 @@ h1 {
     border: 1px solid #ddd;
     border-radius: 5px;
     transition: box-shadow 0.3s ease;
+    padding-right: 50px;
+    padding-top: 10px;
 }
 
 .search-sort input:focus, .sort-options select:focus, form input[type="text"]:focus, form input[type="number"]:focus, form input[type="date"]:focus, form input[type="file"]:focus, #removeItemDropdown:focus, select:focus {
@@ -64,9 +68,10 @@ h1 {
 }
 
 table {
-    width: 100%;
+    width: 90%;
     border-collapse: collapse;
     margin-top: 10px;
+    margin-left: 120px;
 }
 
 table th, table td {
