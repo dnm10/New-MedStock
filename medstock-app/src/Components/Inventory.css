@@ -34,7 +34,7 @@ h1 {
 }
 
 .controls button {
-    margin-right: 10px;
+    margin-right: 30px;
     font-size: 16px;
 }
 
@@ -42,24 +42,35 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
     margin-bottom: 20px;
 }
 
-.search-sort {
-    flex-grow: 0.7;
-    padding-left: 400px;
-    padding-right: 40px;
-    font-size: 13px;
-}
+.search-sort{
+    margin-left: 90px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 50%;
+  }
 
+  .sort-options{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 30%;
+  }
+
+  .sort-options #sortBtn{
+    margin-bottom: 6px;
+  }
 .search-sort input, .sort-options select, form input[type="text"], form input[type="number"], form input[type="date"], form input[type="file"], #removeItemDropdown, select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
     transition: box-shadow 0.3s ease;
-    padding-right: 50px;
-    padding-top: 10px;
+    font-size: 16px;
 }
 
 .search-sort input:focus, .sort-options select:focus, form input[type="text"]:focus, form input[type="number"]:focus, form input[type="date"]:focus, form input[type="file"]:focus, #removeItemDropdown:focus, select:focus {
@@ -70,8 +81,8 @@ h1 {
 table {
     width: 90%;
     border-collapse: collapse;
-    margin-top: 10px;
-    margin-left: 120px;
+    margin-top: 20px;
+    margin-left: 106px;
 }
 
 table th, table td {
