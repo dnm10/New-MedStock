@@ -5,11 +5,68 @@ export default function Inventory() {
   const [inventory, setInventory] = useState([
     { id: 1, name: 'Sample Item 1', category: 'Category A', quantity: 40, expiryDate: '2024-12-31', supplier: 'Supplier X' },
     { id: 2, name: 'Sample Item 2', category: 'Category B', quantity: 25, expiryDate: '2025-01-15', supplier: 'Supplier Y' },
-    { id: 3, name: 'Sample Item 3', category: 'Category C', quantity: 55, expiryDate: '2024-11-30', supplier: 'Supplier Z' },
+    { id: 3, name: 'Sample Item 3', category: 'Category C', quantity: 60, expiryDate: '2024-11-30', supplier: 'Supplier Z' },
     { id: 4, name: 'Sample Item 4', category: 'Category D', quantity: 45, expiryDate: '2024-10-20', supplier: 'Supplier W' },
+    { id: 5, name: 'Sample Item 5', category: 'Category R', quantity: 30, expiryDate: '2025-02-10', supplier: 'Supplier R' },
+    { id: 6, name: 'Sample Item 6', category: 'Category T', quantity: 50, expiryDate: '2025-03-05', supplier: 'Supplier B' },
+    { id: 7, name: 'Sample Item 7', category: 'Category H', quantity: 15, expiryDate: '2025-05-22', supplier: 'Supplier N' },
+    { id: 8, name: 'Sample Item 8', category: 'Category A', quantity: 35, expiryDate: '2024-09-18', supplier: 'Supplier C' },
+    { id: 9, name: 'Sample Item 9', category: 'Category F', quantity: 20, expiryDate: '2025-01-01', supplier: 'Supplier X' },
+    { id: 10, name: 'Sample Item 10', category: 'Category N', quantity: 80, expiryDate: '2024-12-25', supplier: 'Supplier L' },
+    { id: 11, name: 'Sample Item 11', category: 'Category E', quantity: 55, expiryDate: '2025-04-10', supplier: 'Supplier Z' },
+    { id: 12, name: 'Sample Item 12', category: 'Category G', quantity: 70, expiryDate: '2024-11-05', supplier: 'Supplier W' },
+
   ]);
 
   const [filteredInventory, setFilteredInventory] = useState(inventory);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newItem, setNewItem] = useState({
+    name: '',
+    category: '',
+    quantity: '',
+    expiryDate: '',
+    supplier: '',
+  });
+
+  const handleAddItem = () => {
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '' });
+  };
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setNewItem({ ...newItem, [id]: value });
+  };
+
+  const handleSaveItem = (e) => {
+    e.preventDefault();
+
+    const newItemWithId = {
+      ...newItem,
+      id: inventory.length + 1,
+      quantity: parseInt(newItem.quantity, 10),
+    };
+
+    const updatedInventory = [...inventory, newItemWithId];
+    setInventory(updatedInventory);
+    setFilteredInventory(updatedInventory);
+    closeAddModal();
+  };
+
+  const handleSearch = () => {
+    const query = document.getElementById('searchBox').value.toLowerCase();
+    const filteredItems = inventory.filter(item =>
+      Object.values(item)
+        .join(' ')
+        .toLowerCase()
+        .includes(query)
+    );
+    setFilteredInventory(filteredItems);
+  };
 
   const handleSort = () => {
     const sortBy = document.getElementById('sortOptions').value;
@@ -25,23 +82,12 @@ export default function Inventory() {
     setFilteredInventory(sortedInventory);
   };
 
-  const handleSearch = () => {
-    const query = document.getElementById('searchBox').value.toLowerCase();
-    const filteredItems = inventory.filter(item =>
-      Object.values(item)
-        .join(' ') // Join all values of the item object into a single string
-        .toLowerCase()
-        .includes(query)
-    );
-    setFilteredInventory(filteredItems);
-  };
-
   return (
     <>
       <div className="container">
         <h1>Inventory Overview</h1>
         <div className="controls">
-          <button id="addItemBtn">Add New Item</button>
+          <button id="addItemBtn" onClick={handleAddItem}>Add New Item</button>
           <button id="updateItemBtn">Update Item</button>
           <button id="removeItemBtn">Remove Item</button>
           <button id="reportBtn">Inventory Report</button>
@@ -78,10 +124,9 @@ export default function Inventory() {
               <th>Quantity</th>
               <th>Expiry Date</th>
               <th>Supplier</th>
-              <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="inventoryList">
+          <tbody>
             {filteredInventory.map((item, index) => (
               <tr key={item.id}>
                 <td>{index + 1}</td>
@@ -90,91 +135,69 @@ export default function Inventory() {
                 <td>{item.quantity}</td>
                 <td>{item.expiryDate}</td>
                 <td>{item.supplier}</td>
-                <td>
-                  <button className="edit-btn">Edit</button>
-                  <button className="delete-btn">Delete</button>
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div id="addItemModal" className="modal" style={{ display: 'none' }}>
-        <div className="modal-content">
-          <span className="close-btn">&times;</span>
-          <h2>Add New Item</h2>
-          <form id="addItemForm">
-            <label htmlFor="itemName">Item Name:</label>
-            <input type="text" id="itemName" required /><br />
+      {/* Add Item Modal */}
+      {showAddModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close-btn" onClick={closeAddModal}>&times;</span>
+            <h2>Add New Item</h2>
+            <form id="addItemForm" onSubmit={handleSaveItem}>
+              <label htmlFor="name">Item Name:</label>
+              <input
+                type="text"
+                id="name"
+                value={newItem.name}
+                onChange={handleInputChange}
+                required
+              /><br />
 
-            <label htmlFor="category">Category:</label>
-            <input type="text" id="category" required /><br />
+              <label htmlFor="category">Category:</label>
+              <input
+                type="text"
+                id="category"
+                value={newItem.category}
+                onChange={handleInputChange}
+                required
+              /><br />
 
-            <label htmlFor="quantity">Quantity:</label>
-            <input type="number" id="quantity" required /><br />
+              <label htmlFor="quantity">Quantity:</label>
+              <input
+                type="number"
+                id="quantity"
+                value={newItem.quantity}
+                onChange={handleInputChange}
+                required
+              /><br />
 
-            <label htmlFor="expiryDate">Expiry Date:</label>
-            <input type="date" id="expiryDate" required /><br />
+              <label htmlFor="expiryDate">Expiry Date:</label>
+              <input
+                type="date"
+                id="expiryDate"
+                value={newItem.expiryDate}
+                onChange={handleInputChange}
+                required
+              /><br />
 
-            <label htmlFor="supplier">Supplier:</label>
-            <input type="text" id="supplier" required /><br />
+              <label htmlFor="supplier">Supplier:</label>
+              <input
+                type="text"
+                id="supplier"
+                value={newItem.supplier}
+                onChange={handleInputChange}
+                required
+              /><br />
 
-            <label htmlFor="minStock">Minimum Stock Level:</label>
-            <input type="number" id="minStock" required /><br />
-
-            <label htmlFor="itemImage">Add Image:</label>
-            <input type="file" id="itemImage" /><br />
-
-            <button type="submit">Save Item</button>
-          </form>
-        </div>
-      </div>
-
-      <div id="removeModal" className="modal">
-        <div className="modal-content">
-          <span id="closeRemoveModal" className="close">&times;</span>
-          <h2>Remove Item</h2>
-
-          <label htmlFor="removeItemDropdown">Select Item to Remove:</label>
-          <select id="removeItemDropdown">
-            <option value="">--Select an Item--</option>
-          </select>
-
-          <p>Are you sure you want to remove this item: <strong id="removeItemName"></strong>?</p>
-
-          <div className="action-buttons">
-            <button id="confirmRemoveBtn">Confirm Remove</button>
-            <button id="cancelRemoveBtn">Cancel</button>
+              <button type="submit">Save Item</button>
+            </form>
           </div>
         </div>
-      </div>
-
-      <div id="updateItemModal" className="modal">
-        <div className="modal-content">
-          <span className="close-update-btn">&times;</span>
-          <h2>Update Item</h2>
-          <label htmlFor="updateItemSelect">Select Item to Update:</label>
-          <select id="updateItemSelect" required>
-            <option value="">-- Select an Item --</option>
-          </select>
-
-          <div id="updateItemDetails" style={{ display: 'none' }}>
-            <label htmlFor="updateItemName">Item Name:</label>
-            <input type="text" id="updateItemName" required />
-            <label htmlFor="updateCategory">Category:</label>
-            <input type="text" id="updateCategory" required />
-            <label htmlFor="updateQuantity">Quantity:</label>
-            <input type="number" id="updateQuantity" required />
-            <label htmlFor="updateExpiryDate">Expiry Date:</label>
-            <input type="date" id="updateExpiryDate" required />
-            <label htmlFor="updateSupplier">Supplier:</label>
-            <input type="text" id="updateSupplier" required />
-          </div>
-
-          <button id="confirmUpdateBtn">Confirm Update</button>
-        </div>
-      </div>
+      )}
     </>
   );
 }
