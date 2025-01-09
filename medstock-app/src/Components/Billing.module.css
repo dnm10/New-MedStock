@@ -1,19 +1,5 @@
-/* Reset styles for all elements */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-/* Body styles */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #e9f4ff;
-    padding: 20px;
-}
-
 /* Main container styles */
-.container {
+.Billing {
     max-width: 800px;
     margin: 0 auto;
     background-color: #fff;
@@ -28,7 +14,7 @@ header {
     margin-bottom: 20px;
 }
 
-h1 {
+.Billing h1 {
     color: #007BFF;
     font-size: 2.5rem;
     margin-bottom: 10px;
@@ -62,7 +48,7 @@ h2 {
 }
 
 /* Input field styles */
-input[type="text"], input[type="number"] {
+.Billing input[type="text"], .Billing input[type="number"] {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -71,12 +57,13 @@ input[type="text"], input[type="number"] {
     transition: border-color 0.3s;
 }
 
-input[type="text"]:focus, input[type="number"]:focus {
+.Billing input[type="text"]:focus, .Billing input[type="number"]:focus {
     border-color: #007BFF;
 }
 
+
 /* Button styles */
-button {
+.Billing button {
     width: 100%;
     padding: 10px;
     background-color: #007BFF;
@@ -88,7 +75,7 @@ button {
     transition: background-color 0.3s, transform 0.3s;
 }
 
-button:hover {
+.Billing button:hover {
     background-color: #0056b3;
     transform: translateY(-3px);
 }

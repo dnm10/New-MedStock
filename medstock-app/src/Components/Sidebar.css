@@ -1,9 +1,10 @@
+/* Sidebar styles */
 .sidebar {
-    position: fixed;
+    position: fixed; 
     top: 0;
     left: 0;
     height: 100%;
-    width: 85px;
+    width: 85px; 
     background-image: url('../Assets/image0.jpg');
     background-size: cover;
     background-position: center;
@@ -11,12 +12,13 @@
     flex-direction: column;
     padding: 25px 20px;
     overflow-x: hidden;
-    transition: width 0.4s ease;
+    transition: width 0.4s ease;  
     z-index: 10;
 }
 
+
 .sidebar:hover {
-    width: 260px;
+    width: 260px; 
 }
 
 .sidebar .sidebar-header {
@@ -36,6 +38,7 @@
     font-weight: 600;
     white-space: nowrap;
 }
+
 
 .sidebar-links {
     list-style: none;
@@ -62,6 +65,21 @@
     border-radius: 4px;
 }
 
-.sidebar-expanded header {
-    padding-left: 260px;
+.content {
+    margin-left: 85px;
+    transition: margin-left 0.4s ease;
+}
+
+.sidebar:hover + .content {
+    margin-left: 260px; 
+}
+
+
+body {
+    overflow-x: hidden;  
+}
+
+
+header {
+    padding-left: 85px;
 }

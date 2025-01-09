@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Inventory.css';
+import styles from './Inventory.module.css';
 
 export default function Inventory() {
   const [inventory, setInventory] = useState([
@@ -15,7 +15,6 @@ export default function Inventory() {
     { id: 10, name: 'Sample Item 10', category: 'Category N', quantity: 80, expiryDate: '2024-12-25', supplier: 'Supplier L' },
     { id: 11, name: 'Sample Item 11', category: 'Category E', quantity: 55, expiryDate: '2025-04-10', supplier: 'Supplier Z' },
     { id: 12, name: 'Sample Item 12', category: 'Category G', quantity: 70, expiryDate: '2024-11-05', supplier: 'Supplier W' },
-
   ]);
 
   const [filteredInventory, setFilteredInventory] = useState(inventory);
@@ -61,10 +60,11 @@ export default function Inventory() {
     const query = document.getElementById('searchBox').value.toLowerCase();
     const filteredItems = inventory.filter(item =>
       Object.values(item)
-        .join(' ')
-        .toLowerCase()
-        .includes(query)
+          .map(value => String(value).toLowerCase())
+          .join(' ')
+          .includes(query)
     );
+
     setFilteredInventory(filteredItems);
   };
 
@@ -76,7 +76,8 @@ export default function Inventory() {
       } else if (sortBy === 'expiryDate') {
         return new Date(a[sortBy]) - new Date(b[sortBy]);
       } else {
-        return a[sortBy].localeCompare(b[sortBy]);
+        return String(a[sortBy]).localeCompare(String(b[sortBy]));
+
       }
     });
     setFilteredInventory(sortedInventory);
@@ -84,17 +85,17 @@ export default function Inventory() {
 
   return (
     <>
-      <div className="container">
+      <div className={styles.inventory}>
         <h1>Inventory Overview</h1>
-        <div className="controls">
+        <div className={styles.controls}>
           <button id="addItemBtn" onClick={handleAddItem}>Add New Item</button>
           <button id="updateItemBtn">Update Item</button>
           <button id="removeItemBtn">Remove Item</button>
           <button id="reportBtn">Inventory Report</button>
         </div>
 
-        <div className="top-row">
-          <div className="search-sort">
+        <div className={styles.topRow}>
+          <div className={styles.searchSort}>
             <input
               type="text"
               id="searchBox"
@@ -102,7 +103,7 @@ export default function Inventory() {
               onChange={handleSearch}
             />
           </div>
-          <div className="sort-options">
+          <div className={styles.sortOptions}>
             <label>Sort By: </label>
             <select id="sortOptions">
               <option value="name">Name</option>
@@ -143,9 +144,9 @@ export default function Inventory() {
 
       {/* Add Item Modal */}
       {showAddModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close-btn" onClick={closeAddModal}>&times;</span>
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <span className={styles.closeBtn} onClick={closeAddModal}>&times;</span>
             <h2>Add New Item</h2>
             <form id="addItemForm" onSubmit={handleSaveItem}>
               <label htmlFor="name">Item Name:</label>

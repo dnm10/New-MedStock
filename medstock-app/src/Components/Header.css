@@ -21,6 +21,7 @@ header {
   font-size: 1.6rem;
   font-weight: bold;
   margin-left: 80px;
+  white-space: nowrap;
 }
 
 .container-fluid {
@@ -33,7 +34,7 @@ header {
 .home-link {
   margin-right: 6px;
   margin-bottom: 3px;
-  margin-left: 353px;
+  margin-left: 276px;
   margin-top: 7px;
 }
 

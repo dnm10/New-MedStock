@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import styles from './Billing.module.css';
 import '../App.css';
-import './Billing.css';
+
 
 const Billing = () => {
   const [billItems, setBillItems] = useState([]);
@@ -78,7 +79,7 @@ const Billing = () => {
   };
 
   return (
-    <div className="container">
+    <div className={styles.Billing}>
       <header>
         <h1>MedStock Billing System</h1>
       </header>
