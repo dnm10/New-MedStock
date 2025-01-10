@@ -29,7 +29,7 @@ const Billing = () => {
   };
 
   const generateInvoice = () => {
-    const billNumber = Math.floor(Math.random() * 1000000);
+    const billNumber = Math.floor(Math.random() * 1000);
     const date = new Date();
 
     const invoiceWindow = window.open('', '_blank', 'width=600,height=400');
@@ -80,9 +80,9 @@ const Billing = () => {
 
   return (
     <div className={styles.Billing}>
-      <header>
+      
         <h1>MedStock Billing System</h1>
-      </header>
+    
 
       <main>
         <section className="billing-form">

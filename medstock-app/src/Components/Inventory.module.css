@@ -83,7 +83,7 @@ table {
     width: 90%;
     border-collapse: collapse;
     margin-top: 20px;
-    margin-left: 106px;
+    margin-left: 37px;
 }
 
 table th, table td {
@@ -278,4 +278,6 @@ form button[type="submit"]:active {
     padding: 10px;
     text-align: left;
   }
+
+  
   
