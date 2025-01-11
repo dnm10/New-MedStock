@@ -91,7 +91,7 @@ h2 {
     margin-top: 20px;
 }
 
-table th, table td {
+.Billing table th, table td {
     padding: 10px;
     border: 1px solid #ccc;
     text-align: center;
@@ -101,6 +101,27 @@ table th {
     background-color: #007BFF;
     color: white;
 }
+
+.bill-summary-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-left: 50px;
+}
+
+.table-header-row {
+    background-color: #007BFF;
+    color: white;
+  }
+
+
+.table-header {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-weight: bold;
+  }
+
 
 /* Total amount styles */
 #total-amount {

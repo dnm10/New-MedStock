@@ -128,13 +128,13 @@ const Billing = () => {
 
         <section className="bill-summary">
           <h2>Bill Summary</h2>
-          <table>
+          <table className="bill-summary-table">
             <thead>
-              <tr>
-                <th>Medicine</th>
-                <th>Quantity</th>
-                <th>Price per Unit (₹)</th>
-                <th>Total (₹)</th>
+              <tr className="table-header-row">
+                <th className="table-header">Medicine</th>
+                <th className="table-header">Quantity</th>
+                <th className="table-header">Price per Unit (₹)</th>
+                <th className="table-header">Total (₹)</th>
               </tr>
             </thead>
             <tbody>
