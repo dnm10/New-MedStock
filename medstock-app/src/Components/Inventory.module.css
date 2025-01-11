@@ -60,13 +60,25 @@
     align-items: center;
     gap: 10px;
     width: 30%;
+    padding: 10px; /* Add some padding around the container */
+    background-color: #f0f8ff; /* Light blue background */
+    border: 1px solid #007bff; /* Blue border */
+    border-radius: 5px; /* Rounded corners */
+    width: fit-content; /* Adjust width to fit content */
+  }
+ 
+  .sort-options label {
+    font-size: 14px; /* Adjust font size */
+    font-weight: bold; /* Make the label text bold */
+    color: #007bff; /* Blue color for text */
+    margin: 0; /* Remove default margin */
   }
 
   .sort-options #sortBtn{
     margin-bottom: 6px;
   }
   .inventory input[type="text"], .inventory input[type="number"], .inventory input[type="date"], .inventory input[type="file"] {
-    width: 100%;
+    width: 50%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -83,7 +95,7 @@ table {
     width: 90%;
     border-collapse: collapse;
     margin-top: 20px;
-    margin-left: 37px;
+    margin-left: 90px;
 }
 
 table th, table td {
@@ -182,7 +194,9 @@ table td button {
 form {
     display: flex;
     flex-direction: column;
-    gap: 5px;    
+    background-color: #ffffff;
+    gap: 5px;  
+    width: 700px;  
 }
 
 form label {
