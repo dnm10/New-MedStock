@@ -148,7 +148,7 @@ const Billing = () => {
               ))}
             </tbody>
           </table>
-          <h3>Total Amount: ₹{totalAmount.toFixed(2)}</h3>
+          {/* <h3>Total Amount: ₹{totalAmount.toFixed(2)}</h3> */}
           <button onClick={generateInvoice}>Generate Invoice</button>
         </section>
       </main>
