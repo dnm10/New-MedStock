@@ -117,15 +117,15 @@ export default function Inventory() {
           </div>
         </div>
 
-        <table>
+        <table className="invent-table">
           <thead>
-            <tr>
-              <th>No.</th>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Expiry Date</th>
-              <th>Supplier</th>
+            <tr className="invent-header-row">
+              <th className="invent-header">No.</th>
+              <th className="invent-header">Item Name</th>
+              <th className="invent-header">Category</th>
+              <th className="invent-header">Quantity</th>
+              <th className="invent-header">Expiry Date</th>
+              <th className="invent-header">Supplier</th>
             </tr>
           </thead>
           <tbody>

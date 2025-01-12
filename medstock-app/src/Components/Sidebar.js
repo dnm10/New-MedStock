@@ -29,7 +29,7 @@ function Sidebar() {
 
         <li><Link to="/Medicine"><span className="material-symbols-outlined">pill</span>Medicines</Link></li>
 
-        <li><Link to="orders.html"><span className="material-symbols-outlined"> inventory </span>Orders</Link></li>
+        <li><Link to="/Orders"><span className="material-symbols-outlined"> inventory </span>Orders</Link></li>
         
         <li><i className="fa-sharp fa-light fa-file-chart-pie"></i><a href="suppliers.html"><span className="material-symbols-outlined"> local_shipping </span>Suppliers</a></li>
 
