@@ -2,9 +2,6 @@
     max-width: 2100px;
     margin: auto;
     background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .inventory h1 {
@@ -39,6 +36,7 @@
     font-size: 16px;
 }
 
+
 .top-row {
     display: flex;
     justify-content: space-between;
@@ -47,7 +45,7 @@
     margin-bottom: 20px;
 }
 
-.search-sort{
+.inventory .search-sort{
     margin-left: 90px;
     display: flex;
     align-items: center;
@@ -55,17 +53,18 @@
     width: 50%;
   }
 
-  .sort-options{
+.sort-options{
     display: flex;
     align-items: center;
     gap: 10px;
     width: 30%;
-  }
+}
 
-  .sort-options #sortBtn{
+.sort-options #sortBtn{
     margin-bottom: 6px;
-  }
-  .inventory input[type="text"], .inventory input[type="number"], .inventory input[type="date"], .inventory input[type="file"] {
+}
+  
+.inventory input[type="text"], .inventory input[type="number"], .inventory input[type="date"], .inventory input[type="file"] {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
@@ -179,13 +178,13 @@ table td button {
     font-size: 20px;
 }
 
-form {
+.inventory form {
     display: flex;
     flex-direction: column;
     gap: 5px;    
 }
 
-form label {
+.inventory form label {
     color: #007bff;
     font-weight: bold;
     margin-bottom: 2px;
