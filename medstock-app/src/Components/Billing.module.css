@@ -1,117 +1,115 @@
-/* Main container styles */
-.Billing {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-}
-
-/* Header styles */
-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
 .Billing h1 {
-    color: #007BFF;
+    margin-left: 90px;
     font-size: 2.5rem;
-    margin-bottom: 10px;
+    color: #0056b3;
 }
 
-h2 {
-    color: #333;
+.Billing h2 {
+    text-align: left; 
+    margin-left: 90px;
     font-size: 1.8rem;
-    margin-bottom: 15px;
+    color: #333;
 }
 
-/* Form and summary section styles */
+/* Main container styles */
+.Billing main {
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 1200px;
+    background: none;
+}
+
+/* Form and summary sections */
 .billing-form, .bill-summary {
     margin-bottom: 30px;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+    background-color: transparent;
+    border: none;
+    margin-left: 40px;
 }
 
-/* Input group styles */
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
+.Billing label {
+    color: #007bff;
     font-weight: bold;
-    color: #333;
+    margin-bottom: 15px;
+    text-align: left;
+    margin-left: 90px;
 }
 
-/* Input field styles */
-.Billing input[type="text"], .Billing input[type="number"] {
-    width: 90%;
+.Billing input[type="text"], 
+input[type="number"] {
+    width: calc(100% - 90px);
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
-    transition: border-color 0.3s;
-    margin-bottom: 10px;
     margin-top: 5px;
+    margin-left: 90px;
+    align-content: center;
+    box-sizing: border-box;
 }
 
-.Billing input[type="text"]:focus, .Billing input[type="number"]:focus {
+input[type="text"]:focus, 
+input[type="number"]:focus {
     border-color: #007BFF;
+    outline: none;
 }
-
 
 /* Button styles */
 .Billing button {
-    width: 50%;
-    padding: 10px;
-    margin-left: 190px;
-    margin-top: 15px;
+    width: calc(100% - 90px);
+    margin-left: 90px;
+    margin-top: 20px;
+    display: inline-block;
+    padding: 10px 20px;
     background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
-    font-size: 1.2rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
 }
 
 .Billing button:hover {
     background-color: #0056b3;
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 /* Table styles */
-.bill-summary table {
-    width: 100%;
+table {
+    width: calc(100% - 90px);
+    margin-left: 90px;
     border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 1rem;
+}
+
+.Billing h3{
     margin-top: 20px;
 }
 
-table th, table td {
+th, td {
     padding: 10px;
     border: 1px solid #ccc;
     text-align: center;
 }
 
-table th {
+th {
     background-color: #007BFF;
     color: white;
 }
 
-/* Total amount styles */
-#total-amount {
-    font-weight: bold;
-    color: #e74c3c;
-    font-size: 1.5rem;
+tr:nth-child(even) {
+    background-color: #f2f2f2;
 }
 
 /* Footer styles */
 footer {
     text-align: center;
+    padding: 10px 0;
+    background-color: black;
+    color: white;
     margin-top: 20px;
-    color: #ffffff;
+    font-size: 0.9rem;
 }
