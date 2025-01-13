@@ -67,6 +67,7 @@
   border: none;
   padding: 10px 20px;
   font-size: 15px;
+  margin-left: 500px;
   cursor: pointer;
   margin-bottom: 20px;
   margin-top: 10px;
@@ -94,7 +95,7 @@
   background-color: #a1ceff;
   padding: 20px;
   border-radius: 5px;
-  width: 400px;
+  width: 700px;
   margin-top: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -143,4 +144,42 @@
   background-color: #218838;
 }
 
-  
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.historyButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 15px;
+  margin-left: 100px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.historyButton:hover {
+  background-color: #0056b3;
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-left: 10px;
+}
+
+.historyTable th,
+.historyTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.historyTable th {
+  background-color: #181717;
+  text-align: left;
+}
