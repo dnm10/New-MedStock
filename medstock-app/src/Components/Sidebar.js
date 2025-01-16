@@ -31,7 +31,7 @@ function Sidebar() {
 
         <li><Link to="/Orders"><span className="material-symbols-outlined"> inventory </span>Orders</Link></li>
         
-        <li><i className="fa-sharp fa-light fa-file-chart-pie"></i><a href="suppliers.html"><span className="material-symbols-outlined"> local_shipping </span>Suppliers</a></li>
+        <li><Link to="/Supplier"><span className="material-symbols-outlined"> local_shipping </span>Suppliers</Link></li>
 
         <li><Link to="reports.html"><span className="material-symbols-outlined"> bar_chart </span>Reports</Link></li>
       

@@ -7,6 +7,7 @@ import Home from './Components/Home';
 import Inventory from './Components/Inventory';
 import Billing from './Components/Billing';
 import Orders from './Components/Orders';
+import Supplier from './Components/Supplier';
 import './App.css';
 import {
   BrowserRouter as Router,
@@ -26,6 +27,7 @@ function App() {
         <Route exact path="/Inventory" element={<Inventory/>}/>
         <Route path="/Billing" element={<Billing/>}/>
         <Route path="/Orders" element={<Orders/>}/>
+        <Route path="/Supplier" element={<Supplier/>}/>
       </Routes>
   
       <FormPopup />

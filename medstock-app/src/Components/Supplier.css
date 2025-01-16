@@ -1,0 +1,69 @@
+/* General Button Styles */
+button {
+    background-color: #007bff; /* Primary Blue */
+    color: white; /* Text Color */
+    border: none; /* No Border */
+    padding: 10px 15px; /* Padding */
+    font-size: 14px; /* Font Size */
+    font-weight: bold; /* Bold Text */
+    border-radius: 5px; /* Rounded Corners */
+    cursor: pointer; /* Pointer Cursor */
+    transition: all 0.3s ease; /* Smooth Transition */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle Shadow */
+  }
+  
+  /* Hover Effect */
+  button:hover {
+    background-color: #0056b3; /* Darker Blue */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly Larger Shadow */
+    transform: translateY(-2px); /* Lift Effect */
+  }
+  
+  /* Focused Button */
+  button:focus {
+    outline: none; /* Remove Default Outline */
+    box-shadow: 0 0 8px #80bdff; /* Blue Glow */
+  }
+  
+  /* Disabled Button */
+  button:disabled {
+    background-color: #d6d6d6; /* Light Gray */
+    color: #8a8a8a; /* Gray Text */
+    cursor: not-allowed; /* No Pointer Cursor */
+    box-shadow: none; /* No Shadow */
+  }
+  
+  /* Specific Button Variants */
+  .add-supplier-btn {
+    background-color: #007bff; /* Blue */
+    margin-bottom: 10px; /* Extra Space Below */
+  }
+  
+  .add-supplier-btn:hover {
+    background-color: #0056b3; /* Darker Blue */
+  }
+  
+  .edit-btn {
+    background-color: #17a2b8; /* Cyan */
+  }
+  
+  .edit-btn:hover {
+    background-color: #117a8b; /* Darker Cyan */
+  }
+  
+  .delete-btn {
+    background-color: #dc3545; /* Red */
+  }
+  
+  .delete-btn:hover {
+    background-color: #c82333; /* Darker Red */
+  }
+  
+  .order-history-btn {
+    background-color: #28a745; /* Green */
+  }
+  
+  .order-history-btn:hover {
+    background-color: #218838; /* Darker Green */
+  }
+  
