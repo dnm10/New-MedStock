@@ -2,7 +2,7 @@ import React from 'react';
 import Header from './Components/Header';
 import Notifications from "./Components/Notifications";
 import FormPopup from './Components/FormPopup';
-import SideBar from './Components/Sidebar';
+import SideBar from './Components/SideBar';
 import Home from './Components/Home';
 import Inventory from './Components/Inventory';
 import Billing from './Components/Billing';
