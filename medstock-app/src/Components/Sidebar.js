@@ -39,7 +39,7 @@ function Sidebar() {
 
         <li><Link to="notifications.html"><span className="material-symbols-outlined"> notifications </span>Notifications</Link></li>
       
-        <li><Link to="users.html"><span className="material-symbols-outlined"> group </span>Users</Link></li>
+        <li><Link to="/Users"><span className="material-symbols-outlined"> group </span>Users</Link></li>
       
         <li><Link to="profile.html"><span className="material-symbols-outlined"> account_circle </span>Profile</Link></li>
         

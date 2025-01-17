@@ -3,8 +3,21 @@ import "./Supplier.css";
 
 const Supplier = () => {
   const [suppliers, setSuppliers] = useState([
-    { id: 1, name: "ABC Pharma", contactPerson: "John Doe", phone: "1234567890", email: "abc@pharma.com", address: "123 Pharma Street" },
-    { id: 2, name: "XYZ Meds", contactPerson: "Jane Smith", phone: "9876543210", email: "xyz@meds.com", address: "456 Med Lane" },
+    { id: 1, name: "Shree Pharma", contactPerson: "Ravi Verma", phone: "1234567890", email: "ravi.verma@gmail.com", address: "123 Shree Lane, Delhi" },
+    { id: 2, name: "Jai Meds", contactPerson: "Vikram Singh", phone: "9876543210", email: "vikram.singh@gmail.com", address: "456 Jai Avenue, Mumbai" },
+    { id: 3, name: "MediCare Solutions", contactPerson: "Amit Sharma", phone: "9999999999", email: "amit.sharma@gmail.com", address: "12 Health Avenue, Mumbai" },
+    { id: 4, name: "Sankalp Pharma", contactPerson: "Rajesh Kumar", phone: "8888888888", email: "rajesh.kumar@gmail.com", address: "98 Med Street, Delhi" },
+    { id: 5, name: "Vibrant Health", contactPerson: "Arvind Patel", phone: "7777777777", email: "arvind.patel@gmail.com", address: "45 Wellness Road, Bangalore" },
+    { id: 6, name: "HealthFirst Pharmacy", contactPerson: "Ravi Mehra", phone: "6666666666", email: "ravi.mehra@gmail.com", address: "56 Medicorp Lane, Chennai" },
+    { id: 7, name: "CureMed Solutions", contactPerson: "Sunil Agarwal", phone: "5555555555", email: "sunil.agarwal@gmail.com", address: "78 Healing Road, Hyderabad" },
+    { id: 8, name: "PharmaCare", contactPerson: "Vikas Yadav", phone: "4444444444", email: "vikas.yadav@gmail.com", address: "29 Cure Complex, Pune" },
+    { id: 9, name: "Arogya Meds", contactPerson: "Pradeep Singh", phone: "3333333333", email: "pradeep.singh@gmail.com", address: "60 Wellness Park, Kolkata" },
+    { id: 10, name: "MedPlus Solutions", contactPerson: "Manoj Joshi", phone: "2222222222", email: "manoj.joshi@gmail.com", address: "11 Health Hub, Ahmedabad" },
+    { id: 11, name: "LifeCare Pharmaceuticals", contactPerson: "Naveen Reddy", phone: "1231231231", email: "naveen.reddy@gmail.com", address: "22 LifeCare Road, Chennai" },
+    { id: 12, name: "CureMed Pharmacy", contactPerson: "Aakash Gupta", phone: "9879879879", email: "aakash.gupta@gmail.com", address: "35 Health Tower, Bangalore" },
+    { id: 13, name: "MedWell", contactPerson: "Rajiv Chandra", phone: "5555555555", email: "rajiv.chandra@gmail.com", address: "78 Wellness Lane, Kolkata" },
+    { id: 14, name: "Sarvodaya Pharmaceuticals", contactPerson: "Anil Mishra", phone: "6666666666", email: "anil.mishra@gmail.com", address: "54 Sarvodaya Complex, Mumbai" },
+    { id: 15, name: "Rex Pharma", contactPerson: "Manoj Kumar", phone: "4444444444", email: "manoj.kumar@gmail.com", address: "12 Rex Street, Delhi" }
   ]);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -116,7 +129,7 @@ const Supplier = () => {
 
               <div className="modal-actions">
                 <button type="button" onClick={handleSaveSupplier}>Save</button>
-                <button type="button" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="button" className="cancel-btn" onClick={() => setModalOpen(false)}>Cancel</button>
               </div>
             </form>
           </div>
