@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import './Signup.css';
+import mslogo from '../Assets/mslogo.png';
+import styles from './Signup.module.css';
+import '../App.css';
 
 const Signup = ({ toggleForm }) => {
   const [formData, setFormData] = useState({
@@ -40,49 +42,57 @@ const Signup = ({ toggleForm }) => {
   };
 
   return (
-    <div className="form-box signup">
-      <div className="form-content">
-        <h2>SIGN UP</h2>
-        <form id="signupForm" onSubmit={handleSubmit}>
-          <div className="input-field">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter Email"
-              required
-            />
-            <label htmlFor="email">Email</label>
-          </div>
-          <div className="input-field">
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter Password"
-              required
-            />
-            <label htmlFor="password">Password</label>
-          </div>
-          <div className="input-field">
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password"
-              required
-            />
-            <label htmlFor="confirmPassword">Confirm Password</label>
-          </div>
-          <button type="submit">Sign Up</button>
-        </form>
-        <div className="bottom-link">
+    <div className={styles.Signup}>
+      {/* Left side for logo */}
+      <div className="logo-section">
+        <img src={mslogo} alt="Logo" className="logo" />
+      </div>
+
+      {/* Right side for form content */}
+      <div className="form-section">
+        <div className="form-content">
+          <h2>SIGN UP</h2>
+          <form id="signupForm" onSubmit={handleSubmit}>
+            <div className="input-field">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter Email"
+                required
+              />
+              <label htmlFor="email">Email</label>
+            </div>
+            <div className="input-field">
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter Password"
+                required
+              />
+              <label htmlFor="password">Password</label>
+            </div>
+            <div className="input-field">
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm Password"
+                required
+              />
+              <label htmlFor="confirmPassword">Confirm Password</label>
+            </div>
+            <button type="submit">Sign Up</button>
+          </form>
+          <div className="bottom-link">
             Already have an account?{' '}
             <a href="#" onClick={toggleForm}>Log In</a>
-    </div>
+          </div>
+        </div>
       </div>
     </div>
   );

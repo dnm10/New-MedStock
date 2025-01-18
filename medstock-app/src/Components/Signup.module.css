@@ -1,0 +1,124 @@
+/* Signup Page Specific Styles */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  flex-direction: row; /* Layout: logo on the left, form on the right */
+}
+
+.logo-section {
+  flex: 1; /* Takes 1/3 of the space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #2196F3; /* Color for the logo section */
+  height: 100%;
+  padding: 20px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.logo {
+  max-width: 80%; /* Adjust logo size */
+  height: auto;
+}
+
+.form-section {
+  flex: 2; /* Takes 2/3 of the space */
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.form-content {
+  width: 100%;
+  max-width: 400px; /* Constrain max width of form */
+}
+
+.form-content h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.input-field {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-field input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.input-field label {
+  position: absolute;
+  top: -12px;
+  left: 10px;
+  font-size: 14px;
+  color: #777;
+  background-color: white;
+  padding: 0 5px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #1976D2;
+}
+
+.bottom-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.bottom-link a {
+  color: #2196F3;
+  text-decoration: none;
+}
+
+.bottom-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+  .signup-container {
+    flex-direction: column; /* Stack logo and form vertically */
+  }
+
+  .logo-section {
+    height: 150px; /* Adjust logo section height */
+    width: 100%;
+  }
+
+  .form-section {
+    width: 90%;
+    padding: 30px;
+  }
+
+  .logo {
+    max-width: 60%;
+  }
+}

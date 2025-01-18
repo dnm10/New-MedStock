@@ -1,4 +1,4 @@
-header {
+.header{
     position: sticky;
     top: 0;
     left: 0;
@@ -44,7 +44,7 @@ header {
   margin-top: 7px;
 
 }
-.search-container {
+.header,.search-container {
   display: flex;
   align-items: center;
   margin-right: 6px;
