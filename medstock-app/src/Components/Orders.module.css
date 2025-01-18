@@ -61,20 +61,26 @@
   padding: 20px;
 }
 
-.addOrderButton {
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-left: 472px;
+}
+.addOrderButton ,.orderHistoryButton{
   background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 20px;
   font-size: 15px;
-  margin-left: 500px;
+  
   cursor: pointer;
   margin-bottom: 20px;
   margin-top: 10px;
   border-radius: 5px;
 }
 
-.addOrderButton:hover {
+.addOrderButton:hover, .orderhistoryButton:hover {
   background-color: #0056b3;
 }
 
@@ -144,29 +150,6 @@
   background-color: #218838;
 }
 
-.buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.historyButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 15px;
-  margin-left: 100px;
-  cursor: pointer;
-  margin-bottom: 20px;
-  margin-top: 10px;
-  border-radius: 5px;
-}
-
-.historyButton:hover {
-  background-color: #0056b3;
-}
-
 .historyTable {
   width: 100%;
   border-collapse: collapse;
@@ -184,7 +167,7 @@
   text-align: left;
 }
 
-.cards {
+.statsCards {
   display: flex; /* Aligns items in a row */
   gap: 15px; /* Space between the cards */
   margin-bottom: 20px;
