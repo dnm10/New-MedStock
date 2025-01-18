@@ -83,6 +83,7 @@ header {
   font-size: 17px;
   font-weight: 600;
   padding: 6px 18px;
+  margin-bottom: 30px;
   border-radius: 5px;
   cursor: pointer;
   transition: 0.15s ease;

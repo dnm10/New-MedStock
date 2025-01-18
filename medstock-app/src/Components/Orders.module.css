@@ -183,3 +183,53 @@
   background-color: #181717;
   text-align: left;
 }
+
+.cards {
+  display: flex; /* Aligns items in a row */
+  gap: 15px; /* Space between the cards */
+  margin-bottom: 20px;
+  justify-content: center; /* Centers the cards horizontally */
+}
+
+.card {
+  border-radius: 8px;
+  padding: 20px 15px;
+  padding-top: 35px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  text-align: center;
+  width: 250px;
+  height: 130px;
+  color: white; /* Ensures text is visible on colored backgrounds */
+}
+
+/* Styling for card titles */
+.card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Styling for card numbers */
+.card p {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Background colors for each card */
+.card:nth-child(1) {
+  background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
+}
+
+.card:nth-child(2) {
+  background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
+}
+
+.card:nth-child(3) {
+  background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
+}
+
+/* Optional hover effect */
+.card:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Darker shadow */
+}

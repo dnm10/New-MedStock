@@ -130,53 +130,93 @@ table td button {
 .delete-btn:hover {
     background-color: #e53935;
 }
-
+/* Modal Overlay */
 .modal {
-    display: none;
     position: fixed;
-    z-index: 1;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-    background-color: #ffffff;
-    margin: 10% auto;
-    padding: 10px;
-    border: 1px solid #007bff;
-    width: 35%;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  /* Modal Content */
+  .modalContent {
+    background-color: #a1ceff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 500px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     position: relative;
-    transition: all 0.3s ease-in-out;
-}
-
-.modal-content:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.close-btn, .close-update-btn {
-    color: #007bff;
-    float: right;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.close-btn:hover, .close-update-btn:hover {
-    color: #0056b3;
-}
-
-.modal-content h2 {
-    text-align: center;
-    color: #007bff;
-    margin-bottom: 10px;
+    text-align: left;
+  }
+  
+  /* Close Button */
+  .closeBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
     font-size: 20px;
-}
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: #003f7f;
+  }
+  
+  .closeBtn:hover {
+    color: #0056b3;
+  }
+  
+  /* Form Styling */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 5px;
+    height: 550px;
+    margin-top: 100px;
+  }
+  
+  label {
+    font-weight: bold;
+    color: #003f7f;
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  /* Button Styles */
+  button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    align-self: flex-end;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
 
 .inventory form {
     display: flex;
@@ -280,5 +320,55 @@ form button[type="submit"]:active {
     text-align: left;
   }
 
+  .cards {
+    display: flex; /* Aligns items in a row */
+    flex-wrap: nowrap; /* Prevents wrapping to the next line */
+    gap: 15px; /* Space between the cards */
+    margin-bottom: 20px;
+    justify-content: center; /* Centers the cards horizontally */
+    align-items: center; /* Aligns items vertically if needed */
+  }
   
+  .card {
+    border-radius: 8px;
+    padding: 20px 15px;
+    padding-top: 35px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center;
+    width: 250px;
+    height: 130px;
+    color: white; /* Ensures text is visible on colored backgrounds */
+  }
+  
+  /* Styling for card titles */
+  .card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  /* Styling for card numbers */
+  .card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  /* Background colors for each card */
+  .card:nth-child(1) {
+    background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
+  }
+  
+  .card:nth-child(2) {
+    background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
+  }
+  
+  .card:nth-child(3) {
+    background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
+  }
+  
+  /* Optional hover effect */
+  .card:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Darker shadow */
+  }
   
