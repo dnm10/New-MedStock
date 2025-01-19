@@ -1,0 +1,80 @@
+/* Main container for the reports page */
+.Reports {
+    max-width: 2100px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    min-height: 100vh;
+  }
+  
+  /* Header Section */
+  .Reports h1 {
+    text-align: center;
+    margin-left: 89px;
+    margin-bottom: 20px;
+    padding: 20px 0;
+    background-color:#3056ff;
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .Overview{
+    display: flex; /* Aligns items in a row */
+    flex-wrap: nowrap; /* Prevents wrapping to the next line */
+    gap: 15px; /* Space between the cards */
+    margin-bottom: 20px;
+    margin-left: 92px;
+    justify-content: center; /* Centers the cards horizontally */
+    align-items: center; /* Aligns items vertically if needed */
+  }
+
+  .Card {
+    border-radius: 8px;
+    padding: 20px 15px;
+    padding-top: 35px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center;
+    width: 250px;
+    height: 130px;
+    color: white; /* Ensures text is visible on colored backgrounds */
+  }
+
+  /* Styling for card titles */
+  .Card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  /* Styling for card numbers */
+  .Card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  /* Background colors for each card */
+  .Card:nth-child(1) {
+    background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
+  }
+
+  .Card:nth-child(2) {
+    background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
+  }
+
+  .Card:nth-child(3) {
+    background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
+  }
+  .Card:nth-child(4) {
+    background: linear-gradient(135deg, #97148e, #dd44c4); 
+  }
+
+  /* Optional hover effect */
+  .Card:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Darker shadow */
+  }
+
+  
