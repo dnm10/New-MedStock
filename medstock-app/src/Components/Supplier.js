@@ -76,6 +76,19 @@ const Supplier = () => {
         <button onClick={handleAddSupplier} className="add-supplier-btn">Add New Supplier</button>
       </header>
 
+      {/* Supplier Metrics Cards */}
+      <div className="supplierCards">
+        <div className="supplierCard">
+          <h3>Total Suppliers</h3>
+          <p>{suppliers.length}</p>
+        </div>
+        <div className="supplierCard">
+          <h3>Active Suppliers</h3>
+          <p>{suppliers.length}</p> {/* Replace with actual active count if available */}
+        </div>
+      
+      </div>
+
       <table className="suppliers-table">
         <thead>
           <tr>
@@ -97,11 +110,11 @@ const Supplier = () => {
               <td>{supplier.phone}</td>
               <td>{supplier.email}</td>
               <td>{supplier.address}</td>
-                        <td>
-            <button className="edit-btn" onClick={() => handleEditSupplier(supplier)}>Edit</button>
-            <button className="delete-btn" onClick={() => handleDeleteSupplier(supplier.id)}>Delete</button>
-            <button className="order-history-btn" onClick={() => handleOrderHistory(supplier)}>Order History</button>
-            </td>
+              <td>
+                <button className="edit-btn" onClick={() => handleEditSupplier(supplier)}>Edit</button>
+                <button className="delete-btn" onClick={() => handleDeleteSupplier(supplier.id)}>Delete</button>
+                <button className="order-history-btn" onClick={() => handleOrderHistory(supplier)}>Order History</button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -140,4 +153,3 @@ const Supplier = () => {
 };
 
 export default Supplier;
-

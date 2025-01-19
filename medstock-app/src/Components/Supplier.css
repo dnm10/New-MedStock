@@ -115,6 +115,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 15px; /* Spacing Between Fields */
+  overflow-y: scroll; /* Enable scrolling */
 }
 
 /* Form Labels */
@@ -178,4 +179,57 @@ button {
 
 .modal-content .modal-actions button.cancel-btn:hover {
   background-color: #e0e0e0; /* Darker Gray */
+}
+
+
+.supplierStats {
+  display: flex; /* Aligns items in a row */
+  gap: 15px; /* Space between the cards */
+  margin-bottom: 20px; /* Space below the card row */
+  justify-content: center; /* Centers the cards horizontally */
+  
+}
+
+.supplierCard {
+  border-radius: 8px;
+  padding: 20px 15px;
+  padding-top: 35px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  text-align: center;
+  width: 250px;
+  height: 130px;
+  color: white; /* Ensures text is visible on colored backgrounds */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth animation */
+}
+
+
+
+/* Styling for card metrics */
+.supplierCard p {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Background colors for cards */
+.supplierCard:nth-child(1) {
+  background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
+}
+
+.supplierCard:nth-child(2) {
+  background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
+}
+
+.supplierCard:nth-child(3) {
+  background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
+}
+
+.supplierCard:nth-child(4) {
+  background: linear-gradient(135deg, #FFC107, #FFD54F); /* Yellow tones */
+}
+
+/* Hover effect */
+.supplierCard:hover {
+  transform: translateY(-8px); /* Lift the card */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Darker shadow */
 }
