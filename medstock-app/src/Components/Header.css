@@ -1,20 +1,26 @@
-.header{
-    position: sticky;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
-    padding: 0 10px;
-    background-color: #fff;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    transition: padding-left 0.3s ease;
+.header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  padding: 0 10px;
+  background-color: #fff;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  transition: padding-left 0.3s ease;
 }
 
 .navbar {
+  position: sticky; /* Explicitly make the navbar sticky */
+  top: 0; /* Aligns the sticky position to the top */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 10px 20px; /* Adjust padding for better spacing */
+  background-color: #ffffff; /* Inherit background for better visibility */
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px; /* Adds a soft shadow to the navbar */
+  z-index: 5; /* Ensures the navbar is above other content */
+  height: 100px;
 }
 
 .navbar-brand {
@@ -61,17 +67,17 @@
 
 .search-container button {
   padding: 7px 10px;
-  margin-left: -2px;
+  margin-left: 2px;
   background-color: #ffffff;
   color: #fff;
-  border-color: #345aff;
+  
   border-radius: 0 4px 4px 0;
   cursor: pointer;
   height: 38.5px;
 }
 
 .search-container button:hover {
-  background-color: #4ba1fc;
+  background-color: #ffffff;
 }
 
 #signup-btn {
@@ -83,7 +89,7 @@
   font-size: 17px;
   font-weight: 600;
   padding: 6px 18px;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   border-radius: 5px;
   cursor: pointer;
   transition: 0.15s ease;

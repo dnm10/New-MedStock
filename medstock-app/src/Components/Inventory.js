@@ -20,6 +20,9 @@ export default function Inventory() {
 
   const [filteredInventory, setFilteredInventory] = useState(inventory);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
   const [newItem, setNewItem] = useState({
     name: '',
     category: '',
@@ -28,16 +31,24 @@ export default function Inventory() {
     supplier: '',
   });
 
+  const [selectedItem, setSelectedItem] = useState('');
+
   // Calculating stock data for cards
   const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
   const lowStockItems = inventory.filter(item => item.quantity < 20).length;
-  const categories = [...new Set(inventory.map(item => item.category))].length+1;
+  const categories = [...new Set(inventory.map(item => item.category))].length + 1;
 
   const handleAddItem = () => setShowAddModal(true);
   const closeAddModal = () => {
     setShowAddModal(false);
     setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '' });
   };
+
+  const handleRemoveItem = () => setShowRemoveModal(true);
+  const closeRemoveModal = () => setShowRemoveModal(false);
+
+  const handleUpdateItem = () => setShowUpdateModal(true);
+  const closeUpdateModal = () => setShowUpdateModal(false);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -78,6 +89,25 @@ export default function Inventory() {
     setFilteredInventory(sortedInventory);
   };
 
+  const handleRemoveSelectedItem = () => {
+    const updatedInventory = inventory.filter(item => item.id !== selectedItem);
+    setInventory(updatedInventory);
+    setFilteredInventory(updatedInventory);
+    closeRemoveModal();
+  };
+
+  const handleUpdateItemDetails = (e) => {
+    e.preventDefault();
+    const updatedInventory = inventory.map(item =>
+      item.id === selectedItem
+        ? { ...item, name: newItem.name, category: newItem.category, quantity: newItem.quantity, expiryDate: newItem.expiryDate, supplier: newItem.supplier }
+        : item
+    );
+    setInventory(updatedInventory);
+    setFilteredInventory(updatedInventory);
+    closeUpdateModal();
+  };
+
   return (
     <>
       <div className={styles.inventory}>
@@ -102,8 +132,8 @@ export default function Inventory() {
         {/* Controls */}
         <div className={styles.controls}>
           <button id="addItemBtn" onClick={handleAddItem}>Add New Item</button>
-          <button id="updateItemBtn">Update Item</button>
-          <button id="removeItemBtn">Remove Item</button>
+          <button id="updateItemBtn" onClick={handleUpdateItem}>Update Item</button>
+          <button id="removeItemBtn" onClick={handleRemoveItem}>Remove Item</button>
         </div>
 
         {/* Search and Sort */}
@@ -174,6 +204,49 @@ export default function Inventory() {
               <label htmlFor="supplier">Supplier:</label>
               <input type="text" id="supplier" value={newItem.supplier} onChange={handleInputChange} required />
               <button type="submit">Save Item</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Item Modal */}
+      {showRemoveModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <span className={styles.closeBtn} onClick={closeRemoveModal}>&times;</span>
+            <h2>Select Item to Remove</h2>
+            <select
+              onChange={(e) => setSelectedItem(Number(e.target.value))}
+              value={selectedItem}
+            >
+              <option value="">Select Item</option>
+              {inventory.map(item => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+            <button onClick={handleRemoveSelectedItem}>Remove Item</button>
+          </div>
+        </div>
+      )}
+
+      {/* Update Item Modal */}
+      {showUpdateModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <span className={styles.closeBtn} onClick={closeUpdateModal}>&times;</span>
+            <h2>Update Item</h2>
+            <form id="updateItemForm" onSubmit={handleUpdateItemDetails}>
+              <label htmlFor="name">Item Name:</label>
+              <input type="text" id="name" value={newItem.name} onChange={handleInputChange} required />
+              <label htmlFor="category">Category:</label>
+              <input type="text" id="category" value={newItem.category} onChange={handleInputChange} required />
+              <label htmlFor="quantity">Quantity:</label>
+              <input type="number" id="quantity" value={newItem.quantity} onChange={handleInputChange} required />
+              <label htmlFor="expiryDate">Expiry Date:</label>
+              <input type="date" id="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
+              <label htmlFor="supplier">Supplier:</label>
+              <input type="text" id="supplier" value={newItem.supplier} onChange={handleInputChange} required />
+              <button type="submit">Update Item</button>
             </form>
           </div>
         </div>

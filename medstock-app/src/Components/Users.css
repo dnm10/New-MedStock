@@ -117,21 +117,42 @@
   }
   
   /* Form */
-  .modal-content form {
-    display: flex;
-    flex-direction: column;
-    height: 650px;
-  }
+
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh; /* Limit the form height to 90% of the viewport height */
+  overflow-y: scroll; /* Enable scrolling */
+  padding: 20px; /* Optional: Add padding for better spacing */
+  box-sizing: border-box; /* Ensure padding is included in height calculation */
+}
+
+/* Hide the scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+.modal-content form::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide the scrollbar for Firefox */
+.modal-content form {
+  scrollbar-width: none; /* Firefox-specific */
+}
+
+/* Ensure scrolling is functional */
+.modal-content form:focus {
+  outline: none;
+}
+
   
   .modal-content label {
-    margin-top: 5px;
+    margin-top: 1px;
     margin-bottom: none;
     font-weight: bold;
     color: #003f7f;
   }
   
   .modal-content input, .modal-content select {
-    margin-top: 5px;
+    margin-top: 1px;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
