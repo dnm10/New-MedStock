@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import '../App.css';
-import './Sidebar.css';
+import './SideBar.css';
 import mslogo from '../Assets/mslogo.png';
 import { Link } from 'react-router-dom';
 
