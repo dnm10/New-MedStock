@@ -4,7 +4,7 @@ import '../App.css';
 
 export default function Inventory() {
   const [inventory, setInventory] = useState([
-    { id: 1, name: 'Sample Item 1', category: 'Category A', quantity: 40, expiryDate: '2024-12-31', supplier: 'Supplier X' },
+    { id: 1, name: 'Sample item 1', category: 'Category A', quantity: 40, expiryDate: '2024-12-31', supplier: 'Supplier X' },
     { id: 2, name: 'Sample Item 2', category: 'Category B', quantity: 25, expiryDate: '2025-01-15', supplier: 'Supplier Y' },
     { id: 3, name: 'Sample Item 3', category: 'Category C', quantity: 60, expiryDate: '2024-11-30', supplier: 'Supplier Z' },
     { id: 4, name: 'Sample Item 4', category: 'Category D', quantity: 45, expiryDate: '2024-10-20', supplier: 'Supplier W' },
