@@ -33,19 +33,19 @@ function Sidebar() {
         
         <li><Link to="/Supplier"><span className="material-symbols-outlined"> local_shipping </span>Suppliers</Link></li>
 
-        <li><Link to="reports.html"><span className="material-symbols-outlined"> bar_chart </span>Reports</Link></li>
+        <li><Link to="/Reports"><span className="material-symbols-outlined"> bar_chart </span>Reports</Link></li>
       
         <li><Link to="/Billing"><span className="material-symbols-outlined"> receipt_long </span>Billing</Link></li>
 
-        <li><Link to="notifications.html"><span className="material-symbols-outlined"> notifications </span>Notifications</Link></li>
+        <li><Link to="/Notifications"><span className="material-symbols-outlined"> notifications </span>Notifications</Link></li>
       
         <li><Link to="/Users"><span className="material-symbols-outlined"> group </span>Users</Link></li>
       
-        <li><Link to="profile.html"><span className="material-symbols-outlined"> account_circle </span>Profile</Link></li>
+        <li><Link to="/Profile"><span className="material-symbols-outlined"> account_circle </span>Profile</Link></li>
         
-        <li><Link to="settings.html"><span className="material-symbols-outlined"> settings </span>Settings</Link></li>
+        <li><Link to="/Settings"><span className="material-symbols-outlined"> settings </span>Settings</Link></li>
       
-        <li><Link to="logout.html"><span className="material-symbols-outlined"> logout </span>Logout</Link></li>
+        <li><Link to="/Logout"><span className="material-symbols-outlined"> logout </span>Logout</Link></li>
       </ul>
     </aside>
   );
