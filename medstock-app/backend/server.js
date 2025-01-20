@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const con = require('./connection'); // Import the MySQL connection
 
 const app = express();
-const port = 5000;
+const port = 3002;
 
 // Middleware
 app.use(cors());
@@ -20,7 +20,7 @@ con.connect((err) => {
 });
 
 // GET inventory items
-app.get('/api/inventory', (req, res) => {
+app.get('/Inventory', (req, res) => {
   con.query('SELECT * FROM Inventory', (err, results) => {
     if (err) {
       return res.status(500).send('Error fetching inventory');
@@ -30,7 +30,7 @@ app.get('/api/inventory', (req, res) => {
 });
 
 // Add new inventory item
-app.post('/api/inventory', (req, res) => {
+app.post('/Inventory', (req, res) => {
   const { ItemID, ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate } = req.body;
   const query = 'INSERT INTO Inventory (ItemID, ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate) VALUES (?, ?, ?, ?, ?, ?)';
   
@@ -45,7 +45,7 @@ app.post('/api/inventory', (req, res) => {
 });
 
 // Update inventory item
-app.put('/api/inventory/:id', (req, res) => {
+app.put('/Inventory/:id', (req, res) => {
   const { ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate, ReorderStatus } = req.body;
   const query = 'UPDATE Inventory SET ItemName = ?, Category = ?, CurrentStock = ?, MinimumStockLevel = ?, ExpiryDate = ?, ReorderStatus = ? WHERE ItemID = ?';
 
@@ -66,7 +66,7 @@ app.put('/api/inventory/:id', (req, res) => {
 });
 
 // Delete inventory item
-app.delete('/api/inventory/:id', (req, res) => {
+app.delete('/Inventory/:id', (req, res) => {
   const query = 'DELETE FROM Inventory WHERE ItemID = ?';
   
   con.query(query, [req.params.id], (err, result) => {

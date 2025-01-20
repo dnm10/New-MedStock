@@ -3,20 +3,7 @@ import styles from './Inventory.module.css';
 import '../App.css';
 
 export default function Inventory() {
-  const [inventory, setInventory] = useState([
-    { id: 1, name: 'Sample item 1', category: 'Category A', quantity: 40, expiryDate: '2024-12-31', supplier: 'Supplier X' },
-    { id: 2, name: 'Sample Item 2', category: 'Category B', quantity: 25, expiryDate: '2025-01-15', supplier: 'Supplier Y' },
-    { id: 3, name: 'Sample Item 3', category: 'Category C', quantity: 60, expiryDate: '2024-11-30', supplier: 'Supplier Z' },
-    { id: 4, name: 'Sample Item 4', category: 'Category D', quantity: 45, expiryDate: '2024-10-20', supplier: 'Supplier W' },
-    { id: 5, name: 'Sample Item 5', category: 'Category R', quantity: 30, expiryDate: '2025-02-10', supplier: 'Supplier R' },
-    { id: 6, name: 'Sample Item 6', category: 'Category T', quantity: 15, expiryDate: '2025-03-05', supplier: 'Supplier B' },
-    { id: 7, name: 'Sample Item 7', category: 'Category H', quantity: 15, expiryDate: '2025-05-22', supplier: 'Supplier N' },
-    { id: 8, name: 'Sample Item 8', category: 'Category A', quantity: 35, expiryDate: '2024-09-18', supplier: 'Supplier C' },
-    { id: 9, name: 'Sample Item 9', category: 'Category F', quantity: 20, expiryDate: '2025-01-01', supplier: 'Supplier X' },
-    { id: 10, name: 'Sample Item 10', category: 'Category N', quantity: 80, expiryDate: '2024-12-25', supplier: 'Supplier L' },
-    { id: 11, name: 'Sample Item 11', category: 'Category E', quantity: 55, expiryDate: '2025-04-10', supplier: 'Supplier Z' },
-    { id: 12, name: 'Sample Item 12', category: 'Category G', quantity: 70, expiryDate: '2024-11-05', supplier: 'Supplier W' },
-  ]);
+  const [inventory, setInventory] = useState([]);
 
   const [filteredInventory, setFilteredInventory] = useState(inventory);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -47,8 +34,27 @@ export default function Inventory() {
   const handleRemoveItem = () => setShowRemoveModal(true);
   const closeRemoveModal = () => setShowRemoveModal(false);
 
-  const handleUpdateItem = () => setShowUpdateModal(true);
-  const closeUpdateModal = () => setShowUpdateModal(false);
+  const handleUpdateItem = () => {
+    if(selectedItem){
+      const item = inventory.find((item)=> item.id === selectedItem);
+      setNewItem({
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        expiryDate: item.expiryDate,
+        supplier: item.supplier,
+      });
+      setShowUpdateModal(true);
+    }
+    else{
+      alert("Please select an item to update!");
+    }
+  };
+
+  const closeUpdateModal = () => {
+    setShowUpdateModal(false);
+    setNewItem({name: '',category: '',quantity: '',expiryDate: '',supplier: ''});
+  };
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
