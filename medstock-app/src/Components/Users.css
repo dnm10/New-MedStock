@@ -135,6 +135,7 @@
 
 /* Hide the scrollbar for Firefox */
 .modal-content form {
+  margin-top: 10px;
   scrollbar-width: none; /* Firefox-specific */
 }
 

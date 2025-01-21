@@ -1,0 +1,70 @@
+/* Notifications.css */
+.notifications {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .notification-list {
+    display: flex;
+    justify-content: space-around; /* To space out the cards evenly */
+    gap: 20px;
+  }
+  
+  .notification-card {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px; /* Makes the card square-shaped */
+    height: 300px; /* Square shape */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+    margin-top: 20px;
+    margin-left: 110px;
+  }
+  
+  .notification-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .notification-card:nth-child(1) {
+    background-color: #FF6384; /* Red */
+  }
+  
+  .notification-card:nth-child(2) {
+    background-color: #36A2EB; /* Blue */
+  }
+  
+  .notification-card:nth-child(3) {
+    background-color: #FFCD56; /* Yellow */
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .notification-title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .notification-time {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  
+  .notification-body {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  
+  .notification-body p {
+    margin: 0;
+  }
+  
