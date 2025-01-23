@@ -79,6 +79,7 @@ button {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  margin-bottom: 5px;
 }
 
 /* Modal Content */

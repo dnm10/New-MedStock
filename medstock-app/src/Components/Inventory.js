@@ -197,7 +197,7 @@ export default function Inventory() {
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <span className={styles.closeBtn} onClick={closeAddModal}>&times;</span>
-            <h2>Add New Item</h2>
+            <h3>Add Item</h3>
             <form id="addItemForm" onSubmit={handleSaveItem}>
               <label htmlFor="name">Item Name:</label>
               <input type="text" id="name" value={newItem.name} onChange={handleInputChange} required />
