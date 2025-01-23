@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
+import mslogo from './Assets/mslogo.png';
 
 const Login = ({ toggleForm }) => {
   const [formData, setFormData] = useState({
@@ -36,6 +37,9 @@ const Login = ({ toggleForm }) => {
 
   return (
     <div className="form-box login">
+      <div className="form-details">
+        <img src={mslogo} alt="Logo" />
+      </div>
       <div className="form-content">
         <h2>LOGIN</h2>
         <form id="loginForm" onSubmit={handleSubmit}>
@@ -83,10 +87,10 @@ const Login = ({ toggleForm }) => {
           </div>
           <button type="submit">Log In</button>
         </form>
-            <div className="bottom-link">
-                Don't have an account?{' '}
-                <a href="#" onClick={toggleForm}>Register</a>
-            </div>
+        <div className="bottom-link">
+          Don't have an account?{' '}
+          <a href="#" onClick={toggleForm}>Register</a>
+        </div>
       </div>
     </div>
   );
