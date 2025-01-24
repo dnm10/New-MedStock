@@ -11,6 +11,8 @@ import Supplier from './Components/Supplier';
 import Reports from './Components/Reports';
 import Users from './Components/Users';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import {
   BrowserRouter as Router,
   Routes,

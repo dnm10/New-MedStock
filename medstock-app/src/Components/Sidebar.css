@@ -46,6 +46,7 @@
     height: 80%;
     overflow-y: auto;
     scrollbar-width: none;
+    padding: 0px;
 }
 
 .sidebar-links li a {
