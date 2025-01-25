@@ -193,7 +193,7 @@ table td button {
 }
 
 /* Form Styling */
-form {
+.inventoryModal form {
   display: flex;
   flex-direction: column;
   gap: 20px;
