@@ -27,7 +27,7 @@ function Sidebar() {
       <ul className="sidebar-links">
         <li><Link to="/Inventory"><span className="material-symbols-outlined">overview</span>Inventory</Link></li>
 
-        <li><Link to="/Medicine"><span className="material-symbols-outlined">pill</span>Medicines</Link></li>
+       
 
         <li><Link to="/Orders"><span className="material-symbols-outlined"> inventory </span>Orders</Link></li>
         

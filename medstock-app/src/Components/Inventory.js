@@ -23,7 +23,7 @@ export default function Inventory() {
   // Calculating stock data for cards
   const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
   const lowStockItems = inventory.filter(item => item.quantity < 20).length;
-  const categories = [...new Set(inventory.map(item => item.category))].length + 1;
+  const categories = [...new Set(inventory.map(item => item.category))].length;
 
   const handleAddItem = () => setShowAddModal(true);
   const closeAddModal = () => {

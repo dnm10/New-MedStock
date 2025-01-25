@@ -31,52 +31,159 @@ const Billing = () => {
   const generateInvoice = () => {
     const billNumber = Math.floor(Math.random() * 1000);
     const date = new Date();
-
-    const invoiceWindow = window.open('', '_blank', 'width=600,height=400');
+  
+    const invoiceWindow = window.open('', '_blank', 'width=800,height=600');
     invoiceWindow.document.write(`
-      <html>
+      <!DOCTYPE html>
+      <html lang="en">
       <head>
-        <title>Invoice</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h1 { text-align: center; color: #007BFF; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-          th { background-color: #007BFF; color: white; }
+          /* General Styles */
+          body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+          }
+          .invoice-container {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border: 3px solid #007BFF; /* Main Border */
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+          }
+          .invoice-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007BFF; /* Separator Border */
+          }
+          .invoice-header h1 {
+            color: #007BFF;
+            margin: 0;
+            font-size: 24px;
+          }
+          .invoice-header p {
+            margin: 5px 0;
+            font-size: 14px;
+          }
+          .invoice-details {
+            margin-top: 20px;
+            font-size: 14px;
+          }
+          .invoice-details p {
+            margin: 5px 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: center;
+          }
+          th {
+            background-color: #007BFF;
+            color: white;
+          }
+          tfoot td {
+            font-weight: bold;
+          }
+          .invoice-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+          }
+  
+          /* Watermark Styles */
+          .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: rgba(0, 123, 255, 0.1); /* Light transparent blue */
+            white-space: nowrap;
+            z-index: -1; /* Behind content */
+          }
+  
+          /* Print-Specific Styles */
+          @media print {
+            body {
+              background-color: white;
+            }
+            .invoice-container {
+              border: none;
+              box-shadow: none;
+            }
+            th {
+              background-color: #007BFF !important;
+              -webkit-print-color-adjust: exact; /* Ensures accurate color printing */
+            }
+          }
         </style>
       </head>
       <body>
-        <h1>Invoice</h1>
-        <p>Bill No: ${billNumber}</p>
-        <p>Date: ${date.toLocaleDateString()}</p>
-        <p>Time: ${date.toLocaleTimeString()}</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Medicine</th>
-              <th>Quantity</th>
-              <th>Price per Unit (₹)</th>
-              <th>Total (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${billItems.map(item => `
-              <tr>
-                <td>${item.name}</td>
-                <td>${item.quantity}</td>
-                <td>₹${item.price.toFixed(2)}</td>
-                <td>₹${(item.quantity * item.price).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <h3>Total Amount: ₹${totalAmount.toFixed(2)}</h3>
+        <div class="invoice-container">
+          <div class="watermark">MedStock</div>
+          <div class="invoice-header">
+            <h1>MedStock Invoice</h1>
+            <p><strong>Bill No:</strong> ${billNumber}</p>
+            <p><strong>Date:</strong> ${date.toLocaleDateString()}</p>
+            <p><strong>Time:</strong> ${date.toLocaleTimeString()}</p>
+          </div>
+          <div class="invoice-details">
+            <table>
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Quantity</th>
+                  <th>Price per Unit (₹)</th>
+                  <th>Total (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${billItems
+                  .map(
+                    (item) => `
+                    <tr>
+                      <td>${item.name}</td>
+                      <td>${item.quantity}</td>
+                      <td>₹${item.price.toFixed(2)}</td>
+                      <td>₹${(item.quantity * item.price).toFixed(2)}</td>
+                    </tr>
+                  `
+                  )
+                  .join('')}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3">Total Amount</td>
+                  <td>₹${totalAmount.toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="invoice-footer">
+            <p>&copy; 2025 MedStock. All Rights Reserved.</p>
+          </div>
+        </div>
       </body>
       </html>
     `);
     invoiceWindow.document.close();
     invoiceWindow.print();
   };
+  
 
   return (
     <div className={styles.Billing}>
