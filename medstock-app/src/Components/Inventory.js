@@ -194,9 +194,9 @@ export default function Inventory() {
 
       {/* Add Item Modal */}
       {showAddModal && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <span className={styles.closeBtn} onClick={closeAddModal}>&times;</span>
+        <div className={styles.inventoryModal}>
+          <div className={styles.inventoryModalContent}>
+            <span className={styles.inventoryCloseBtn} onClick={closeAddModal}>&times;</span>
             <h3>Add Item</h3>
             <form id="addItemForm" onSubmit={handleSaveItem}>
               <label htmlFor="name">Item Name:</label>
@@ -217,9 +217,9 @@ export default function Inventory() {
 
       {/* Remove Item Modal */}
       {showRemoveModal && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <span className={styles.closeBtn} onClick={closeRemoveModal}>&times;</span>
+        <div className={styles.inventoryModal}>
+          <div className={styles.inventoryModalContent}>
+            <span className={styles.inventoryCloseBtn} onClick={closeRemoveModal}>&times;</span>
             <h2>Select Item to Remove</h2>
             <select
               onChange={(e) => setSelectedItem(Number(e.target.value))}
@@ -237,9 +237,9 @@ export default function Inventory() {
 
       {/* Update Item Modal */}
       {showUpdateModal && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <span className={styles.closeBtn} onClick={closeUpdateModal}>&times;</span>
+        <div className={styles.inventoryModal}>
+          <div className={styles.inventoryModalContent}>
+            <span className={styles.inventoryCloseBtn} onClick={closeUpdateModal}>&times;</span>
             <h2>Update Item</h2>
             <form id="updateItemForm" onSubmit={handleUpdateItemDetails}>
               <label htmlFor="name">Item Name:</label>

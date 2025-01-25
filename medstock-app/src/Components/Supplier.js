@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Supplier.css";
+import styles from "./Supplier.css";
 
 const Supplier = () => {
   const [suppliers, setSuppliers] = useState([
@@ -45,7 +45,7 @@ const Supplier = () => {
   };
 
   return (
-    <div className="supplier">
+    <div className={styles.supplier}>
       <header>
         <h1>Suppliers Management</h1>
         <button onClick={handleAddSupplier} className="add-supplier-btn">
@@ -110,60 +110,28 @@ const Supplier = () => {
       </table>
 
       {modalOpen && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className={styles.supplierModal}>
+          <div className={styles.supplierModalContent}>
             <h2>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h2>
             <form>
               <label>Name:</label>
-              <input
-                type="text"
-                name="name"
-                value={formValues.name}
-                onChange={handleInputChange}
-              />
+              <input type="text" name="name" value={formValues.name} onChange={handleInputChange}/>
 
               <label>Contact Person:</label>
-              <input
-                type="text"
-                name="contactPerson"
-                value={formValues.contactPerson}
-                onChange={handleInputChange}
-              />
+              <input type="text" name="contactPerson" value={formValues.contactPerson} onChange={handleInputChange}/>
 
               <label>Phone:</label>
-              <input
-                type="text"
-                name="phone"
-                value={formValues.phone}
-                onChange={handleInputChange}
-              />
+              <input type="text" name="phone" value={formValues.phone} onChange={handleInputChange}/>
 
               <label>Email:</label>
-              <input
-                type="email"
-                name="email"
-                value={formValues.email}
-                onChange={handleInputChange}
-              />
+              <input type="email" name="email" value={formValues.email}onChange={handleInputChange}/>
 
               <label>Address:</label>
-              <textarea
-                name="address"
-                value={formValues.address}
-                onChange={handleInputChange}
-              ></textarea>
+              <textarea name="address" value={formValues.address} onChange={handleInputChange}></textarea>
 
               <div className="modal-actions">
-                <button type="button" onClick={handleSaveSupplier}>
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={() => setModalOpen(false)}
-                >
-                  Cancel
-                </button>
+                <button type="button" onClick={handleSaveSupplier}>Save</button>
+                <button type="button" className="cancel-btn" onClick={() => setModalOpen(false)}>Cancel</button>
               </div>
             </form>
           </div>
