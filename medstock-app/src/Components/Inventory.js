@@ -1,25 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import styles from './Inventory.module.css';
 import '../App.css';
 
 export default function Inventory() {
-  const [inventory, setInventory] = useState([
-    { id: 1, name: "Paracetamol", category: "Pain Reliever", quantity: 50, expiryDate: "2025-12-31", supplier: "ABC Pharma", threshold: 20 },
-    { id: 2, name: "Amoxicillin", category: "Antibiotics", quantity: 10, expiryDate: "2024-11-01", supplier: "HealthCare Supplies", threshold: 15 },
-    { id: 3, name: "Vitamin C", category: "Supplements", quantity: 100, expiryDate: "2026-06-15", supplier: "Wellness Co.", threshold: 30 },
-    { id: 4, name: "Cough Syrup", category: "Cold and Flu", quantity: 8, expiryDate: "2024-03-12", supplier: "Medico Pvt. Ltd.", threshold: 10 },
-    { id: 5, name: "Insulin", category: "Diabetes", quantity: 25, expiryDate: "2025-05-10", supplier: "LifeCare Pharmaceuticals", threshold: 15 },
-    { id: 6, name: "Ibuprofen", category: "Pain Reliever", quantity: 40, expiryDate: "2025-09-22", supplier: "PainFree Co.", threshold: 20 },
-    { id: 7, name: "Cetirizine", category: "Allergy", quantity: 35, expiryDate: "2024-08-15", supplier: "Allergy Relief Supplies", threshold: 15 },
-    { id: 8, name: "Multivitamin", category: "Supplements", quantity: 120, expiryDate: "2026-01-01", supplier: "HealthyLife Inc.", threshold: 50 },
-    { id: 9, name: "Antacid", category: "Digestive Health", quantity: 18, expiryDate: "2024-10-30", supplier: "DigestWell Pharma", threshold: 10 },
-    { id: 10, name: "Losartan", category: "Hypertension", quantity: 22, expiryDate: "2025-07-19", supplier: "HeartCare Pharma", threshold: 20 },
-    { id: 11, name: "Metformin", category: "Diabetes", quantity: 60, expiryDate: "2026-04-18", supplier: "SugarControl Ltd.", threshold: 30 },
-    { id: 12, name: "Azithromycin", category: "Antibiotics", quantity: 15, expiryDate: "2024-12-31", supplier: "CureFast Pharma", threshold: 15 },
-    { id: 13, name: "Hydrocortisone Cream", category: "Topicals", quantity: 45, expiryDate: "2025-11-05", supplier: "SkinHealth Supplies", threshold: 20 },
-    { id: 14, name: "Loperamide", category: "Digestive Health", quantity: 5, expiryDate: "2024-09-11", supplier: "ReliefNow Co.", threshold: 10 },
-    { id: 15, name: "Saline Nasal Spray", category: "Respiratory Care", quantity: 30, expiryDate: "2025-03-01", supplier: "BreathEasy Pharma", threshold: 10 },
-  ]);
+  const [inventory, setInventory] = useState([]);
   
   const [filteredInventory, setFilteredInventory] = useState(inventory);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -34,6 +19,18 @@ export default function Inventory() {
     supplier: '',
     threshold: '', // New field for threshold
   });
+
+  useEffect(() => {
+    // Fetch the inventory data on page load (or after the page refreshes)
+    axios.get('http://localhost:5000/api/Inventory')
+      .then(response => {
+        setInventory(response.data); // Set inventory data from the backend
+        setFilteredInventory(response.data); // Update filtered inventory if needed
+      })
+      .catch(error => {
+        console.error('Error fetching inventory:', error);
+      });
+  }, []);
 
   const [selectedItem, setSelectedItem] = useState('');
 
@@ -81,16 +78,33 @@ export default function Inventory() {
   const handleSaveItem = (e) => {
     e.preventDefault();
     const newItemWithId = {
-      ...newItem,
-      id: inventory.length + 1,
+      name: newItem.name,
+      category: newItem.category,
       quantity: parseInt(newItem.quantity, 10),
+      expiryDate: newItem.expiryDate,
+      supplier: newItem.supplier,
       threshold: parseInt(newItem.threshold, 10), // Save threshold as a number
     };
-    const updatedInventory = [...inventory, newItemWithId];
-    setInventory(updatedInventory);
-    setFilteredInventory(updatedInventory);
-    closeAddModal();
+  
+    // Send a POST request to your backend API to save the new item to the database
+    axios.post('http://localhost:5000/api/inventory', newItemWithId)
+      .then(response => {
+        // After the item is saved, fetch the updated inventory
+        axios.get('http://localhost:5000/api/inventory')
+          .then(response => {
+            setInventory(response.data); // Update the inventory state with the latest data
+            setFilteredInventory(response.data); // Update filtered inventory as well
+          })
+          .catch(error => console.error('Error fetching updated inventory:', error));
+  
+        // Close the modal and reset the form
+        closeAddModal();
+      })
+      .catch(error => {
+        console.error('Error adding item:', error);
+      });
   };
+  
 
   const handleSearch = () => {
     const query = document.getElementById('searchBox').value.toLowerCase();
@@ -114,31 +128,46 @@ export default function Inventory() {
   };
 
   const handleRemoveSelectedItem = () => {
-    const updatedInventory = inventory.filter(item => item.id !== selectedItem);
-    setInventory(updatedInventory);
-    setFilteredInventory(updatedInventory);
-    closeRemoveModal();
+    axios.delete(`http://localhost:5000/api/inventory/${selectedItem}`)
+      .then(response => {
+        // After the item is removed, fetch the updated inventory
+        axios.get('http://localhost:5000/api/inventory')
+          .then(response => {
+            setInventory(response.data);
+            setFilteredInventory(response.data);
+          })
+          .catch(error => console.error('Error fetching inventory:', error));
+  
+        closeRemoveModal();
+      })
+      .catch(error => console.error('Error removing item:', error));
   };
+  
 
   const handleUpdateItemDetails = (e) => {
     e.preventDefault();
-    const updatedInventory = inventory.map(item =>
-      item.id === selectedItem
-        ? {
-            ...item,
-            name: newItem.name,
-            category: newItem.category,
-            quantity: parseInt(newItem.quantity, 10),
-            expiryDate: newItem.expiryDate,
-            supplier: newItem.supplier,
-            threshold: parseInt(newItem.threshold, 10),
-          }
-        : item
-    );
-    setInventory(updatedInventory);
-    setFilteredInventory(updatedInventory);
-    closeUpdateModal();
+  
+    const updatedItem = {
+      ...newItem,
+      quantity: parseInt(newItem.quantity, 10),
+      threshold: parseInt(newItem.threshold, 10),
+    };
+  
+    axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, updatedItem)
+      .then(response => {
+        // Re-fetch the updated inventory list from the backend
+        axios.get('http://localhost:5000/api/inventory')
+          .then(response => {
+            setInventory(response.data);
+            setFilteredInventory(response.data);
+          })
+          .catch(error => console.error('Error fetching inventory:', error));
+  
+        closeUpdateModal();
+      })
+      .catch(error => console.error('Error updating item:', error));
   };
+  
 
   return (
     <>
