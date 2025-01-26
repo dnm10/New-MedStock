@@ -34,17 +34,17 @@ app.get('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
 
 // Add new inventory item
 app.post('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
-  const { ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate, Supplier, Threshold } = req.body;
+  const { ItemName, Category, CurrentStockquant, ExpiryDate, Supplier, Threshold } = req.body;
   const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold) VALUES (?, ?, ?, ?, ?, ?)';
 
-  con.query(query, [ItemName, Category, CurrentStock, ExpiryDate, Supplier, Threshold], (err, result) => {    if (err) {
+  con.query(query, [ItemName, Category, CurrentStockquant, ExpiryDate, Supplier, Threshold], (err, result) => {    if (err) {
       return res.status(500).send('Error adding new item');
     }
     res.status(201).json({
       id: result.insertId, 
       name: ItemName,
       category: Category,
-      quantity: CurrentStock,
+      quantity: CurrentStockquant,
       expiryDate: ExpiryDate,
       supplier: Supplier,
       threshold: Threshold
