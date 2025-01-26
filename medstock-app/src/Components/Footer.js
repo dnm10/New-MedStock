@@ -2,6 +2,7 @@ import React from 'react'
 import '../App.css';
 import './footer.css';
 import mslogoed from '../Assets/mslogoed.png';
+import { Link } from 'react-router-dom';
 export default function Footer() {
   return (
     <footer>
@@ -20,19 +21,19 @@ export default function Footer() {
                 <li><a href="#">Get started</a></li>
             </ul>
             <ul className="box">
-                <li><a href="#">Inventory</a></li>
-                <li><a href="#">Orders</a></li>
-                <li><a href="#">Suppliers</a></li>
-                <li><a href="#">Reports</a></li>
-                <li><a href="#">Billing</a></li>
-                <li><a href="#">Notifications</a></li>
+            <li><Link to="/Inventory">Inventory</Link></li>
+            <li><Link to="/Orders">Orders</Link></li>
+            <li><Link to="/Supplier">Suppliers</Link></li>
+            <li><Link to="/Reports">Reports</Link></li>
+            <li><Link to="/Billing">Billing</Link></li>
+            <li><Link to="/Notifications">Notifications</Link></li>
                 
             </ul>
             <ul className="box">
-                <li><a href="#">Users</a></li>
-                <li><a href="#">Profile</a></li>
-                <li><a href="#">Settings</a></li>
-                <li><a href="#">Logout</a></li>
+            <li><Link to="/Users">Users</Link></li>
+            <li><Link to="/Profile">Profile</Link></li>
+            <li><Link to="/Settings">Settings</Link></li>
+            <li><Link to="/Logout">Logout</Link></li>
             </ul>
         </div>
     </div>

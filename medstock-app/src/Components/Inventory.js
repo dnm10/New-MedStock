@@ -3,8 +3,24 @@ import styles from './Inventory.module.css';
 import '../App.css';
 
 export default function Inventory() {
-  const [inventory, setInventory] = useState([]);
-
+  const [inventory, setInventory] = useState([
+    { id: 1, name: "Paracetamol", category: "Pain Reliever", quantity: 50, expiryDate: "2025-12-31", supplier: "ABC Pharma", threshold: 20 },
+    { id: 2, name: "Amoxicillin", category: "Antibiotics", quantity: 10, expiryDate: "2024-11-01", supplier: "HealthCare Supplies", threshold: 15 },
+    { id: 3, name: "Vitamin C", category: "Supplements", quantity: 100, expiryDate: "2026-06-15", supplier: "Wellness Co.", threshold: 30 },
+    { id: 4, name: "Cough Syrup", category: "Cold and Flu", quantity: 8, expiryDate: "2024-03-12", supplier: "Medico Pvt. Ltd.", threshold: 10 },
+    { id: 5, name: "Insulin", category: "Diabetes", quantity: 25, expiryDate: "2025-05-10", supplier: "LifeCare Pharmaceuticals", threshold: 15 },
+    { id: 6, name: "Ibuprofen", category: "Pain Reliever", quantity: 40, expiryDate: "2025-09-22", supplier: "PainFree Co.", threshold: 20 },
+    { id: 7, name: "Cetirizine", category: "Allergy", quantity: 35, expiryDate: "2024-08-15", supplier: "Allergy Relief Supplies", threshold: 15 },
+    { id: 8, name: "Multivitamin", category: "Supplements", quantity: 120, expiryDate: "2026-01-01", supplier: "HealthyLife Inc.", threshold: 50 },
+    { id: 9, name: "Antacid", category: "Digestive Health", quantity: 18, expiryDate: "2024-10-30", supplier: "DigestWell Pharma", threshold: 10 },
+    { id: 10, name: "Losartan", category: "Hypertension", quantity: 22, expiryDate: "2025-07-19", supplier: "HeartCare Pharma", threshold: 20 },
+    { id: 11, name: "Metformin", category: "Diabetes", quantity: 60, expiryDate: "2026-04-18", supplier: "SugarControl Ltd.", threshold: 30 },
+    { id: 12, name: "Azithromycin", category: "Antibiotics", quantity: 15, expiryDate: "2024-12-31", supplier: "CureFast Pharma", threshold: 15 },
+    { id: 13, name: "Hydrocortisone Cream", category: "Topicals", quantity: 45, expiryDate: "2025-11-05", supplier: "SkinHealth Supplies", threshold: 20 },
+    { id: 14, name: "Loperamide", category: "Digestive Health", quantity: 5, expiryDate: "2024-09-11", supplier: "ReliefNow Co.", threshold: 10 },
+    { id: 15, name: "Saline Nasal Spray", category: "Respiratory Care", quantity: 30, expiryDate: "2025-03-01", supplier: "BreathEasy Pharma", threshold: 10 },
+  ]);
+  
   const [filteredInventory, setFilteredInventory] = useState(inventory);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -16,44 +32,45 @@ export default function Inventory() {
     quantity: '',
     expiryDate: '',
     supplier: '',
+    threshold: '', // New field for threshold
   });
 
   const [selectedItem, setSelectedItem] = useState('');
 
   // Calculating stock data for cards
   const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
-  const lowStockItems = inventory.filter(item => item.quantity < 20).length;
+  const lowStockItems = inventory.filter(item => item.quantity < item.threshold).length; // Updated for threshold
   const categories = [...new Set(inventory.map(item => item.category))].length;
 
   const handleAddItem = () => setShowAddModal(true);
   const closeAddModal = () => {
     setShowAddModal(false);
-    setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '' });
+    setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '', threshold: '' });
   };
 
   const handleRemoveItem = () => setShowRemoveModal(true);
   const closeRemoveModal = () => setShowRemoveModal(false);
 
   const handleUpdateItem = () => {
-    if(selectedItem){
-      const item = inventory.find((item)=> item.id === selectedItem);
+    if (selectedItem) {
+      const item = inventory.find(item => item.id === selectedItem);
       setNewItem({
         name: item.name,
         category: item.category,
         quantity: item.quantity,
         expiryDate: item.expiryDate,
         supplier: item.supplier,
+        threshold: item.threshold,
       });
       setShowUpdateModal(true);
-    }
-    else{
-      alert("Please select an item to update!");
+    } else {
+      alert('Please select an item to update!');
     }
   };
 
   const closeUpdateModal = () => {
     setShowUpdateModal(false);
-    setNewItem({name: '',category: '',quantity: '',expiryDate: '',supplier: ''});
+    setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '', threshold: '' });
   };
 
   const handleInputChange = (e) => {
@@ -67,6 +84,7 @@ export default function Inventory() {
       ...newItem,
       id: inventory.length + 1,
       quantity: parseInt(newItem.quantity, 10),
+      threshold: parseInt(newItem.threshold, 10), // Save threshold as a number
     };
     const updatedInventory = [...inventory, newItemWithId];
     setInventory(updatedInventory);
@@ -106,7 +124,15 @@ export default function Inventory() {
     e.preventDefault();
     const updatedInventory = inventory.map(item =>
       item.id === selectedItem
-        ? { ...item, name: newItem.name, category: newItem.category, quantity: newItem.quantity, expiryDate: newItem.expiryDate, supplier: newItem.supplier }
+        ? {
+            ...item,
+            name: newItem.name,
+            category: newItem.category,
+            quantity: parseInt(newItem.quantity, 10),
+            expiryDate: newItem.expiryDate,
+            supplier: newItem.supplier,
+            threshold: parseInt(newItem.threshold, 10),
+          }
         : item
     );
     setInventory(updatedInventory);
@@ -167,29 +193,37 @@ export default function Inventory() {
 
         {/* Inventory Table */}
         <table className="invent-table">
-          <thead>
-            <tr className="invent-header-row">
-              <th>No.</th>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Expiry Date</th>
-              <th>Supplier</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInventory.map((item, index) => (
-              <tr key={item.id}>
-                <td>{index + 1}</td>
-                <td>{item.name}</td>
-                <td>{item.category}</td>
-                <td>{item.quantity}</td>
-                <td>{item.expiryDate}</td>
-                <td>{item.supplier}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  <thead>
+    <tr className="invent-header-row">
+      <th>No.</th>
+      <th>Item Name</th>
+      <th>Category</th>
+      <th>Quantity</th>
+      <th>Expiry Date</th>
+      <th>Supplier</th>
+      <th>Threshold</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredInventory.map((item, index) => (
+      <tr
+        key={item.id}
+        style={{
+          backgroundColor: item.quantity < item.threshold ? "#ffcccc" : "transparent",
+        }}
+      >
+        <td>{index + 1}</td>
+        <td>{item.name}</td>
+        <td>{item.category}</td>
+        <td>{item.quantity}</td>
+        <td>{item.expiryDate}</td>
+        <td>{item.supplier}</td>
+        <td>{item.threshold}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
       </div>
 
       {/* Add Item Modal */}
@@ -209,6 +243,8 @@ export default function Inventory() {
               <input type="date" id="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
               <label htmlFor="supplier">Supplier:</label>
               <input type="text" id="supplier" value={newItem.supplier} onChange={handleInputChange} required />
+              <label htmlFor="threshold">Threshold:</label>
+              <input type="number" id="threshold" value={newItem.threshold} onChange={handleInputChange} required />
               <button type="submit">Save Item</button>
             </form>
           </div>
@@ -252,7 +288,9 @@ export default function Inventory() {
               <input type="date" id="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
               <label htmlFor="supplier">Supplier:</label>
               <input type="text" id="supplier" value={newItem.supplier} onChange={handleInputChange} required />
-              <button type="submit">Update Item</button>
+              <label htmlFor="threshold">Threshold:</label>
+              <input type="number" id="threshold" value={newItem.threshold} onChange={handleInputChange} required />
+              <button type="submit">Save Changes</button>
             </form>
           </div>
         </div>

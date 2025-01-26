@@ -110,33 +110,41 @@ const Supplier = () => {
       </table>
 
       {modalOpen && (
-        <div className={styles.supplierModal}>
-          <div className={styles.supplierModalContent}>
-            <h2>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h2>
-            <form>
-              <label>Name:</label>
-              <input type="text" name="name" value={formValues.name} onChange={handleInputChange}/>
+  <div className="supplierModal">
+    <div className="supplierModalContent">
+      <button
+        type="button"
+        className="supplierCloseBtn"
+        onClick={() => setModalOpen(false)}
+      >
+        &times;
+      </button>
+      <h3>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h3>
+      <form>
+        <label>Name:</label>
+        <input type="text" name="name" value={formValues.name} onChange={handleInputChange} />
 
-              <label>Contact Person:</label>
-              <input type="text" name="contactPerson" value={formValues.contactPerson} onChange={handleInputChange}/>
+        <label>Contact Person:</label>
+        <input type="text" name="contactPerson" value={formValues.contactPerson} onChange={handleInputChange} />
 
-              <label>Phone:</label>
-              <input type="text" name="phone" value={formValues.phone} onChange={handleInputChange}/>
+        <label>Phone:</label>
+        <input type="text" name="phone" value={formValues.phone} onChange={handleInputChange} />
 
-              <label>Email:</label>
-              <input type="email" name="email" value={formValues.email}onChange={handleInputChange}/>
+        <label>Email:</label>
+        <input type="email" name="email" value={formValues.email} onChange={handleInputChange} />
 
-              <label>Address:</label>
-              <textarea name="address" value={formValues.address} onChange={handleInputChange}></textarea>
+        <label>Address:</label>
+        <textarea name="address" value={formValues.address} onChange={handleInputChange}></textarea>
 
-              <div className="modal-actions">
-                <button type="button" onClick={handleSaveSupplier}>Save</button>
-                <button type="button" className="cancel-btn" onClick={() => setModalOpen(false)}>Cancel</button>
-              </div>
-            </form>
-          </div>
+        <div className="modal-actions">
+          <button type="button" onClick={handleSaveSupplier}>
+            Save
+          </button>
         </div>
-      )}
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };
