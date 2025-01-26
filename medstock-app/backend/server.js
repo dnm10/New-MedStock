@@ -1,13 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const con = require('./connection'); // Import the MySQL connection
+const con = require('./connections'); // Import the MySQL connection
 
 const app = express();
-const port = 3002;
+const port = 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow requests from React frontend
+}));
+
 app.use(bodyParser.json());
 
 // Test MySQL connection
@@ -20,8 +23,8 @@ con.connect((err) => {
 });
 
 // GET inventory items
-app.get('/Inventory', (req, res) => {
-  con.query('SELECT * FROM Inventory', (err, results) => {
+app.get('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
+  con.query('SELECT * FROM inventory', (err, results) => {
     if (err) {
       return res.status(500).send('Error fetching inventory');
     }
@@ -30,45 +33,46 @@ app.get('/Inventory', (req, res) => {
 });
 
 // Add new inventory item
-app.post('/Inventory', (req, res) => {
-  const { ItemID, ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate } = req.body;
-  const query = 'INSERT INTO Inventory (ItemID, ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate) VALUES (?, ?, ?, ?, ?, ?)';
-  
-  con.query(query, [ItemID, ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate], (err, result) => {
-    if (err) {
+app.post('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
+  const { ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate, Supplier, Threshold } = req.body;
+  const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold) VALUES (?, ?, ?, ?, ?, ?)';
+
+  con.query(query, [ItemName, Category, CurrentStock, ExpiryDate, Supplier, Threshold], (err, result) => {    if (err) {
       return res.status(500).send('Error adding new item');
     }
     res.status(201).json({
-      ItemID, ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate
+      id: result.insertId, 
+      name: ItemName,
+      category: Category,
+      quantity: CurrentStock,
+      expiryDate: ExpiryDate,
+      supplier: Supplier,
+      threshold: Threshold
     });
   });
 });
 
 // Update inventory item
-app.put('/Inventory/:id', (req, res) => {
-  const { ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate, ReorderStatus } = req.body;
-  const query = 'UPDATE Inventory SET ItemName = ?, Category = ?, CurrentStock = ?, MinimumStockLevel = ?, ExpiryDate = ?, ReorderStatus = ? WHERE ItemID = ?';
+app.put('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventory'
+  const { name, category, quantity, expiryDate, supplier, threshold } = req.body;
 
-  con.query(query, [ItemName, Category, CurrentStock, MinimumStockLevel, ExpiryDate, ReorderStatus, req.params.id], (err, result) => {
+  const query = 'UPDATE inventory SET name = ?, category = ?, quantity = ?, expiryDate = ?, supplier = ?, threshold = ? WHERE id = ?';
+
+  con.query(query, [name, category, quantity, expiryDate, supplier, threshold, req.params.id], (err, result) => {
     if (err) {
       return res.status(500).send('Error updating item');
     }
     res.json({
-      ItemID: req.params.id,
-      ItemName,
-      Category,
-      CurrentStock,
-      MinimumStockLevel,
-      ExpiryDate,
-      ReorderStatus
+      id: req.params.id,
+      name, category, quantity, expiryDate, supplier, threshold
     });
   });
 });
 
 // Delete inventory item
-app.delete('/Inventory/:id', (req, res) => {
-  const query = 'DELETE FROM Inventory WHERE ItemID = ?';
-  
+app.delete('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventory'
+  const query = 'DELETE FROM inventory WHERE id = ?';
+
   con.query(query, [req.params.id], (err, result) => {
     if (err) {
       return res.status(500).send('Error deleting item');
