@@ -2,16 +2,14 @@
 .Reports {
     max-width: 2100px;
     margin: auto;
-    padding: 20px;
     background-color: #fff;
-    min-height: 100vh;
   }
   
   /* Header Section */
   .Reports h1 {
     text-align: center;
-    margin-left: 89px;
     margin-bottom: 20px;
+    margin-left: 85px;
     padding: 20px 0;
     background-color:#3056ff;
     color: rgb(255, 255, 255);
