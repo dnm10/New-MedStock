@@ -50,14 +50,14 @@ export default function Inventory() {
 
   const handleUpdateItem = () => {
     if (selectedItem) {
-      const item = inventory.find(item => item.id === selectedItem);
+      const newItem = inventory.find(item => item.id === selectedItem);
       setNewItem({
-        name: item.name,
-        category: item.category,
-        quantity: item.quantity,
-        expiryDate: item.expiryDate,
-        supplier: item.supplier,
-        threshold: item.threshold,
+        name: newItem.name,
+        category: newItem.category,
+        quantity: newItem.quantity,
+        expiryDate: newItem.expiryDate,
+        supplier: newItem.supplier,
+        threshold: newItem.threshold,
       });
       setShowUpdateModal(true);
     } else {
