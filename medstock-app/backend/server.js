@@ -23,7 +23,7 @@ con.connect((err) => {
 });
 
 // GET inventory items
-app.get('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
+app.get('/api/inventory', (req, res) => {  
   con.query('SELECT * FROM inventory', (err, results) => {
     if (err) {
       return res.status(500).send('Error fetching inventory');
@@ -33,21 +33,21 @@ app.get('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
 });
 
 // Add new inventory item
-app.post('/api/inventory', (req, res) => {  // Changed to lowercase 'inventory'
-  const { ItemName, Category, CurrentStockquant, ExpiryDate, Supplier, Threshold } = req.body;
+app.post('/api/inventory', (req, res) => {  
+  const { name, category, quantity, expiryDate, supplier, threshold } = req.body;
   const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold) VALUES (?, ?, ?, ?, ?, ?)';
 
-  con.query(query, [ItemName, Category, CurrentStockquant, ExpiryDate, Supplier, Threshold], (err, result) => {    if (err) {
+  con.query(query, [name, category, quantity, expiryDate, supplier, threshold], (err, result) => {    if (err) {
       return res.status(500).send('Error adding new item');
     }
     res.status(201).json({
       id: result.insertId, 
-      name: ItemName,
-      category: Category,
-      quantity: CurrentStockquant,
-      expiryDate: ExpiryDate,
-      supplier: Supplier,
-      threshold: Threshold
+      name: name,
+      category: category,
+      quantity: quantity,
+      expiryDate: expiryDate,
+      supplier: supplier,
+      threshold: threshold
     });
   });
 });
