@@ -71,12 +71,13 @@ export default function Inventory() {
   };
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setNewItem({ ...newItem, [id]: value });
+    const { name, value } = e.target;
+    setNewItem({ ...newItem, [name]: value });
   };
 
   const handleSaveItem = (e) => {
     e.preventDefault();
+    console.log("Sve button clicked!");
     const newItemWithId = {
       name: newItem.name,
       category: newItem.category,
@@ -263,17 +264,17 @@ export default function Inventory() {
             <h3>Add Item</h3>
             <form id="addItemForm" onSubmit={handleSaveItem}>
               <label htmlFor="name">Item Name:</label>
-              <input type="text" id="name" value={newItem.name} onChange={handleInputChange} required />
+              <input type="text" name="name" value={newItem.name} onChange={handleInputChange} required />
               <label htmlFor="category">Category:</label>
-              <input type="text" id="category" value={newItem.category} onChange={handleInputChange} required />
+              <input type="text" name="category" value={newItem.category} onChange={handleInputChange} required />
               <label htmlFor="quantity">Quantity:</label>
-              <input type="number" id="quantity" value={newItem.quantity} onChange={handleInputChange} required />
+              <input type="number" name="quantity" value={newItem.quantity} onChange={handleInputChange} required />
               <label htmlFor="expiryDate">Expiry Date:</label>
-              <input type="date" id="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
+              <input type="date" name="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
               <label htmlFor="supplier">Supplier:</label>
-              <input type="text" id="supplier" value={newItem.supplier} onChange={handleInputChange} required />
+              <input type="text" name="supplier" value={newItem.supplier} onChange={handleInputChange} required />
               <label htmlFor="threshold">Threshold:</label>
-              <input type="number" id="threshold" value={newItem.threshold} onChange={handleInputChange} required />
+              <input type="number" name="threshold" value={newItem.threshold} onChange={handleInputChange} required />
               <button type="submit">Save Item</button>
             </form>
           </div>
