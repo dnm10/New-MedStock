@@ -1,97 +1,102 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+.Signup {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f2f2f2;
+  min-height: 100vh;
+  background-color: transparent;
+  padding: 20px;
 }
 
 .form-box {
-  width: 100%;
-  max-width: 900px;
   display: flex;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: white;
+  flex-direction: row;
+  max-width: 900px;
+  width: 100%;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0.1, 0.1, 0.1, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-/* Left side for logo */
-.form-box .form-details {
-  flex: 1;
-  background-color: #3056ff; /* Change as per your preference */
+.form-details {
+  background-color: #3056ff;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  padding: 30px;
+  flex: 1;
 }
 
-.form-box .form-details img {
-  max-width: 70%;
+.logoImage {
+  max-width: 100%;
   height: auto;
-  border-radius: 50%;
 }
 
-/* Right side for content */
-.form-box .form-content {
+.form-content {
   flex: 2;
-  padding: 50px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.form-box .form-content h2 {
+.form-content h2 {
   text-align: center;
-  font-size: 28px;
-  margin-bottom: 30px;
-  color: #333;
+  font-size: 30px;
+  color: #3056ff;
+  margin-bottom: 20px;
 }
 
-/* Form Inputs and Buttons */
 .input-field {
-  position: relative;
   margin-bottom: 20px;
 }
 
 .input-field input {
   width: 100%;
-  padding: 10px;
-  margin-top: 8px;
+  padding: 12px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.input-field input:focus {
+  border-color: #3056ff;
 }
 
 .input-field label {
-  position: absolute;
-  top: -12px;
-  left: 10px;
+  display: block;
+  margin-top: 5px;
+  margin-left: 4px;
   font-size: 14px;
-  color: #777;
-  background-color: white;
-  padding: 0 5px;
+  color: #555;
 }
 
-/* Button */
+.SignupType {
+  display: flex;
+  gap: 120px;
+  margin: 15px 0;
+}
+
 button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background-color: #3056ff;
   color: white;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
 button:hover {
-  background-color: #74aeef;
+  background-color: #1e40af;
 }
 
-/* Bottom Link */
 .bottom-link {
+  margin-top: 15px;
   text-align: center;
-  margin-top: 20px;
+  font-size: 14px;
 }
 
 .bottom-link a {
