@@ -56,17 +56,22 @@
   /* Background colors for each card */
   .Card:nth-child(1) {
     background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
+    font-size: 25px;
+    
   }
 
   .Card:nth-child(2) {
     background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
+    font-size: 25px;
   }
 
   .Card:nth-child(3) {
-    background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
+    background: linear-gradient(135deg, #ff6030, #FF8A65); /* Orange tones */
+    font-size: 25px;
   }
   .Card:nth-child(4) {
-    background: linear-gradient(135deg, #97148e, #dd44c4); 
+    background: linear-gradient(135deg, #ff24f0, #dd44c4);
+    font-size: 25px; 
   }
 
   /* Optional hover effect */
