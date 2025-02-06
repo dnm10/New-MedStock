@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import './Signup.css';
-import mslogo from './Assets/mslogo.png'; // Assuming the logo is stored in the Assets folder
+import styles from './Signup.module.css';
+import mslogo from '../Assets/mslogo.png';
+import { Link } from 'react-router-dom';
 
 const Signup = ({ toggleForm }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'User',
   });
 
   const handleChange = (e) => {
@@ -40,51 +42,73 @@ const Signup = ({ toggleForm }) => {
   };
 
   return (
-    <div className="form-box signup">
-      <div className="form-details">
-        <img src={mslogo} alt="Logo" />
-      </div>
-      <div className="form-content">
-        <h2>SIGN UP</h2>
-        <form id="signupForm" onSubmit={handleSubmit}>
-          <div className="input-field">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter Email"
-              required
-            />
-            <label htmlFor="email">Email</label>
+    <div className={styles.signupContainer}>
+      <div className={styles.formBox}>
+        <div className={styles.formDetails}>
+          <img src={mslogo} alt="Logo" className={styles.logoImage} />
+        </div>
+        <div className={styles.formContent}>
+          <h2>SIGN UP</h2>
+          <form onSubmit={handleSubmit}>
+            <div className={styles.inputField}>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter Email"
+                required
+              />
+              <label>Email</label>
+            </div>
+            <div className={styles.inputField}>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter Password"
+                required
+              />
+              <label>Password</label>
+            </div>
+            <div className={styles.inputField}>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm Password"
+                required
+              />
+              <label>Confirm Password</label>
+            </div>
+            <div className={styles.signupType}>
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="Admin"
+                  checked={formData.role === 'Admin'}
+                  onChange={handleChange}
+                /> Admin
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="User"
+                  checked={formData.role === 'User'}
+                  onChange={handleChange}
+                /> User
+              </label>
+            </div>
+            <button type="submit">Sign Up</button>
+          </form>
+          <div className={styles.bottomLink}>
+            Already have an account?{' '}
+            <Link to="/Login" onClick={toggleForm}>Login</Link>
           </div>
-          <div className="input-field">
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter Password"
-              required
-            />
-            <label htmlFor="password">Password</label>
-          </div>
-          <div className="input-field">
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password"
-              required
-            />
-            <label htmlFor="confirmPassword">Confirm Password</label>
-          </div>
-          <button type="submit">Sign Up</button>
-        </form>
-        <div className="bottom-link">
-          Already have an account?{' '}
-          <a href="#" onClick={toggleForm}>Login</a>
         </div>
       </div>
     </div>
