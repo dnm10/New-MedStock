@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import './Login.css';
-import mslogo from './Assets/mslogo.png';
+import styles from './Login.module.css';
+import mslogo from '../Assets/mslogo.png';
+import { Link } from 'react-router-dom';
 
 const Login = ({ toggleForm }) => {
   const [formData, setFormData] = useState({
@@ -18,9 +19,7 @@ const Login = ({ toggleForm }) => {
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       const result = await response.json();
@@ -36,60 +35,63 @@ const Login = ({ toggleForm }) => {
   };
 
   return (
-    <div className="form-box login">
-      <div className="form-details">
-        <img src={mslogo} alt="Logo" />
-      </div>
-      <div className="form-content">
-        <h2>LOGIN</h2>
-        <form id="loginForm" onSubmit={handleSubmit}>
-          <div className="input-field">
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter Email"
-              required
-            />
-            <label htmlFor="email">Email</label>
+    <div className={styles.Login}>
+      <div className={styles.formBox}>
+        <div className={styles.formDetails}>
+          <img src={mslogo} alt="MedStock Logo" className={styles.logoImage} />
+        </div>
+        <div className={styles.formContent}>
+          <h2>LOGIN</h2>
+          <form onSubmit={handleSubmit}>
+            <div className={styles.inputField}>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter Email"
+                required
+              />
+              <label>Email</label>
+            </div>
+            <div className={styles.inputField}>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter Password"
+                required
+              />
+              <label>Password</label>
+            </div>
+            <div className={styles.loginType}>
+              <label>
+                <input
+                  type="radio"
+                  name="loginType"
+                  value="Admin"
+                  checked={formData.loginType === 'Admin'}
+                  onChange={handleChange}
+                />
+                Admin
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="loginType"
+                  value="User"
+                  checked={formData.loginType === 'User'}
+                  onChange={handleChange}
+                />
+                User
+              </label>
+            </div>
+            <button type="submit">Log In</button>
+          </form>
+          <div className={styles.bottomLink}>
+            Don't have an account? <Link to="/Signup" onClick={toggleForm}>Register</Link>
           </div>
-          <div className="input-field">
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter Password"
-              required
-            />
-            <label htmlFor="password">Password</label>
-          </div>
-          <div className="login-type">
-            <input
-              type="radio"
-              id="loginAdmin"
-              name="loginType"
-              value="Admin"
-              checked={formData.loginType === 'Admin'}
-              onChange={handleChange}
-            />
-            <label htmlFor="loginAdmin">Login as Admin</label>
-            <input
-              type="radio"
-              id="loginUser"
-              name="loginType"
-              value="User"
-              checked={formData.loginType === 'User'}
-              onChange={handleChange}
-            />
-            <label htmlFor="loginUser">Login as User</label>
-          </div>
-          <button type="submit">Log In</button>
-        </form>
-        <div className="bottom-link">
-          Don't have an account?{' '}
-          <a href="#" onClick={toggleForm}>Register</a>
         </div>
       </div>
     </div>
