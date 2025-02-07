@@ -12,16 +12,16 @@ const Reports = () => {
   const [salesData, setSalesData] = useState([]);
   const [lowStockItems, setLowStockItems] = useState([]);
   const [dateRange, setDateRange] = useState('daily'); // daily or monthly
-  const [showReport, setShowReport] = useState(false);
+  // const [showReport, setShowReport] = useState(false);
 
   // Sample data for sales and stock items
   const billItems = [
     { name: 'Medicine A', quantity: 10, price: 50 },
     { name: 'Medicine B', quantity: 5, price: 30 },
   ];
-  const billNumber = '12345';
+  // const billNumber = '12345';
   const date = new Date();
-  const totalAmount = billItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
+  // const totalAmount = billItems.reduce((acc, item) => acc + item.quantity * item.price, 0);
 
   useEffect(() => {
     // Fetch stock counts from the backend API

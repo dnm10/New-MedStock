@@ -33,11 +33,11 @@ function FormPopup() {
                 <input type="radio" id="loginUser" name="loginType" value="User" required />
                 <label htmlFor="loginUser">Login as User</label>
               </div>
-              <a href="#" className="forgot-pass-link">Forgot password?</a>
+              <a href="/Password" className="forgot-pass-link">Forgot password?</a>
               <button type="submit">Log In</button>
             </form>
             <div className="bottom-link">
-              Don't have an account? <a href="#" id="signup-link">Register</a>
+              Don't have an account? <a href="/Register" id="signup-link">Register</a>
             </div>
           </div>
         </div>

@@ -15,10 +15,10 @@ export default function Footer() {
         </div>
         <div className="link-boxes">
             <ul className="box">
-                <li><a href="#">Home</a></li>
+                <li><a href="/Home">Home</a></li>
                 <li><a href="../contactus/contact.html">Contact us</a></li>
-                <li><a href="#">About us</a></li>
-                <li><a href="#">Get started</a></li>
+                <li><a href="/About">About us</a></li>
+                <li><a href="/Start">Get started</a></li>
             </ul>
             <ul className="box">
             <li><Link to="/Inventory">Inventory</Link></li>

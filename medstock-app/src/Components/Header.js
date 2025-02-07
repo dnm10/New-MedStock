@@ -8,7 +8,7 @@ function Header() {
       <nav className="navbar bg-body-tertiary">
       <div className="container-fluid">
      
-      <a className="navbar-brand">Smart Inventory Solutions!</a>
+      <b className="navbar-brand">Smart Inventory Solutions!</b>
 
       <Link to="/" className="home-link">
         <span className="material-symbols-outlined">home</span>
