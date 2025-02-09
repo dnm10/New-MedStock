@@ -191,7 +191,7 @@ const Billing = () => {
         <h1>MedStock Billing System</h1>
     
 
-      <billingmain>
+      <billingmain className={styles.billingMain}>
         <section className="billing-form">
           <h2>Add Medicine</h2>
           <form>
