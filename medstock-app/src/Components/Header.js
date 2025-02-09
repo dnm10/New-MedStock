@@ -23,7 +23,7 @@ function Header() {
         <span className="material-symbols-outlined">notifications</span>
       </Link>
 
-      <Link to="/Signup">
+      <Link to="/">
       <button className="btn btn-outline-primary" id="signup-btn">SIGNUP</button>
       </Link>
     </div>

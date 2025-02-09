@@ -1,22 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './AuthForm.module.css';
 import mslogo from '../Assets/mslogo.png';
+import { useNavigate } from 'react-router-dom';
 
 const AuthForm = () => {
+  const navigate = useNavigate(); // ✅ React Router navigation
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: 'medstock@gmail.com',
     password: 'medstock',
-    confirmPassword: 'medstock', // Only for Signup
-    role: 'Admin',               // Default role
+    confirmPassword: 'medstock',
+    role: 'Admin',
   });
-
-  // 🚀 Auto-trigger login on component mount
-  useEffect(() => {
-    if (isLogin) {
-      handleSubmit(new Event('submit'));  // Trigger the form submission automatically
-    }
-  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,7 +19,6 @@ const AuthForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!isLogin && formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
@@ -40,12 +34,11 @@ const AuthForm = () => {
       });
 
       const result = await response.json();
-      console.log('Login Response:', result);
+      console.log('Response:', result);
 
       if (response.ok) {
         alert(`${isLogin ? 'Login' : 'Signup'} Successful`);
-        // ✅ Redirect to Home after successful login
-        window.location.href = '/Home';
+        navigate('/Home'); // ✅ Redirect using React Router
       } else {
         alert(result.message || `${isLogin ? 'Login' : 'Signup'} Failed`);
       }
@@ -107,7 +100,7 @@ const AuthForm = () => {
               <label>
                 <input
                   type="radio"
-                  name={isLogin ? 'loginType' : 'role'}
+                  name="role"
                   value="Admin"
                   checked={formData.role === 'Admin'}
                   onChange={handleChange}
@@ -116,7 +109,7 @@ const AuthForm = () => {
               <label>
                 <input
                   type="radio"
-                  name={isLogin ? 'loginType' : 'role'}
+                  name="role"
                   value="User"
                   checked={formData.role === 'User'}
                   onChange={handleChange}
