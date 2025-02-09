@@ -1,0 +1,46 @@
+.first {
+    height: 100vh;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+  }
+  
+  .firstContent {
+    margin-left: 0px;
+    margin-right: 20px;
+    max-width: 600px;
+  }
+  
+  .capabilities {
+    text-align: center;
+  }
+  
+  .points {
+    font-weight: 300;
+    margin-top: 15px;
+    color: #345aff;
+    list-style-type: disc;
+    padding-left: 20px;
+    line-height: 1.6;
+  }
+  
+  .image1Box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30%;
+    margin-left: 90px;
+    margin-right: 0px;
+  }
+  
+  .firstImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+  
