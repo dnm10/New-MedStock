@@ -1,0 +1,99 @@
+.footer {
+  background: #001122;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  font-size: 14px;
+}
+
+.content {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px 40px;
+  color: #fff;
+}
+
+.logoDetails {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.logoImage {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.logoName {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Link Boxes */
+.linkBoxes {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  background-color: #001122;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.box {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex: 1 1 calc(33.33% - 20px);
+  text-align: left;
+}
+
+.box li {
+  margin-bottom: 10px;
+}
+
+.box li:last-child {
+  margin-bottom: 0;
+}
+
+.box a {
+  text-decoration: none;
+  color: #007bff;
+  font-size: 1rem;
+  transition: color 0.3s, font-weight 0.3s;
+}
+
+.box a:hover {
+  color: #0056b3;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .linkBoxes {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .box {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .logoDetails {
+    flex-direction: column;
+  }
+
+  .logoImage {
+    margin: 0 auto 10px;
+  }
+}
