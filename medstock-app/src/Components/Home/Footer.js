@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../Home/Footer.module.css';
+import '../../App.css';
 import mslogoed from '../../Assets/mslogoed.png';
 import { Link } from 'react-router-dom';
 

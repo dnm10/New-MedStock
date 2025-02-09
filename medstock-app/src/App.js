@@ -12,7 +12,7 @@ import Reports from './Components/Reports';
 import Users from './Components/Users';
 import AuthForm from './Components/AuthForm';
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 import {
   BrowserRouter as Router,

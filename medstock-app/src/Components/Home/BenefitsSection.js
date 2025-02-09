@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../Home/BenefitsSection.module.css';
 import hp3 from '../../Assets/hp3.jpg';
+import '../../App.css';
 
 export default function BenefitsSection() {
   return (

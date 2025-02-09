@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './OverviewSection.module.css';
+import '../../App.css';
 import hp2 from '../../Assets/hp2.jpg';
 
 export default function OverviewSection() {

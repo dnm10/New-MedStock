@@ -191,7 +191,7 @@ const Billing = () => {
         <h1>MedStock Billing System</h1>
     
 
-      <main>
+      <billingmain>
         <section className="billing-form">
           <h2>Add Medicine</h2>
           <form>
@@ -258,7 +258,7 @@ const Billing = () => {
           {/* <h3>Total Amount: ₹{totalAmount.toFixed(2)}</h3> */}
           <button onClick={generateInvoice}>Generate Invoice</button>
         </section>
-      </main>
+      </billingmain>
 
       <footer>
         <p>&copy; 2025 MedStock. All Rights Reserved.</p>

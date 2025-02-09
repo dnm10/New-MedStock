@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../Home/HeroSection.module.css';
-import hp1 from '../../Assets/hp1.jpg'; 
+import hp1 from '../../Assets/hp1.jpg';
+import '../../App.css';
 
 function HeroSection() {
   return (

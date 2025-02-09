@@ -3,6 +3,7 @@ import HeroSection from './HeroSection';
 import OverviewSection from './OverviewSection';
 import BenefitsSection from './BenefitsSection';
 import Footer from './Footer';
+import '../../App.css';
 import '../Home/Home.module.css';
 
 function Home() {
