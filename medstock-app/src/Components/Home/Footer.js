@@ -18,7 +18,7 @@ export default function Footer() {
         <div className={styles.linkBoxes}>
           <ul className={styles.box}>
             <li><Link to="/Home">Home</Link></li>
-            <li><Link to="/Contact">Contact Us</Link></li>
+            <li><Link to="/ContactUs">Contact Us</Link></li>
             <li><Link to="/About">About Us</Link></li>
             <li><Link to="/Start">Get Started</Link></li>
           </ul>

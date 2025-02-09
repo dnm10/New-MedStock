@@ -1,27 +1,13 @@
 import React, { useState } from "react";
-import "./Users.css"; // Ensure you update the CSS file name if necessary
+import "./Users.css";
 
 const Users = () => {
   const [users, setUsers] = useState([
-    { id: 1, name: "Arjun Mehta", role: "Admin", email: "arjunmehta@gmail.com", phone: "9876543210", status: "Active" },
-    { id: 2, name: "Vikram Das", role: "Pharmacist", email: "vikramdas@gmail.com", phone: "9898765432", status: "Inactive" },
-    { id: 3, name: "Rohan Gupta", role: "Pharmacist", email: "rohangupta@gmail.com", phone: "9871203456", status: "Active" },
-    { id: 4, name: "Amit Patel", role: "Admin", email: "amitpatel@gmail.com", phone: "9988123456", status: "Active" },
-    { id: 5, name: "Kunal Rao", role: "Pharmacist", email: "kunalrao@gmail.com", phone: "9988997766", status: "Inactive" },
-    { id: 6, name: "Deepak Joshi", role: "Pharmacist", email: "deepakjoshi@gmail.com", phone: "9873459876", status: "Active" },
-    { id: 7, name: "Rajiv Menon", role: "Pharmacist", email: "rajivmenon@gmail.com", phone: "9875556666", status: "Active" },
-    { id: 8, name: "Anil Kumar", role: "Admin", email: "anilkumar@gmail.com", phone: "9876543211", status: "Inactive" },
-    { id: 9, name: "Sandeep Verma", role: "Pharmacist", email: "sandeepverma@gmail.com", phone: "9876544321", status: "Active" },
-    { id: 10, name: "Manoj Sharma", role: "Admin", email: "manojsharma@gmail.com", phone: "9871234567", status: "Active" },
-    { id: 11, name: "Nikhil Agarwal", role: "Pharmacist", email: "nikhilagarwal@gmail.com", phone: "9876546789", status: "Inactive" },
-    { id: 12, name: "Ravi Kapoor", role: "Pharmacist", email: "ravikapoor@gmail.com", phone: "9876541234", status: "Active" },
-    { id: 13, name: "Kishore Reddy", role: "Admin", email: "kishorereddy@gmail.com", phone: "9871113333", status: "Inactive" },
-    { id: 14, name: "Suraj Singh", role: "Pharmacist", email: "surajsingh@gmail.com", phone: "9875678901", status: "Active" },
-    { id: 15, name: "Ajay Bhat", role: "Admin", email: "ajaybhat@gmail.com", phone: "9876547890", status: "Active" }
+    { id: 1, name: "Arjun Mehta", role: "Admin", email: "arjunmehta@gmail.com", phone: "9876543210", status: "Active" }
   ]);
-  
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to track modal visibility
-  const [currentUser, setCurrentUser] = useState(null); // State to track the user being edited
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [formValues, setFormValues] = useState({ name: "", role: "", email: "", phone: "", password: "", confirmPassword: "", status: "Active" });
 
   // Handle input changes
@@ -30,14 +16,14 @@ const Users = () => {
     setFormValues({ ...formValues, [name]: value });
   };
 
-  // Open modal to add or edit a user
+  // Open modal
   const openModal = (user = null) => {
     setCurrentUser(user);
     setFormValues(user || { name: "", role: "", email: "", phone: "", password: "", confirmPassword: "", status: "Active" });
-    setIsModalOpen(true); // Open the modal
+    setIsModalOpen(true);
   };
 
-  // Save user (add or edit)
+  // Save user (add/edit)
   const saveUser = () => {
     if (currentUser) {
       setUsers(users.map((user) => (user.id === currentUser.id ? { ...currentUser, ...formValues } : user)));
@@ -45,18 +31,13 @@ const Users = () => {
       const newUser = { ...formValues, id: users.length + 1 };
       setUsers([...users, newUser]);
     }
-    setIsModalOpen(false); // Close the modal after saving
-  };
-
-  // Delete user
-  const deleteUser = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
+    setIsModalOpen(false);
   };
 
   return (
     <div className="users-page">
       <h1>Users Management</h1>
-      <button className="add-user-btn" onClick={() => openModal()}> Add New User</button> {/* Button to open modal */}
+      <button className="add-user-btn" onClick={() => openModal()}> Add New User</button>
 
       <table className="users-table">
         <thead>
@@ -80,20 +61,19 @@ const Users = () => {
               <td>{user.phone}</td>
               <td>{user.status}</td>
               <td>
-                <button className="edit-btn" onClick={() => openModal(user)}>Edit</button> {/* Edit Button */}
-                <button className="delete-btn" onClick={() => deleteUser(user.id)}>Delete</button> {/* Delete Button */}
+               { /*<button className="edit-btn" onClick={() => openModal(user)}>Edit</button> */}
+                <button className="delete-btn" onClick={() => setUsers(users.filter((u) => u.id !== user.id))}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Modal for Add/Edit User */}
+      {/* MODAL */}
       {isModalOpen && (
         <div className="users-modal">
-          <div className="users-modal-content">
-            <button className="close-btn" onClick={() => setIsModalOpen(false)}>&times;</button> {/* Close Button */}
-            <h2>{currentUser ? "Edit User" : "Add New User"}</h2> {/* Title for Add/Edit */}
+          <div className="users-modal-content modalContent">
+            <h2>{currentUser ? "Edit User" : "Add New User"}</h2>
             <form>
               <label>Name:</label>
               <input type="text" name="name" value={formValues.name} onChange={handleInputChange} />
@@ -117,10 +97,8 @@ const Users = () => {
               <label>Confirm Password:</label>
               <input type="password" name="confirmPassword" value={formValues.confirmPassword} onChange={handleInputChange} />
 
-              <div className="modal-actions">
-                <button type="button" className="save-btn" onClick={saveUser}>Save</button> {/* Save Button */}
-                <button type="button" className="cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button> {/* Cancel Button */}
-              </div>
+              <button type="button" className="saveOrderButton" onClick={saveUser}>Save</button>
+              <button type="button" className="cancelButton" onClick={() => setIsModalOpen(false)}>Cancel</button>
             </form>
           </div>
         </div>

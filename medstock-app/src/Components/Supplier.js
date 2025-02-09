@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ReactDOM from "react-dom"; // Import ReactDOM
 import styles from "./Supplier.module.css";
 
 const Supplier = () => {
@@ -46,23 +47,10 @@ const Supplier = () => {
 
   return (
     <div className={styles.supplier}>
-        <h1>Suppliers Management</h1>
-      
+      <h1>Suppliers Management</h1>
       <button onClick={handleAddSupplier} className="add-supplier-btn">
-          Add New Supplier
-        </button>
-
-      {/* Supplier Metrics Cards */}
-      <div className="supplierCards">
-        <div className="supplierCard">
-          <h3>Total Suppliers</h3>
-          <p>{suppliers.length}</p>
-        </div>
-        <div className="supplierCard">
-          <h3>Active Suppliers</h3>
-          <p>{suppliers.length}</p> {/* Replace with actual active count if needed */}
-        </div>
-      </div>
+        Add New Supplier
+      </button>
 
       <table className="suppliers-table">
         <thead>
@@ -108,17 +96,11 @@ const Supplier = () => {
         </tbody>
       </table>
 
-      {modalOpen && (
-    <div className="supplierModal">
-      <div className="supplierModalContent">
-        <button
-        type="button"
-        className="supplierCloseBtn"
-        onClick={() => setModalOpen(false)}
-        >
-        &times;
-        </button>
-      <h3>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h3>
+      {modalOpen &&
+  ReactDOM.createPortal(
+    <div className={styles.supplierModal}>
+      <div className={styles.supplierModalContent}>
+        <h3>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h3>
         <form>
           <label>Name:</label>
           <input type="text" name="name" value={formValues.name} onChange={handleInputChange} />
@@ -135,15 +117,20 @@ const Supplier = () => {
           <label>Address:</label>
           <textarea name="address" value={formValues.address} onChange={handleInputChange}></textarea>
 
-          <div className="modal-actions">
-            <button type="button" onClick={handleSaveSupplier}>
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.saveButton} onClick={handleSaveSupplier}>
               Save
+            </button>
+            <button type="button" className={styles.closeButton} onClick={() => setModalOpen(false)}>
+              Close
             </button>
           </div>
         </form>
       </div>
-    </div>
-)}
+    </div>,
+    document.body
+  )}
+
     </div>
   );
 };

@@ -2,88 +2,177 @@
   max-width: 2100px;
   margin: auto;
   background: white;
+  padding: 20px;
 }
 
 .supplier h1 {
-text-align: center;
-margin-bottom: 20px;
-margin-left: 85px;
-padding: 20px 0;
-background-color:#3056ff;
-color: rgb(255, 255, 255);
-font-size: 24px;
-font-weight: bold;
-border-radius: 10px;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 20px 0;
+  background-color: #3056ff;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.supplier button {
-    background-color: #007bff; /* Primary Blue */
-    color: white; /* Text Color */
-    border: none; /* No Border */
-    padding: 10px 15px; /* Padding */
-    font-size: 14px; /* Font Size */
-    font-weight: bold; /* Bold Text */
-    border-radius: 5px; /* Rounded Corners */
-    cursor: pointer; /* Pointer Cursor */
-    transition: all 0.3s ease; /* Smooth Transition */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle Shadow */
-  }
-  
-  /* Hover Effect */
-  .supplier button:hover {
-    background-color: #0056b3; /* Darker Blue */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly Larger Shadow */
-    transform: translateY(-2px); /* Lift Effect */
-  }
-  
-  /* Focused Button */
-  .supplier button:focus {
-    outline: none; /* Remove Default Outline */
-    box-shadow: 0 0 8px #80bdff; /* Blue Glow */
-  }
-  
-  /* Disabled Button */
-  .supplier button:disabled {
-    background-color: #d6d6d6; /* Light Gray */
-    color: #8a8a8a; /* Gray Text */
-    cursor: not-allowed; /* No Pointer Cursor */
-    box-shadow: none; /* No Shadow */
-  }
-  
-  /* Specific Button Variants */
-  .add-supplier-btn {
-    background-color: #007bff; /* Blue */
-    margin-bottom: 10px; /* Extra Space Below */
-  }
-  
-  .add-supplier-btn:hover {
-    background-color: #0056b3; /* Darker Blue */
-  }
-  
-  .edit-btn {
-    background-color: #17a2b8; /* Cyan */
-  }
-  
-  .edit-btn:hover {
-    background-color: #117a8b; /* Darker Cyan */
-  }
-  
-  .delete-btn {
-    background-color: #dc3545; /* Red */
-  }
-  
-  .delete-btn:hover {
-    background-color: #c82333; /* Darker Red */
-  }
-  
-  .order-history-btn {
-    background-color: #28a745; /* Green */
-  }
-  
-  .order-history-btn:hover {
-    background-color: #218838; /* Darker Green */
-  }
+.addSupplierBtn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.addSupplierBtn:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.suppliersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.suppliersTable th, .suppliersTable td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.suppliersTable th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.actionBtns {
+  display: flex;
+  gap: 10px;
+}
+
+.editBtn {
+  background: #ffcc00;
+  color: #333;
+  border: none;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.editBtn:hover {
+  background: #e6b800;
+  transform: scale(1.05);
+}
+
+.deleteBtn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: #cc0000;
+  transform: scale(1.05);
+}
+
+.supplierModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow: auto;
+  backdrop-filter: blur(5px);
+}
+
+.supplierModalContent {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  padding: 30px;
+  border-radius: 16px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  position: relative;
+  text-align: left;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.supplierCloseBtn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 28px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: #1565c0;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.supplierCloseBtn:hover {
+  color: #e53935;
+  transform: scale(1.3);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.saveButton {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.saveButton:hover {
+  background-color: #388e3c;
+}
+
+.closeButton {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.closeButton:hover {
+  background-color: #c82333;
+}
+
+
+
 /* Modal Background */
 .supplierModal {
   position: fixed;
@@ -199,58 +288,4 @@ button[type="button"] {
 
 button[type="button"]:hover {
   background-color: #388e3c; /* Darker green on hover */
-}
-
-
-
-.supplierStats {
-  display: flex; /* Aligns items in a row */
-  gap: 15px; /* Space between the cards */
-  margin-bottom: 20px; /* Space below the card row */
-  justify-content: center; /* Centers the cards horizontally */
-  
-}
-
-.supplierCard {
-  border-radius: 8px;
-  padding: 20px 15px;
-  padding-top: 35px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  text-align: center;
-  width: 250px;
-  height: 130px;
-  color: white; /* Ensures text is visible on colored backgrounds */
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth animation */
-}
-
-
-
-/* Styling for card metrics */
-.supplierCard p {
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-/* Background colors for cards */
-.supplierCard:nth-child(1) {
-  background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
-}
-
-.supplierCard:nth-child(2) {
-  background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
-}
-
-.supplierCard:nth-child(3) {
-  background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
-}
-
-.supplierCard:nth-child(4) {
-  background: linear-gradient(135deg, #FFC107, #FFD54F); /* Yellow tones */
-}
-
-/* Hover effect */
-.supplierCard:hover {
-  transform: translateY(-8px); /* Lift the card */
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Darker shadow */
 }

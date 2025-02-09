@@ -80,7 +80,8 @@
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  margin-left: 620px;
+  margin-left: 400px;
+  margin-right: 250px;
 }/* Button Styling */
 .addOrderButton, .orderHistoryButton {
   background: #007bff; /* Gradient blue button */
@@ -131,18 +132,23 @@
   max-height: 80vh;
 }
 
-/* Close Button */
+
 .closeButton {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
-  border: none;
-  font-size: 28px;
+  color: blue;
+  font-size: 30px;
   cursor: pointer;
-  color: #1565c0;
-  transition: color 0.3s ease, transform 0.2s ease;
+  transition: color 0.3s ease;
+  border: none;
+  background: none;
+  padding: 0;
+  display: inline-block;
+  align-items: end;
 }
+
+.closeButton:hover {
+  color: #000;
+}
+
 
 .closeButton:hover {
   color: #e53935; /* Red on hover */

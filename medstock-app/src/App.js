@@ -11,6 +11,7 @@ import Supplier from './Components/Supplier';
 import Reports from './Components/Reports';
 import Users from './Components/Users';
 import AuthForm from './Components/AuthForm';
+import ContactUs from './Components/Home/ContactUs';
 import './App.css';
 
 
@@ -20,6 +21,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+
 
 
 const Layout = ({ children }) => {
@@ -47,6 +49,7 @@ function App() {
             <Route path='/' element={<AuthForm />} />      {/* Login */}
             <Route path="/Signup" element={<AuthForm />} /> {/* Signup */}
             <Route path="/Home" element={<Home />} />
+            <Route path="/Home/ContactUs" element={<ContactUs/>} />
             <Route path="/Notifications" element={<Notifications />} />
             <Route exact path="/Inventory" element={<Inventory />} />
             <Route path="/Billing" element={<Billing />} />

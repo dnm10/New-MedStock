@@ -228,7 +228,7 @@ input:focus {
 
 /* Button Styling */
 button {
-  padding: 14px 25px;
+  padding: 4px 5px;
   font-size: 1.1rem;
   font-weight: bold;
   border: none;
