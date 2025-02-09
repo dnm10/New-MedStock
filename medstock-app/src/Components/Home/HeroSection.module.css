@@ -1,0 +1,63 @@
+.heroSection {
+    height: 100vh;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+  }
+  
+  .content {
+    margin-left: 0px;
+    max-width: 600px;
+  }
+  
+  .content h2 {
+    font-size: 3rem;
+    line-height: 1.2;
+    color: #345aff;
+    font-weight: bold;
+  }
+  
+  .content h3 {
+    margin-top: 15px;
+    font-weight: 300;
+    color: hsl(213, 100%, 62.86%);
+    font-style: italic;
+  }
+  
+  .heroBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30%;
+    margin-right: 80px;
+    animation: fadeIn 2s ease-in-out; /* Simple fade-in animation */
+  }
+  
+  .heroImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adding shadow for depth */
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .heroImage:hover {
+    transform: scale(1.05); /* Zoom effect on hover */
+  }
+  
+  /* Fade-in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
