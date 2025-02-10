@@ -117,7 +117,7 @@ const AuthForm = () => {
               </label>
             </div>
 
-            <button type="submit">{isLogin ? 'Log In' : 'Sign Up'}</button>
+            <button className={styles.lsbtn} type="submit">{isLogin ? 'Log In' : 'Sign Up'}</button>
           </form>
 
           <div className={styles.bottomLink}>
