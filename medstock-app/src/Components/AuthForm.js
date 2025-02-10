@@ -124,13 +124,16 @@ const AuthForm = () => {
             {isLogin ? (
               <>
                 Don't have an account?{' '}
-                <button onClick={() => setIsLogin(false)} style={{ background: 'none', border: 'none', color: '#3056ff', cursor: 'pointer' }}>Register</button>
+                <button className={styles.registerButton} onClick={() => setIsLogin(false)} style={{ background: 'none', border: 'none', color: '#3056ff', cursor: 'pointer' }}>Register</button>
               </>
             ) : (
               <>
                 Already have an account?{' '}
                 <button onClick={() => setIsLogin(true)} style={{ background: 'none', border: 'none', color: '#3056ff', cursor: 'pointer' }}>Login</button>
               </>
+
+
+
             )}
           </div>
         </div>

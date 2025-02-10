@@ -20,7 +20,7 @@
 }
 
 .formDetails {
-  background-color: #3056ff;
+  background-color: #5c77f0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,6 +31,7 @@
 .logoImage {
   max-width: 100%;
   height: auto;
+  border-radius: 10px;
 }
 
 .formContent {
@@ -110,3 +111,20 @@ button:hover {
 .bottomLink a:hover {
   text-decoration: underline;
 }
+
+.registerButton {
+  background:none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 12px;
+  transition: color 0.1s ease;
+  background-color: #3056ff;
+  border-radius: 10px;
+}
+
+.registerButton:hover {
+  color: #1e40af;
+}
+
