@@ -7,9 +7,9 @@ const AuthForm = () => {
   const navigate = useNavigate(); // ✅ React Router navigation
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    email: 'medstock@gmail.com',
-    password: 'medstock',
-    confirmPassword: 'medstock',
+    email: '',
+    password: '',
+    confirmPassword: '',
     role: 'Admin',
   });
 
@@ -20,17 +20,23 @@ const AuthForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      alert('Passwords do not match!');
       return;
     }
 
-    const endpoint = isLogin ? 'http://localhost:5000/api/login' : 'http://localhost:5000/api/signup';
+    const endpoint = isLogin
+      ? 'http://localhost:5000/api/login'
+      : 'http://localhost:5000/api/signup';
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
       });
 
       const result = await response.json();
@@ -117,23 +123,43 @@ const AuthForm = () => {
               </label>
             </div>
 
-            <button className={styles.lsbtn} type="submit">{isLogin ? 'Log In' : 'Sign Up'}</button>
+            <button className={styles.lsbtn} type="submit">
+              {isLogin ? 'Log In' : 'Sign Up'}
+            </button>
           </form>
 
           <div className={styles.bottomLink}>
             {isLogin ? (
               <>
                 Don't have an account?{' '}
-                <button className={styles.registerButton} onClick={() => setIsLogin(false)} style={{ background: 'none', border: 'none', color: '#3056ff', cursor: 'pointer' }}>Register</button>
+                <button
+                  className={styles.registerButton}
+                  onClick={() => setIsLogin(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#3056ff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Register
+                </button>
               </>
             ) : (
               <>
                 Already have an account?{' '}
-                <button onClick={() => setIsLogin(true)} style={{ background: 'none', border: 'none', color: '#3056ff', cursor: 'pointer' }}>Login</button>
+                <button
+                  onClick={() => setIsLogin(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#3056ff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Login
+                </button>
               </>
-
-
-
             )}
           </div>
         </div>

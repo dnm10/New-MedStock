@@ -1,26 +1,69 @@
-import React from 'react';
-import styles from '../Home/BenefitsSection.module.css';
-import hp3 from '../../Assets/hp3.jpg';
-import '../../App.css';
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import styles from "../Home/BenefitsSection.module.css";
 
-export default function BenefitsSection() {
+// Sample images (Replace with actual image URLs)
+import img1 from "../../Assets/slider1.jpg";
+import img2 from "../../Assets/slider2.png";
+import img3 from "../../Assets/hpbg3.jpg";
+
+const benefitsData = [
+  {
+    id: 1,
+    name: "Kell Dawk",
+    description: "Simplified stock management and automated tracking.",
+    image: img1,
+  },
+  {
+    id: 2,
+    name: "Lotw Fox",
+    description: "Real-time notifications for low or expiring stock.",
+    image: img2,
+  },
+  {
+    id: 3,
+    name: "Sara Mit",
+    description: "Generate reports to analyze trends and insights.",
+    image: img3,
+  },
+];
+
+export default function BenefitsSlider() {
   return (
-    <section className={styles.third}>
-      <div className={styles.thirdContent}>
-        <div className={styles.benefits}>
-          <h2>User Benefits:</h2>
-        </div>
-        <h3>
-          <ul className={styles.points1}>
-            <li>Simplified Stock Management: Automate inventory tracking.</li>
-            <li>Stay Informed: Real-time notifications for expiring or low stock.</li>
-            <li>Save Time: Reduce manual effort with automated updates and reports.</li>
-          </ul>
-        </h3>
-      </div>
-      <div className={styles.image3Box}>
-        <img src={hp3} alt="User Benefits" className={styles.thirdImage} />
-      </div>
+    <section className={styles.sliderSection}>
+      <h2 className={styles.heading}>Responsive Card Slider</h2>
+
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay]}
+        spaceBetween={20}
+        slidesPerView={1}
+        loop={true}
+        navigation
+        pagination={{ clickable: true }}
+        autoplay={{ delay: 3000 }}
+        breakpoints={{
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+        }}
+        className={styles.slider}
+      >
+        {benefitsData.map((benefit) => (
+          <SwiperSlide key={benefit.id} className={styles.slide}>
+            <div className={styles.card}>
+              <img src={benefit.image} alt={benefit.name} className={styles.cardImage} />
+              <div className={styles.cardContent}>
+                <h3>{benefit.name}</h3>
+                <p>{benefit.description}</p>
+                <button className={styles.viewMoreBtn}>View More</button>
+              </div>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </section>
   );
 }

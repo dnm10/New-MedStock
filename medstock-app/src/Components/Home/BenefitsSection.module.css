@@ -1,42 +1,104 @@
-.third {
-  height: 100vh;
-  background-position: center;
-  background-size: cover;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.thirdContent {
-  margin-left: 90px;
-  max-width: 600px;
-}
-
-.benefits {
+.sliderContainer {
   text-align: center;
+  background: #0e233d;
+  padding: 50px 20px;
 }
 
-.points1 {
-  font-weight: 300;
-  margin-top: 15px;
-  color: #345aff;
-  list-style-type: disc;
-  padding-left: 20px;
-  line-height: 1.6;
+.heading {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px;
 }
 
-.image3Box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 30%;
-  margin-right: 80px;
+.heading span {
+  color: #ffcc00;
 }
 
-.thirdImage {
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
+.slider {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* 🚀 Improved Hover Effect */
+.card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0px 8px 20px rgba(255, 204, 0, 0.5); /* Yellow glow effect */
+}
+
+.cardImage {
+  width: 100%;
+  height: 400px;
   object-fit: cover;
+}
+
+.cardContent {
+  padding: 20px;
+  background: #0e233d;
+  color: white;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.cardContent h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.cardContent p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* 🌟 Button Hover Animation */
+.button {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background: #23221d;
+  color: #0e233d;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.button:hover {
+  background: #1c1b1a;
+  transform: scale(1.1);
+}
+
+/* 🎯 Swiper Navigation Arrows */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #12110f !important;
+  transition: transform 0.3s;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  transform: scale(1.2);
+}
+
+/* 🔵 Pagination Bullet Styling */
+.swiper-pagination-bullet {
+  background: white !important;
+  opacity: 0.7;
+  transition: opacity 0.3s, transform 0.2s;
+}
+
+.swiper-pagination-bullet-active {
+  background: #050504 !important;
+  opacity: 1;
+  transform: scale(1.2);
 }

@@ -3,6 +3,8 @@ import axios from 'axios';
 import styles from './Inventory.module.css';
 import '../App.css';
 
+
+
 export default function Inventory() {
   const [inventory, setInventory] = useState([]);
   
