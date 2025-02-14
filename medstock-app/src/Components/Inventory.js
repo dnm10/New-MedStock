@@ -34,7 +34,9 @@ export default function Inventory() {
       });
   }, []);
 
-  const [selectedItem, setSelectedItem] = useState('');
+  //const [selectedItem, setSelectedItem] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+
 
   // Calculating stock data for cards
   const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
@@ -50,7 +52,7 @@ export default function Inventory() {
   const handleRemoveItem = () => setShowRemoveModal(true);
   const closeRemoveModal = () => setShowRemoveModal(false);
 
-  const handleUpdateItem = () => {
+ /* const handleUpdateItem = () => {
     if (selectedItem) {
       const newItem = inventory.find(item => item.id === selectedItem);
       setNewItem({
@@ -65,7 +67,25 @@ export default function Inventory() {
     } else {
       alert('Please select an item to update!');
     }
+  }; */
+
+  const handleUpdateItem = () => {
+    if (!selectedItem) {
+      alert("Please select an item to update!");
+      return;
+    }
+  
+    const itemToUpdate = inventory.find(item => item.id === selectedItem);
+    if (!itemToUpdate) {
+      alert("Selected item not found!");
+      return;
+    }
+  
+    setNewItem({ ...itemToUpdate });  
+    setShowUpdateModal(true);  // ✅ Now, the modal will open
   };
+  
+  
 
   const closeUpdateModal = () => {
     setShowUpdateModal(false);
@@ -89,6 +109,28 @@ export default function Inventory() {
       threshold: parseInt(newItem.threshold, 10), // Save threshold as a number
     };
   
+
+    const handleUpdateItemDetails = (e) => {
+      e.preventDefault();
+    
+      if (!selectedItem) {
+        alert("No item selected for update!");
+        return;
+      }
+    
+      axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, newItem)
+        .then(() => {
+          return axios.get('http://localhost:5000/api/inventory');
+        })
+        .then(response => {
+          setInventory(response.data);
+          setFilteredInventory(response.data);
+          closeUpdateModal();
+        })
+        .catch(error => console.error('Error updating item:', error));
+    };
+    
+    
     // Send a POST request to your backend API to save the new item to the database
     axios.post('http://localhost:5000/api/inventory', newItemWithId)
       .then(response => {
@@ -146,31 +188,22 @@ export default function Inventory() {
       .catch(error => console.error('Error removing item:', error));
   };
   
+const handleUpdateItemDetails = (e) => {
+  e.preventDefault();
+  
+  axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, newItem)
+    .then(() => {
+      axios.get('http://localhost:5000/api/inventory')
+        .then(response => {
+          setInventory(response.data);
+          setFilteredInventory(response.data);
+        })
+        .catch(error => console.error('Error fetching inventory:', error));
+      closeUpdateModal();
+    })
+    .catch(error => console.error('Error updating item:', error));
+};
 
-  const handleUpdateItemDetails = (e) => {
-    e.preventDefault();
-  
-    const updatedItem = {
-      ...newItem,
-      quantity: parseInt(newItem.quantity, 10),
-      threshold: parseInt(newItem.threshold, 10),
-    };
-  
-    axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, updatedItem)
-      .then(response => {
-        // Re-fetch the updated inventory list from the backend
-        axios.get('http://localhost:5000/api/inventory')
-          .then(response => {
-            setInventory(response.data);
-            setFilteredInventory(response.data);
-          })
-          .catch(error => console.error('Error fetching inventory:', error));
-  
-        closeUpdateModal();
-      })
-      .catch(error => console.error('Error updating item:', error));
-  };
-  
 
   return (
     <>
@@ -239,11 +272,16 @@ export default function Inventory() {
   <tbody>
     {filteredInventory.map((item, index) => (
       <tr
-        key={item.id}
-        style={{
-          backgroundColor: item.quantity < item.threshold ? "#ffcccc" : "transparent",
-        }}
-      >
+      key={item.id}
+      onClick={() => setSelectedItem(item.id)}  // ✅ Select item on click
+      style={{
+        backgroundColor:
+          item.id === selectedItem ? "#cce5ff" :  // Highlight selected item
+          item.quantity < item.threshold ? "#ffcccc" : "transparent",
+        cursor: "pointer",
+      }}
+    >
+    
         <td>{index + 1}</td>
         <td>{item.name}</td>
         <td>{item.category}</td>
@@ -303,30 +341,30 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Update Item Modal */}
-      {showUpdateModal && (
-        <div className={styles.inventoryModal}>
-          <div className={styles.inventoryModalContent}>
-            <span className={styles.inventoryCloseBtn} onClick={closeUpdateModal}>&times;</span>
-            <h2>Update Item</h2>
-            <form id="updateItemForm" onSubmit={handleUpdateItemDetails}>
-              <label htmlFor="name">Item Name:</label>
-              <input type="text" id="name" value={newItem.name} onChange={handleInputChange} required />
-              <label htmlFor="category">Category:</label>
-              <input type="text" id="category" value={newItem.category} onChange={handleInputChange} required />
-              <label htmlFor="quantity">Quantity:</label>
-              <input type="number" id="quantity" value={newItem.quantity} onChange={handleInputChange} required />
-              <label htmlFor="expiryDate">Expiry Date:</label>
-              <input type="date" id="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
-              <label htmlFor="supplier">Supplier:</label>
-              <input type="text" id="supplier" value={newItem.supplier} onChange={handleInputChange} required />
-              <label htmlFor="threshold">Threshold:</label>
-              <input type="number" id="threshold" value={newItem.threshold} onChange={handleInputChange} required />
-              <button type="submit">Save Changes</button>
-            </form>
-          </div>
-        </div>
-      )}
+{showUpdateModal && (
+  <div className={styles.inventoryModal}>
+    <div className={styles.inventoryModalContent}>
+      <span className={styles.inventoryCloseBtn} onClick={closeUpdateModal}>&times;</span>
+      <h2>Update Item</h2>
+      <form id="updateItemForm" onSubmit={handleUpdateItemDetails}>
+        <label htmlFor="name">Item Name:</label>
+        <input type="text" name="name" value={newItem.name} onChange={handleInputChange} required />
+        <label htmlFor="category">Category:</label>
+        <input type="text" name="category" value={newItem.category} onChange={handleInputChange} required />
+        <label htmlFor="quantity">Quantity:</label>
+        <input type="number" name="quantity" value={newItem.quantity} onChange={handleInputChange} required />
+        <label htmlFor="expiryDate">Expiry Date:</label>
+        <input type="date" name="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
+        <label htmlFor="supplier">Supplier:</label>
+        <input type="text" name="supplier" value={newItem.supplier} onChange={handleInputChange} required />
+        <label htmlFor="threshold">Threshold:</label>
+        <input type="number" name="threshold" value={newItem.threshold} onChange={handleInputChange} required />
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+)}
+
     </>
   );
 }

@@ -121,3 +121,66 @@ app.delete('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inven
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+
+
+// Fetch stock summary
+app.get('/api/reports/stock', (req, res) => {
+  const stockQuery = `
+    SELECT 
+      (SELECT COUNT(*) FROM inventory) AS totalItems,
+      (SELECT SUM(quantity) FROM inventory) AS totalStock,
+      (SELECT COUNT(*) FROM inventory WHERE quantity < threshold) AS lowStock,
+      (SELECT COUNT(*) FROM inventory WHERE expiryDate < NOW()) AS expiredItems
+  `;
+
+  con.query(stockQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching stock data:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results[0]); 
+  });
+});
+
+// Fetch sales data (daily or monthly)
+app.get('/api/reports/sales', (req, res) => {
+  const { range } = req.query;
+  let salesQuery = '';
+
+  if (range === 'daily') {
+    salesQuery = `
+      SELECT name, SUM(quantity) AS quantity, price
+      FROM sales
+      WHERE DATE(sale_date) = CURDATE()
+      GROUP BY name, price
+    `;
+  } else if (range === 'monthly') {
+    salesQuery = `
+      SELECT name, SUM(quantity) AS quantity, price
+      FROM sales
+      WHERE MONTH(sale_date) = MONTH(CURDATE()) AND YEAR(sale_date) = YEAR(CURDATE())
+      GROUP BY name, price
+    `;
+  } else {
+    return res.status(400).json({ error: 'Invalid range' });
+  }
+
+  con.query(salesQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching sales data:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json({ sales: results });
+  });
+});
+
+// Fetch low stock items
+app.get('/api/reports/low-stock', (req, res) => {
+  con.query('SELECT name, quantity, threshold FROM inventory WHERE quantity < threshold', (err, results) => {
+    if (err) {
+      console.error('Error fetching low stock items:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json({ items: results });
+  });
+});
