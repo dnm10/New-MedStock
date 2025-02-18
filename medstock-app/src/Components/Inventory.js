@@ -161,7 +161,7 @@ export default function Inventory() {
     );
     setFilteredInventory(filteredItems);
   };
-
+/*
   const handleSort = () => {
     const sortBy = document.getElementById('sortOptions').value;
     const sortedInventory = [...filteredInventory].sort((a, b) => {
@@ -171,7 +171,7 @@ export default function Inventory() {
     });
     setFilteredInventory(sortedInventory);
   };
-
+*/
   const handleRemoveSelectedItem = () => {
     axios.delete(`http://localhost:5000/api/inventory/${selectedItem}`)
       .then(response => {
@@ -244,7 +244,7 @@ const handleUpdateItemDetails = (e) => {
             />
           </div>
           <div className={styles.sortOptions}>
-            <label>Sort By: </label>
+           { /*<label>Sort By: </label> }
             <select id="sortOptions">
               <option value="name">Name</option>
               <option value="category">Category</option>
@@ -252,7 +252,7 @@ const handleUpdateItemDetails = (e) => {
               <option value="expiryDate">Expiry Date</option>
               <option value="supplier">Supplier</option>
             </select>
-            <button id="sortBtn" onClick={handleSort}>Sort</button>
+           { /*<button id="sortBtn" onClick={handleSort}>Sort</button> */}
           </div>
         </div>
 
