@@ -85,34 +85,34 @@
 }
 
 /* Table styles */
-.bill-summary {
+.billingSummary {
   margin-top: 30px;
   width: 100%;
 }
 
-.bill-summary table {
+.billingTable {
   width: 100%;
+  margin-left: 0px;
   border-collapse: collapse;
-  font-size: 1rem;
 }
 
-.bill-summary th, 
-.bill-summary td {
+.billingSummary th, 
+.billingSummary td {
   padding: 12px;
   border: 1px solid #ccc;
   text-align: center;
 }
 
-.bill-summary th {
+.billingSummary th {
   background-color: #007bff;
   color: white;
 }
 
-.bill-summary tr:nth-child(even) {
+.billingSummary tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-.bill-summary tr td {
+.billingSummary tr td {
   font-size: 0.95rem;
 }
 

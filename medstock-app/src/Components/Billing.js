@@ -233,9 +233,9 @@ const Billing = () => {
           </form>
         </section>
 
-        <section className="bill-summary">
+        <section className={styles.billingSummary}>
           <h2>Bill Summary</h2>
-          <table className="bill-summary-table">
+          <table className={styles.billingTable}>
             <thead>
               <tr className="table-header-row">
                 <th className="table-header">Medicine</th>

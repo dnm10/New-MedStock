@@ -52,7 +52,7 @@ const Supplier = () => {
         Add New Supplier
       </button>
 
-      <table className="suppliers-table">
+      <table className={styles.suppliersTable}>
         <thead>
           <tr>
             <th>ID</th>

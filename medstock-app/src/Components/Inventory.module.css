@@ -84,7 +84,7 @@
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-table {
+.inventoryTable {
     width: 92%;
     border-collapse: collapse;
     box-sizing: border-box;
@@ -93,28 +93,28 @@ table {
     position: absolute;
 }
 
-table th, table td {
+.inventoryTable th, .inventoryTable td {
     padding: 12px;
     text-align: left;
     border: 1px solid #ddd;
 }
 
-table th {
+.inventoryTable th {
     background-color: #007bff;
     color: white;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-table tbody tr:hover {
+.inventoryTable tbody tr:hover {
     background-color: #f0f8ff;
     transition: background-color 0.3s ease;
 }
 
-table tbody td:hover {
+.inventoryTable tbody td:hover {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-table td button {
+.inventoryTable td button {
     margin: 0 5px;
     padding: 5px 10px;
 }

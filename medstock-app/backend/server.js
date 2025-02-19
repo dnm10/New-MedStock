@@ -184,3 +184,84 @@ app.get('/api/reports/low-stock', (req, res) => {
     res.json({ items: results });
   });
 });
+
+
+// GET all orders
+app.get('/api/orders', (req, res) => {
+  con.query('SELECT * FROM orders', (err, results) => {
+    if (err) {
+      return res.status(500).send('Error fetching orders');
+    }
+    res.json(results);
+  });
+});
+
+// ADD new order
+app.post('/api/orders', (req, res) => {
+  const { SupplierID, OrderQuantity, OrderDate, DeliveryStatus, ExpectedDeliveryDate } = req.body;
+
+  if (!SupplierID || !OrderQuantity || !OrderDate || !DeliveryStatus || !ExpectedDeliveryDate) {
+    return res.status(400).send('All fields are required');
+  }
+
+  const query = `
+    INSERT INTO orders (SupplierID, OrderQuantity, OrderDate, DeliveryStatus, ExpectedDeliveryDate)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  con.query(
+    query,
+    [SupplierID, OrderQuantity, OrderDate, DeliveryStatus, ExpectedDeliveryDate],
+    (err, result) => {
+      if (err) {
+        return res.status(500).send('Error adding new order');
+      }
+      res.status(201).json({
+        OrderID: result.insertId,
+        SupplierID,
+        OrderQuantity,
+        OrderDate,
+        DeliveryStatus,
+        ExpectedDeliveryDate,
+      });
+    }
+  );
+});
+
+// UPDATE delivery status of order
+app.put('/api/orders/:id', (req, res) => {
+  const { DeliveryStatus } = req.body;
+  const { id } = req.params;
+
+  if (!DeliveryStatus) {
+    return res.status(400).send('DeliveryStatus is required');
+  }
+
+  const query = 'UPDATE orders SET DeliveryStatus = ? WHERE OrderID = ?';
+
+  con.query(query, [DeliveryStatus, id], (err) => {
+    if (err) {
+      return res.status(500).send('Error updating order');
+    }
+    res.json({ OrderID: id, DeliveryStatus });
+  });
+});
+
+// DELETE order
+app.delete('/api/orders/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM orders WHERE OrderID = ?';
+
+  con.query(query, [id], (err) => {
+    if (err) {
+      return res.status(500).send('Error deleting order');
+    }
+    res.status(200).send(`Order with ID ${id} deleted successfully`);
+  });
+});
+
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
+});
+
+

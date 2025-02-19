@@ -257,7 +257,7 @@ const handleUpdateItemDetails = (e) => {
         </div>
 
         {/* Inventory Table */}
-        <table className="invent-table">
+        <table className={styles.inventoryTable}>
   <thead>
     <tr className="invent-header-row">
       <th>No.</th>
