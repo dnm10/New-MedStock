@@ -7,9 +7,9 @@ const AuthForm = () => {
   const navigate = useNavigate(); // ✅ React Router navigation
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
+    email: 'medstock@gmail.com',
+    password: 'medstock',
+    confirmPassword: 'medstock',
     role: 'Admin',
   });
 
