@@ -85,10 +85,12 @@
 }
 
 table {
-    width: 90%;
+    width: 92%;
     border-collapse: collapse;
+    box-sizing: border-box;
     margin-top: 20px;
-    margin-left: 13px;
+    margin-left: 90px;
+    position: absolute;
 }
 
 table th, table td {
