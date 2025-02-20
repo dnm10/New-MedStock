@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 import './Sidebar.css';
 import mslogo from '../Assets/mslogo.png';
@@ -7,7 +7,15 @@ import { useRole } from './RoleContext';
 
 function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { role } = useRole(); 
+  const { role } = useRole();
+  const [userRole, setUserRole] = useState(role);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    if (storedRole) {
+      setUserRole(storedRole);
+    }
+  }, [role]);
 
   const handleMouseEnter = () => {
     setIsExpanded(true);
@@ -39,7 +47,7 @@ function Sidebar() {
         </li>
 
         {/* Admin-Only Links */}
-        {role === 'Admin' && (
+        {userRole === 'Admin' && (
           <>
             <li>
               <Link to="/Inventory">

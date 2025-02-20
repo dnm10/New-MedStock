@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './AuthForm.module.css';
 import mslogo from '../Assets/mslogo.png';
 import { useNavigate } from 'react-router-dom';
-import { useRole } from './RoleContext'; 
+import { useRole } from './RoleContext';
 
 const AuthForm = () => {
   const navigate = useNavigate();
@@ -17,14 +17,61 @@ const AuthForm = () => {
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'role') {
+      setFormData({
+        ...formData,
+        role: value,
+        password: '',
+        confirmPassword: '',
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = () => {
+    const { password, role } = formData;
+    const minLength = role === 'Admin' ? 8 : 6;
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*]/.test(password);
+
+    return (
+      password.length >= minLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumber &&
+      hasSpecialChar
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validateEmail(formData.email)) {
+      alert('Invalid email format!');
+      return;
+    }
+
     if (!isLogin && formData.password !== formData.confirmPassword) {
       alert('Passwords do not match!');
+      return;
+    }
+
+    if (!validatePassword()) {
+      alert(
+        formData.role === 'Admin'
+          ? 'Admin password must be at least 8 characters, with uppercase, lowercase, number, and special character.'
+          : 'User password must be at least 6 characters, with uppercase, lowercase, number, and special character.'
+      );
       return;
     }
 
@@ -44,19 +91,12 @@ const AuthForm = () => {
       });
 
       const result = await response.json();
-      console.log('Response:', result);
 
       if (response.ok) {
         alert(`${isLogin ? 'Login' : 'Signup'} Successful`);
-
-        setRole(formData.role); // Set role in context
-
-        // Redirect based on role
-        if (formData.role === 'Admin') {
-          navigate('/Home');
-        } else if (formData.role === 'User') {
-          navigate('/Home'); // Same path, but Sidebar will change based on role
-        }
+        setRole(result.user.role);
+        localStorage.setItem('role', result.user.role);
+        navigate('/Home');
       } else {
         alert(result.message || `${isLogin ? 'Login' : 'Signup'} Failed`);
       }
@@ -149,12 +189,6 @@ const AuthForm = () => {
                 <button
                   className={styles.registerButton}
                   onClick={() => setIsLogin(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#3056ff',
-                    cursor: 'pointer',
-                  }}
                 >
                   Register
                 </button>
@@ -162,17 +196,7 @@ const AuthForm = () => {
             ) : (
               <>
                 Already have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#3056ff',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Login
-                </button>
+                <button onClick={() => setIsLogin(true)}>Login</button>
               </>
             )}
           </div>

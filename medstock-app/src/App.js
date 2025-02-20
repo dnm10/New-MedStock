@@ -13,15 +13,8 @@ import Users from './Components/Users';
 import AuthForm from './Components/AuthForm';
 import ContactUs from './Components/Home/ContactUs';
 import './App.css';
-
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from 'react-router-dom';
-import { RoleProvider } from './Components/RoleContext';
-
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { RoleProvider, useRole } from './Components/RoleContext';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -39,6 +32,11 @@ const Layout = ({ children }) => {
   );
 };
 
+const ProtectedRoute = ({ children }) => {
+  const { role } = useRole();
+  return role ? children : <Navigate to="/" />;
+};
+
 function App() {
   return (
     <div className="App">
@@ -46,21 +44,81 @@ function App() {
         <Router>
           <Layout>
             <Routes>
-              
               <Route path="/" element={<AuthForm />} />
               <Route path="/Signup" element={<AuthForm />} />
 
-              
-              <Route path="/Home" element={<Home />} />
-              <Route path="/Home/ContactUs" element={<ContactUs />} />
-              <Route path="/Notifications" element={<Notifications />} />
-              <Route path="/Inventory" element={<Inventory />} />
-              <Route path="/Billing" element={<Billing />} />
-              <Route path="/Orders" element={<Orders />} />
-              <Route path="/Supplier" element={<Supplier />} />
-              <Route path="/Users" element={<Users />} />
-              <Route path="/Reports" element={<Reports />} />
-              
+              <Route
+                path="/Home"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Home/ContactUs"
+                element={
+                  <ProtectedRoute>
+                    <ContactUs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Notifications"
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Inventory"
+                element={
+                  <ProtectedRoute>
+                    <Inventory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Billing"
+                element={
+                  <ProtectedRoute>
+                    <Billing />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Supplier"
+                element={
+                  <ProtectedRoute>
+                    <Supplier />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Users"
+                element={
+                  <ProtectedRoute>
+                    <Users />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Reports"
+                element={
+                  <ProtectedRoute>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Layout>
         </Router>

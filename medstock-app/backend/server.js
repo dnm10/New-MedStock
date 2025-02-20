@@ -23,19 +23,33 @@ con.connect((err) => {
 });
 
 
+const validator = require('validator');
+
 // User Signup
 app.post('/api/signup', (req, res) => {
   const { email, password, role } = req.body;
 
-  const query = 'INSERT INTO users (email, password, role) VALUES (?, ?, ?)';
-  con.query(query, [email, password, role], (err, result) => {
-    if (err) {
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(400).json({ message: 'Email already exists' });
-      }
-      return res.status(500).json({ message: 'Error signing up' });
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+
+  const checkEmailQuery = 'SELECT * FROM users WHERE email = ?';
+  con.query(checkEmailQuery, [email], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Database error' });
+
+    if (results.length > 0) {
+      return res.status(400).json({ message: 'Email already exists' });
     }
-    res.status(201).json({ message: 'Signup successful', userId: result.insertId });
+
+    const query = 'INSERT INTO users (email, password, role) VALUES (?, ?, ?)';
+    con.query(query, [email, password, role], (err, result) => {
+      if (err) return res.status(500).json({ message: 'Error signing up' });
+
+      res.status(201).json({
+        message: 'Signup successful',
+        user: { id: result.insertId, email, role },
+      });
+    });
   });
 });
 
@@ -45,17 +59,20 @@ app.post('/api/login', (req, res) => {
 
   const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
   con.query(query, [email, password], (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error logging in' });
-    }
+    if (err) return res.status(500).json({ message: 'Database error' });
+
     if (results.length === 0) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const user = results[0];
-    res.status(200).json({ message: 'Login successful', user: { id: user.id, email: user.email, role: user.role } });
+    res.status(200).json({
+      message: 'Login successful',
+      user: { id: user.id, email: user.email, role: user.role },
+    });
   });
 });
+
 
 
 // GET inventory items
@@ -260,8 +277,5 @@ app.delete('/api/orders/:id', (req, res) => {
   });
 });
 
-app.listen(5000, () => {
-  console.log('Server is running on port 5000');
-});
 
 
