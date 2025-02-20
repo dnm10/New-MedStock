@@ -107,7 +107,7 @@ function Sidebar() {
         </li>
 
         <li>
-          <Link to="/Logout">
+          <Link to="/">
             <span className="material-symbols-outlined">logout</span>Logout
           </Link>
         </li>
