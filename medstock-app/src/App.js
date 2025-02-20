@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from './Components/Header';
-import Notifications from "./Components/Notifications";
+import Notifications from './Components/Notifications';
 import FormPopup from './Components/FormPopup';
 import Sidebar from './Components/Sidebar';
 import Home from './Components/Home/Home';
@@ -14,28 +14,27 @@ import AuthForm from './Components/AuthForm';
 import ContactUs from './Components/Home/ContactUs';
 import './App.css';
 
-
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
-} from "react-router-dom";
-
+} from 'react-router-dom';
+import { RoleProvider } from './Components/RoleContext';
 
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideLayout = location.pathname === '/' || location.pathname === '/Signup'; // Hide for Login & Signup
+  const isAuthPage = location.pathname === '/' || location.pathname === '/Signup';
 
   return (
     <>
-      {!hideLayout && <Header />}
+      {!isAuthPage && <Header />}
       <div className="AppContainer">
-        {!hideLayout && <Sidebar />}
+        {!isAuthPage && <Sidebar />}
         <main>{children}</main>
       </div>
-      {!hideLayout && <FormPopup />}
+      {!isAuthPage && <FormPopup />}
     </>
   );
 };
@@ -43,26 +42,31 @@ const Layout = ({ children }) => {
 function App() {
   return (
     <div className="App">
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path='/' element={<AuthForm />} />      {/* Login */}
-            <Route path="/Signup" element={<AuthForm />} /> {/* Signup */}
-            <Route path="/Home" element={<Home />} />
-            <Route path="/Home/ContactUs" element={<ContactUs/>} />
-            <Route path="/Notifications" element={<Notifications />} />
-            <Route exact path="/Inventory" element={<Inventory />} />
-            <Route path="/Billing" element={<Billing />} />
-            <Route path="/Orders" element={<Orders />} />
-            <Route path="/Supplier" element={<Supplier />} />
-            <Route path="/Users" element={<Users />} />
-            <Route path="/Reports" element={<Reports />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <RoleProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              
+              <Route path="/" element={<AuthForm />} />
+              <Route path="/Signup" element={<AuthForm />} />
+
+              
+              <Route path="/Home" element={<Home />} />
+              <Route path="/Home/ContactUs" element={<ContactUs />} />
+              <Route path="/Notifications" element={<Notifications />} />
+              <Route path="/Inventory" element={<Inventory />} />
+              <Route path="/Billing" element={<Billing />} />
+              <Route path="/Orders" element={<Orders />} />
+              <Route path="/Supplier" element={<Supplier />} />
+              <Route path="/Users" element={<Users />} />
+              <Route path="/Reports" element={<Reports />} />
+              
+            </Routes>
+          </Layout>
+        </Router>
+      </RoleProvider>
     </div>
   );
 }
 
 export default App;
-

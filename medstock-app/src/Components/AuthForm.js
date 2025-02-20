@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import styles from './AuthForm.module.css';
 import mslogo from '../Assets/mslogo.png';
 import { useNavigate } from 'react-router-dom';
+import { useRole } from './RoleContext'; 
 
 const AuthForm = () => {
-  const navigate = useNavigate(); // ✅ React Router navigation
+  const navigate = useNavigate();
+  const { setRole } = useRole();
+
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    email: 'medstock@gmail.com',
-    password: 'medstock',
-    confirmPassword: 'medstock',
+    email: '',
+    password: '',
+    confirmPassword: '',
     role: 'Admin',
   });
 
@@ -19,6 +22,7 @@ const AuthForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isLogin && formData.password !== formData.confirmPassword) {
       alert('Passwords do not match!');
       return;
@@ -44,7 +48,15 @@ const AuthForm = () => {
 
       if (response.ok) {
         alert(`${isLogin ? 'Login' : 'Signup'} Successful`);
-        navigate('/Home'); // ✅ Redirect using React Router
+
+        setRole(formData.role); // Set role in context
+
+        // Redirect based on role
+        if (formData.role === 'Admin') {
+          navigate('/Home');
+        } else if (formData.role === 'User') {
+          navigate('/Home'); // Same path, but Sidebar will change based on role
+        }
       } else {
         alert(result.message || `${isLogin ? 'Login' : 'Signup'} Failed`);
       }
@@ -110,7 +122,8 @@ const AuthForm = () => {
                   value="Admin"
                   checked={formData.role === 'Admin'}
                   onChange={handleChange}
-                /> Admin
+                />{' '}
+                Admin
               </label>
               <label>
                 <input
@@ -119,7 +132,8 @@ const AuthForm = () => {
                   value="User"
                   checked={formData.role === 'User'}
                   onChange={handleChange}
-                /> User
+                />{' '}
+                User
               </label>
             </div>
 
