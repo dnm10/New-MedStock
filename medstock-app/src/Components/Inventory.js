@@ -94,8 +94,53 @@ export default function Inventory() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+  
+    // Regex patterns
+    const alphaNumericRegex = /^[A-Za-z0-9- ]+$/; // Alphabets, numbers, hyphens, spaces
+    const onlyLettersRegex = /^[A-Za-z ]+$/; // Only alphabets and spaces
+    const allNumbersRegex = /^\d+$/; // Only numbers
+  
+    // First, store the value in newItem
     setNewItem({ ...newItem, [name]: value });
+  
+    // Validate quantity after storing it
+    if (name === "quantity") {
+      const numericValue = parseInt(value, 10);
+      if (!isNaN(numericValue) && numericValue < 20) {
+        alert("Quantity must be at least 20.");
+      }
+      return;
+    }
+  
+    // Validate name, supplier, and category
+    if (["name", "supplier", "category"].includes(name)) {
+      if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
+        alert(
+          `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and should not be all numbers.`
+        );
+        return;
+      }
+    }
+  
+    // Validate category separately for only letters
+    if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
+      alert("Category should contain only alphabets and should not be all numbers.");
+      return;
+    }
+  
+    // Validate expiry date
+    if (name === "expiryDate") {
+      const selectedDate = new Date(value);
+      const currentDate = new Date();
+      const year2025 = new Date("2025-01-01");
+  
+      if (selectedDate < currentDate || selectedDate < year2025) {
+        alert("Expiry date must be from 2025 onwards.");
+        return;
+      }
+    }
   };
+  
 
   const handleSaveItem = (e) => {
     e.preventDefault();
