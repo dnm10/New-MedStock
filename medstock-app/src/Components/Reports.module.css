@@ -1,83 +1,135 @@
-/* Main container for the reports page */
+/* 🔹 Main Container */
 .Reports {
-    max-width: 2100px;
-    margin: auto;
-    background-color: #fff;
-  }
-  
-  /* Header Section */
-  .Reports h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    margin-left: 85px;
-    padding: 20px 0;
-    background-color:#3056ff;
-    color: rgb(255, 255, 255);
-    font-size: 24px;
-    font-weight: bold;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .Overview{
-    display: flex; /* Aligns items in a row */
-    flex-wrap: nowrap; /* Prevents wrapping to the next line */
-    gap: 15px; /* Space between the cards */
-    margin-bottom: 20px;
-    margin-left: 92px;
-    justify-content: center; /* Centers the cards horizontally */
-    align-items: center; /* Aligns items vertically if needed */
-  }
+  max-width: 2100px;
+  margin: auto;
+  background-color: #fff;
+  padding: 30px 0;
+}
 
-  .Card {
-    border-radius: 8px;
-    padding: 20px 15px;
-    padding-top: 35px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    text-align: center;
-    width: 250px;
-    height: 130px;
-    color: white; /* Ensures text is visible on colored backgrounds */
-  }
+/* 🔹 Header */
+.Reports h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0d47a1; /* Deep blue */
+  font-size: 26px;
+  font-weight: bold;
+}
 
-  /* Styling for card titles */
-  .Card h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-  }
+/* 🔹 New Description Card (Blue & White Theme) */
+.DescriptionCard {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb); /* Light blue shades */
+  padding: 25px;
+  margin: 20px 85px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
-  /* Styling for card numbers */
-  .Card p {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
+.DescriptionCard h2 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #0d47a1;
+}
 
-  /* Background colors for each card */
-  .Card:nth-child(1) {
-    background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
-    font-size: 25px;
-    
-  }
+.DescriptionCard p {
+  font-size: 16px;
+  color: #0d47a1;
+  margin-top: 8px;
+}
 
-  .Card:nth-child(2) {
-    background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
-    font-size: 25px;
-  }
+/* 🔹 Overview Cards */
+.Overview {
+  display: flex;
+  gap: 20px;
+  margin: 20px auto;
+  justify-content: center;
+  align-items: center;
+}
 
-  .Card:nth-child(3) {
-    background: linear-gradient(135deg, #ff6030, #FF8A65); /* Orange tones */
-    font-size: 25px;
-  }
-  .Card:nth-child(4) {
-    background: linear-gradient(135deg, #ff24f0, #dd44c4);
-    font-size: 25px; 
-  }
+/* 🔹 Individual Cards */
+.Card {
+  border-radius: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  width: 280px;
+  height: 150px;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
+}
 
-  /* Optional hover effect */
-  .Card:hover {
-    transform: translateY(-5px); /* Slight lift on hover */
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Darker shadow */
-  }
+/* 🔹 Card Titles */
+.Card h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
 
-  
+/* 🔹 Different Card Colors */
+.Card:nth-child(1) {
+  background: linear-gradient(135deg, #1565c0, #64b5f6); /* Blue shades */
+}
+
+.Card:nth-child(2) {
+  background: linear-gradient(135deg, #0d47a1, #42a5f5); /* Deep blue */
+}
+
+.Card:nth-child(3) {
+  background: linear-gradient(135deg, #1976d2, #90caf9); /* Sky blue */
+}
+
+.Card:nth-child(4) {
+  background: linear-gradient(135deg, #1e88e5, #bbdefb); /* Light blue */
+}
+
+/* 🔹 Card Hover Effect */
+.Card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 🔹 Date Range Selector */
+.DateRangeSelector {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.DateRangeSelector label {
+  font-size: 18px;
+  color: #0d47a1;
+  font-weight: bold;
+}
+
+.DateRangeSelector select {
+  font-size: 16px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #0d47a1;
+  color: #0d47a1;
+  margin-left: 10px;
+}
+
+/* 🔹 Print Button */
+.ButtonContainer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.PrintButton {
+  background: linear-gradient(135deg, #1565c0, #64b5f6);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.PrintButton:hover {
+  background: linear-gradient(135deg, #0d47a1, #42a5f5);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}

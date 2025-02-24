@@ -1,23 +1,60 @@
-import React, { useState } from "react";
-import ReactDOM from "react-dom"; // Import ReactDOM
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import styles from "./Supplier.module.css";
 
 const Supplier = () => {
-  const [suppliers, setSuppliers] = useState([
-    { id: 1, name: "Shree Pharma", contactPerson: "Ravi Verma", phone: "1234567890", email: "ravi.verma@gmail.com", address: "123 Shree Lane, Delhi" },
-    { id: 2, name: "Jai Meds", contactPerson: "Vikram Singh", phone: "9876543210", email: "vikram.singh@gmail.com", address: "456 Jai Avenue, Mumbai" },
-    { id: 3, name: "MediCare Solutions", contactPerson: "Amit Sharma", phone: "9999999999", email: "amit.sharma@gmail.com", address: "12 Health Avenue, Mumbai" },
-  ]);
-
+  const [suppliers, setSuppliers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editSupplier, setEditSupplier] = useState(null);
   const [formValues, setFormValues] = useState({
-    name: "",
-    contactPerson: "",
-    phone: "",
-    email: "",
-    address: "",
+    SupplierName: "",
+    ContactPerson: "",
+    PhoneNumber: "",
+    EmailAddress: "",
+    Address: "",
   });
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
+
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/suppliers");
+      const data = await response.json();
+      setSuppliers(data);
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
+
+  // Validation function
+  const validateForm = () => {
+    let newErrors = {};
+    const nameRegex = /^[A-Za-z\s]+$/; // Only alphabets and spaces
+    const phoneRegex = /^[0-9]{10}$/; // Exactly 10 digits
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Valid email format
+
+    if (!formValues.SupplierName.trim() || !nameRegex.test(formValues.SupplierName)) {
+      newErrors.SupplierName = "Supplier name should contain only alphabets.";
+    }
+    if (!formValues.ContactPerson.trim() || !nameRegex.test(formValues.ContactPerson)) {
+      newErrors.ContactPerson = "Contact person should contain only alphabets.";
+    }
+    if (!formValues.PhoneNumber.match(phoneRegex)) {
+      newErrors.PhoneNumber = "Phone number must be exactly 10 digits.";
+    }
+    if (!formValues.EmailAddress.match(emailRegex)) {
+      newErrors.EmailAddress = "Enter a valid email address.";
+    }
+    if (!formValues.Address.trim()) {
+      newErrors.Address = "Address is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,22 +64,62 @@ const Supplier = () => {
   const handleAddSupplier = () => {
     setModalOpen(true);
     setEditSupplier(null);
-    setFormValues({ name: "", contactPerson: "", phone: "", email: "", address: "" });
+    setFormValues({
+      SupplierName: "",
+      ContactPerson: "",
+      PhoneNumber: "",
+      EmailAddress: "",
+      Address: "",
+    });
+    setErrors({});
   };
 
-  const handleSaveSupplier = () => {
-    if (editSupplier) {
-      setSuppliers((prev) =>
-        prev.map((supplier) => (supplier.id === editSupplier.id ? { ...editSupplier, ...formValues } : supplier))
-      );
-    } else {
-      setSuppliers((prev) => [...prev, { id: Date.now(), ...formValues }]);
+  const handleEditSupplier = (supplier) => {
+    setModalOpen(true);
+    setEditSupplier(supplier.SupplierID);
+    setFormValues({
+      SupplierName: supplier.SupplierName,
+      ContactPerson: supplier.ContactPerson,
+      PhoneNumber: supplier.PhoneNumber,
+      EmailAddress: supplier.EmailAddress,
+      Address: supplier.Address,
+    });
+    setErrors({});
+  };
+
+  const handleSaveSupplier = async () => {
+    if (!validateForm()) return; // Stop if validation fails
+
+    try {
+      const method = editSupplier ? "PUT" : "POST";
+      const url = editSupplier
+        ? `http://localhost:5000/api/suppliers/${editSupplier}`
+        : "http://localhost:5000/api/suppliers";
+
+      await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formValues),
+      });
+
+      fetchSuppliers();
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Error saving supplier:", error);
     }
-    setModalOpen(false);
   };
 
-  const handleDeleteSupplier = (id) => {
-    setSuppliers((prev) => prev.filter((supplier) => supplier.id !== id));
+  const handleDeleteSupplier = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this supplier?")) return;
+
+    try {
+      await fetch(`http://localhost:5000/api/suppliers/${id}`, {
+        method: "DELETE",
+      });
+      fetchSuppliers();
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+    }
   };
 
   return (
@@ -51,7 +128,6 @@ const Supplier = () => {
       <button onClick={handleAddSupplier} className="add-supplier-btn">
         Add New Supplier
       </button>
-
       <table className={styles.suppliersTable}>
         <thead>
           <tr>
@@ -66,27 +142,23 @@ const Supplier = () => {
         </thead>
         <tbody>
           {suppliers.map((supplier) => (
-            <tr key={supplier.id}>
-              <td>{supplier.id}</td>
-              <td>{supplier.name}</td>
-              <td>{supplier.contactPerson}</td>
-              <td>{supplier.phone}</td>
-              <td>{supplier.email}</td>
-              <td>{supplier.address}</td>
+            <tr key={supplier.SupplierID}>
+              <td>{supplier.SupplierID}</td>
+              <td>{supplier.SupplierName}</td>
+              <td>{supplier.ContactPerson}</td>
+              <td>{supplier.PhoneNumber}</td>
+              <td>{supplier.EmailAddress}</td>
+              <td>{supplier.Address}</td>
               <td>
                 <button
                   className="edit-btn"
-                  onClick={() => {
-                    setModalOpen(true);
-                    setEditSupplier(supplier);
-                    setFormValues(supplier);
-                  }}
+                  onClick={() => handleEditSupplier(supplier)}
                 >
                   Edit
                 </button>
                 <button
                   className="delete-btn"
-                  onClick={() => handleDeleteSupplier(supplier.id)}
+                  onClick={() => handleDeleteSupplier(supplier.SupplierID)}
                 >
                   Delete
                 </button>
@@ -97,40 +169,44 @@ const Supplier = () => {
       </table>
 
       {modalOpen &&
-  ReactDOM.createPortal(
-    <div className={styles.supplierModal}>
-      <div className={styles.supplierModalContent}>
-        <h3>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h3>
-        <form>
-          <label>Name:</label>
-          <input type="text" name="name" value={formValues.name} onChange={handleInputChange} />
+        ReactDOM.createPortal(
+          <div className={styles.supplierModal}>
+            <div className={styles.supplierModalContent}>
+              <h3>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h3>
+              <form onSubmit={(e) => e.preventDefault()}>
+                <label>Name:</label>
+                <input type="text" name="SupplierName" value={formValues.SupplierName} onChange={handleInputChange} />
+                {errors.SupplierName && <span className="error">{errors.SupplierName}</span>}
 
-          <label>Contact Person:</label>
-          <input type="text" name="contactPerson" value={formValues.contactPerson} onChange={handleInputChange} />
+                <label>Contact Person:</label>
+                <input type="text" name="ContactPerson" value={formValues.ContactPerson} onChange={handleInputChange} />
+                {errors.ContactPerson && <span className="error">{errors.ContactPerson}</span>}
 
-          <label>Phone:</label>
-          <input type="text" name="phone" value={formValues.phone} onChange={handleInputChange} />
+                <label>Phone:</label>
+                <input type="text" name="PhoneNumber" value={formValues.PhoneNumber} onChange={handleInputChange} />
+                {errors.PhoneNumber && <span className="error">{errors.PhoneNumber}</span>}
 
-          <label>Email:</label>
-          <input type="email" name="email" value={formValues.email} onChange={handleInputChange} />
+                <label>Email:</label>
+                <input type="email" name="EmailAddress" value={formValues.EmailAddress} onChange={handleInputChange} />
+                {errors.EmailAddress && <span className="error">{errors.EmailAddress}</span>}
 
-          <label>Address:</label>
-          <textarea name="address" value={formValues.address} onChange={handleInputChange}></textarea>
+                <label>Address:</label>
+                <textarea name="Address" value={formValues.Address} onChange={handleInputChange}></textarea>
+                {errors.Address && <span className="error">{errors.Address}</span>}
 
-          <div className={styles.modalActions}>
-            <button type="button" className={styles.saveButton} onClick={handleSaveSupplier}>
-              Save
-            </button>
-            <button type="button" className={styles.closeButton} onClick={() => setModalOpen(false)}>
-              Close
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>,
-    document.body
-  )}
-
+                <div className={styles.modalActions}>
+                  <button type="button" className={styles.saveButton} onClick={handleSaveSupplier}>
+                    Save
+                  </button>
+                  <button type="button" className={styles.closeButton} onClick={() => setModalOpen(false)}>
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

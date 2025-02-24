@@ -10,7 +10,7 @@ const Billing = () => {
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
 
-  const addToBill = () => {
+ /* const addToBill = () => {
     if (name.trim() && quantity > 0 && price > 0) {
       const newItem = { name, quantity, price };
       const updatedItems = [...billItems, newItem];
@@ -26,7 +26,46 @@ const Billing = () => {
     } else {
       alert('Please enter valid values for all fields.');
     }
+  };       */
+
+  const addToBill = async () => {
+    if (name.trim() && quantity > 0 && price > 0) {
+      const newItem = { name, quantity, price };
+  
+      try {
+        // Send request to update inventory in backend
+        const response = await fetch("http://localhost:5000/api/update-inventory", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, quantity }),
+        });
+  
+        const result = await response.json();
+  
+        if (response.ok) {
+          // Proceed only if inventory update is successful
+          const updatedItems = [...billItems, newItem];
+          const updatedTotal = updatedItems.reduce((sum, curr) => sum + curr.quantity * curr.price, 0);
+  
+          setBillItems(updatedItems);
+          setTotalAmount(updatedTotal);
+          setName('');
+          setQuantity(1);
+          setPrice(0);
+        } else {
+          alert(result.message || "Failed to update inventory.");
+        }
+      } catch (error) {
+        console.error("Error updating inventory:", error);
+        alert("Error connecting to server.");
+      }
+    } else {
+      alert("Please enter valid values for all fields.");
+    }
   };
+  
 
   const generateInvoice = () => {
     const billNumber = Math.floor(Math.random() * 1000);
@@ -187,11 +226,10 @@ const Billing = () => {
 
   return (
     <div className={styles.Billing}>
-      
-        <h1>MedStock Billing System</h1>
-    
-
-      <billingmain className={styles.billingMain}>
+      <h1>MedStock Billing System</h1>
+  
+      {/* Replaced billingmain with a div */}
+      <div className={styles.billingMain}>
         <section className="billing-form">
           <h2>Add Medicine</h2>
           <form>
@@ -232,16 +270,16 @@ const Billing = () => {
             <button type="button" onClick={addToBill}>Add to Bill</button>
           </form>
         </section>
-
+  
         <section className={styles.billingSummary}>
           <h2>Bill Summary</h2>
           <table className={styles.billingTable}>
             <thead>
-              <tr className="table-header-row">
-                <th className="table-header">Medicine</th>
-                <th className="table-header">Quantity</th>
-                <th className="table-header">Price per Unit (₹)</th>
-                <th className="table-header">Total (₹)</th>
+              <tr>
+                <th>Medicine</th>
+                <th>Quantity</th>
+                <th>Price per Unit (₹)</th>
+                <th>Total (₹)</th>
               </tr>
             </thead>
             <tbody>
@@ -255,16 +293,16 @@ const Billing = () => {
               ))}
             </tbody>
           </table>
-          {/* <h3>Total Amount: ₹{totalAmount.toFixed(2)}</h3> */}
           <button onClick={generateInvoice}>Generate Invoice</button>
         </section>
-      </billingmain>
-
+      </div>
+  
       <footer>
         <p>&copy; 2025 MedStock. All Rights Reserved.</p>
       </footer>
     </div>
   );
+  
 };
 
 export default Billing;

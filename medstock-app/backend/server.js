@@ -202,7 +202,7 @@ app.get('/api/reports/low-stock', (req, res) => {
   });
 });
 
-
+/// ORDERS ///////////////////////////////////////////////
 // GET all orders
 app.get('/api/orders', (req, res) => {
   con.query('SELECT * FROM orders', (err, results) => {
@@ -276,6 +276,130 @@ app.delete('/api/orders/:id', (req, res) => {
     res.status(200).send(`Order with ID ${id} deleted successfully`);
   });
 });
+
+// ======================= SUPPLIERS =========================== //
+
+// GET all suppliers
+app.get('/api/suppliers', (req, res) => {
+  con.query('SELECT * FROM Suppliers', (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching suppliers' });
+    }
+    res.json(results);
+  });
+});
+
+// ADD a new supplier
+app.post('/api/suppliers', (req, res) => {
+  const { SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate } = req.body;
+
+  if (!SupplierName || !ContactPerson || !PhoneNumber || !EmailAddress || !Address) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  const query = `
+    INSERT INTO Suppliers (SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate) 
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  con.query(
+    query,
+    [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate || null],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error adding supplier' });
+      }
+      res.status(201).json({
+        SupplierID: result.insertId,
+        SupplierName,
+        ContactPerson,
+        PhoneNumber,
+        EmailAddress,
+        Address,
+        LastDeliveryDate,
+      });
+    }
+  );
+});
+
+// UPDATE a supplier
+app.put('/api/suppliers/:id', (req, res) => {
+  const { SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate } = req.body;
+  const { id } = req.params;
+
+  if (!SupplierName || !ContactPerson || !PhoneNumber || !EmailAddress || !Address) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  const query = `
+    UPDATE Suppliers 
+    SET SupplierName = ?, ContactPerson = ?, PhoneNumber = ?, EmailAddress = ?, Address = ?, LastDeliveryDate = ?
+    WHERE SupplierID = ?
+  `;
+
+  con.query(
+    query,
+    [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate || null, id],
+    (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error updating supplier' });
+      }
+      res.json({ message: 'Supplier updated successfully' });
+    }
+  );
+});
+
+// DELETE a supplier
+app.delete('/api/suppliers/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM Suppliers WHERE SupplierID = ?';
+
+  con.query(query, [id], (err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error deleting supplier' });
+    }
+    res.json({ message: `Supplier with ID ${id} deleted successfully` });
+  });
+});
+
+
+// for billing
+app.post("/api/update-inventory", (req, res) => {
+  const { name, quantity } = req.body;
+
+  // Check current stock
+  con.query("SELECT quantity FROM inventory WHERE name = ?", [name], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Internal server error." });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Item not found in inventory." });
+    }
+
+    const currentStock = results[0].quantity;
+
+    if (currentStock < quantity) {
+      return res.status(400).json({ message: "Insufficient stock available." });
+    }
+
+    // Update stock
+    con.query(
+      "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
+      [quantity, name],
+      (updateErr) => {
+        if (updateErr) {
+          console.error("Error updating inventory:", updateErr);
+          return res.status(500).json({ message: "Error updating inventory." });
+        }
+        res.json({ message: "Inventory updated successfully." });
+      }
+    );
+  });
+});
+
 
 
 
