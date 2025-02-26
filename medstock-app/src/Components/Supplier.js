@@ -29,32 +29,46 @@ const Supplier = () => {
     }
   };
 
-  // Validation function
   const validateForm = () => {
     let newErrors = {};
+    
+    // Regex patterns
     const nameRegex = /^[A-Za-z\s]+$/; // Only alphabets and spaces
     const phoneRegex = /^[0-9]{10}$/; // Exactly 10 digits
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Valid email format
+    const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com)$/; // Must be Gmail or Yahoo
 
+    // Validate Supplier Name (Only alphabets and spaces)
     if (!formValues.SupplierName.trim() || !nameRegex.test(formValues.SupplierName)) {
-      newErrors.SupplierName = "Supplier name should contain only alphabets.";
-    }
-    if (!formValues.ContactPerson.trim() || !nameRegex.test(formValues.ContactPerson)) {
-      newErrors.ContactPerson = "Contact person should contain only alphabets.";
-    }
-    if (!formValues.PhoneNumber.match(phoneRegex)) {
-      newErrors.PhoneNumber = "Phone number must be exactly 10 digits.";
-    }
-    if (!formValues.EmailAddress.match(emailRegex)) {
-      newErrors.EmailAddress = "Enter a valid email address.";
-    }
-    if (!formValues.Address.trim()) {
-      newErrors.Address = "Address is required.";
+        newErrors.SupplierName = "Supplier name should contain only alphabets.";
     }
 
+    // Validate Contact Person (Only alphabets and spaces)
+    if (!formValues.ContactPerson.trim() || !nameRegex.test(formValues.ContactPerson)) {
+        newErrors.ContactPerson = "Contact person should contain only alphabets.";
+    }
+
+    // Validate Phone Number (Exactly 10 digits)
+    if (!formValues.PhoneNumber.match(phoneRegex)) {
+        newErrors.PhoneNumber = "Phone number must be exactly 10 digits.";
+    }
+
+    // Validate Email (Only Gmail or Yahoo)
+    if (!formValues.EmailAddress.match(emailRegex)) {
+        newErrors.EmailAddress = "Enter a valid email address";
+    }
+
+    // Validate Address (Required)
+    if (!formValues.Address.trim()) {
+        newErrors.Address = "Address is required.";
+    }
+
+    // Set errors in state
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
-  };
+
+    // Return true if no errors exist
+    return Object.keys(newErrors).length === 0;
+};
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

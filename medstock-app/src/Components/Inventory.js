@@ -94,52 +94,60 @@ export default function Inventory() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
+
     // Regex patterns
     const alphaNumericRegex = /^[A-Za-z0-9- ]+$/; // Alphabets, numbers, hyphens, spaces
     const onlyLettersRegex = /^[A-Za-z ]+$/; // Only alphabets and spaces
     const allNumbersRegex = /^\d+$/; // Only numbers
-  
-    // First, store the value in newItem
-    setNewItem({ ...newItem, [name]: value });
-  
-    // Validate quantity after storing it
-    if (name === "quantity") {
-      const numericValue = parseInt(value, 10);
-      if (!isNaN(numericValue) && numericValue < 20) {
-        alert("Quantity must be at least 20.");
-      }
-      return;
+
+    // Validate expiry date before updating the state
+    if (name === "expiryDate") {
+        const selectedDate = new Date(value);
+        const currentDate = new Date();
+
+        // Set time to midnight to avoid timezone issues
+        selectedDate.setHours(0, 0, 0, 0);
+        currentDate.setHours(0, 0, 0, 0);
+
+        // Get the minimum valid expiry date (1 year from today)
+        const minExpiryDate = new Date();
+        minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
+
+        if (selectedDate < minExpiryDate) {
+            alert("Expiry date must be at least 1 year from today.");
+            return; // Prevent state update
+        }
     }
-  
+
+    // Validate quantity
+    if (name === "quantity") {
+        const numericValue = parseInt(value, 10);
+        if (!isNaN(numericValue) && numericValue < 20) {
+            alert("Quantity must be minimum 20.");
+            return; // Prevent state update
+        }
+    }
+
     // Validate name, supplier, and category
     if (["name", "supplier", "category"].includes(name)) {
-      if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
-        alert(
-          `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and should not be all numbers.`
-        );
-        return;
-      }
+        if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
+            alert(
+                `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and should not be all numbers.`
+            );
+            return; // Prevent state update
+        }
     }
-  
+
     // Validate category separately for only letters
     if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
-      alert("Category should contain only alphabets and should not be all numbers.");
-      return;
+        alert("Category Invalid.");
+        return; // Prevent state update
     }
-  
-    // Validate expiry date
-    if (name === "expiryDate") {
-      const selectedDate = new Date(value);
-      const currentDate = new Date();
-      const year2025 = new Date("2025-01-01");
-  
-      if (selectedDate < currentDate || selectedDate < year2025) {
-        alert("Expiry date must be from 2025 onwards.");
-        return;
-      }
-    }
-  };
+
+    // Update state only if validation passes
+    setNewItem({ ...newItem, [name]: value });
+};
+
   
 
   const handleSaveItem = (e) => {
@@ -315,28 +323,28 @@ const handleUpdateItemDetails = (e) => {
     </tr>
   </thead>
   <tbody>
-    {filteredInventory.map((item, index) => (
-      <tr
+  {filteredInventory.map((item, index) => (
+    <tr
       key={item.id}
-      onClick={() => setSelectedItem(item.id)}  // ✅ Select item on click
+      onClick={() => setSelectedItem(item.id)}
       style={{
         backgroundColor:
-          item.id === selectedItem ? "#cce5ff" :  // Highlight selected item
+          item.id === selectedItem ? "#cce5ff" :
           item.quantity < item.threshold ? "#ffcccc" : "transparent",
         cursor: "pointer",
       }}
     >
-    
-        <td>{index + 1}</td>
-        <td>{item.name}</td>
-        <td>{item.category}</td>
-        <td>{item.quantity}</td>
-        <td>{item.expiryDate}</td>
-        <td>{item.supplier}</td>
-        <td>{item.threshold}</td>
-      </tr>
-    ))}
-  </tbody>
+      <td>{index + 1}</td>
+      <td>{item.name}</td>
+      <td>{item.category}</td>
+      <td>{item.quantity}</td>
+      <td>{new Date(item.expiryDate).toISOString().split('T')[0]}</td> {/* YYYY-MM-DD Format */}
+      <td>{item.supplier}</td>
+      <td>{item.threshold}</td>
+    </tr>
+  ))}
+</tbody>
+
 </table>
 
       </div>

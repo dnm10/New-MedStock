@@ -12,6 +12,7 @@ import Reports from './Components/Reports';
 import Users from './Components/Users';
 import AuthForm from './Components/AuthForm';
 import ContactUs from './Components/Home/ContactUs';
+import Profile from './Components/Profile';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { RoleProvider, useRole } from './Components/RoleContext';
@@ -116,6 +117,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Reports />
+                  </ProtectedRoute>
+                }
+              />
+
+<Route
+                path="/Profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
