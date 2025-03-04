@@ -94,27 +94,28 @@ export default function Inventory() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
+    // Allow users to type freely first
+    setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
+};
+
+const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+
     // Regex patterns
     const alphaNumericRegex = /^[A-Za-z0-9- ]+$/; // Alphabets, numbers, hyphens, spaces
     const onlyLettersRegex = /^[A-Za-z ]+$/; // Only alphabets and spaces
     const allNumbersRegex = /^\d+$/; // Only numbers
 
-    // Validate expiry date before updating the state
+    // Validate expiry date
     if (name === "expiryDate") {
         const selectedDate = new Date(value);
-        const currentDate = new Date();
-
-        // Set time to midnight to avoid timezone issues
-        selectedDate.setHours(0, 0, 0, 0);
-        currentDate.setHours(0, 0, 0, 0);
-
-        // Get the minimum valid expiry date (1 year from today)
         const minExpiryDate = new Date();
         minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
 
         if (selectedDate < minExpiryDate) {
             alert("Expiry date must be at least 1 year from today.");
-            return; // Prevent state update
+            setNewItem((prevItem) => ({ ...prevItem, [name]: "" })); // Reset invalid value
+            return;
         }
     }
 
@@ -122,21 +123,32 @@ export default function Inventory() {
     if (["name", "supplier", "category"].includes(name)) {
         if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
             alert(
-                `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and should not be all numbers.`
+                `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and not be all numbers.`
             );
-            return; // Prevent state update
+            setNewItem((prevItem) => ({ ...prevItem, [name]: "" }));
+            return;
         }
     }
 
     // Validate category separately for only letters
     if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
         alert("Category Invalid.");
-        return; // Prevent state update
+        setNewItem((prevItem) => ({ ...prevItem, [name]: "" }));
+        return;
     }
 
-    // Update state only if validation passes
-    setNewItem({ ...newItem, [name]: value });
+    // Validate quantity (should be 20 or more)
+    if (name === "quantity") {
+        const quantityValue = parseInt(value, 10);
+
+        if (isNaN(quantityValue) || quantityValue < 20) {
+            alert("Quantity must be 20 or more.");
+            setNewItem((prevItem) => ({ ...prevItem, [name]: "20" })); // Reset to 20 if invalid
+            return;
+        }
+    }
 };
+
 
   const handleSaveItem = (e) => {
     e.preventDefault();

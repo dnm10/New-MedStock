@@ -29,9 +29,8 @@ const AuthForm = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
-
   const validateEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com)$/;
+    const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]*@(gmail\.com|yahoo\.com)$/;
     return emailRegex.test(email);
   };
   
