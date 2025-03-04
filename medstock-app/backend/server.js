@@ -202,12 +202,13 @@ app.get('/api/reports/low-stock', (req, res) => {
   });
 });
 
-/// ORDERS ///////////////////////////////////////////////
+// ORDERS ///////////////////////////////////////////////
+
 // GET all orders
 app.get('/api/orders', (req, res) => {
-  con.query('SELECT * FROM orders', (err, results) => {
+  con.query('SELECT * FROM Orders', (err, results) => {
     if (err) {
-      return res.status(500).send('Error fetching orders');
+      return res.status(500).json({ message: 'Error fetching orders' });
     }
     res.json(results);
   });
@@ -215,67 +216,69 @@ app.get('/api/orders', (req, res) => {
 
 // ADD new order
 app.post('/api/orders', (req, res) => {
-  const { SupplierID, OrderQuantity, OrderDate, DeliveryStatus, ExpectedDeliveryDate } = req.body;
+  const { MedicineName, QuantityOrdered, Price, DeliveryDate, SupplierID } = req.body;
 
-  if (!SupplierID || !OrderQuantity || !OrderDate || !DeliveryStatus || !ExpectedDeliveryDate) {
-    return res.status(400).send('All fields are required');
+  // Check if all required fields are provided
+  if (!MedicineName || !QuantityOrdered || !Price || !DeliveryDate || !SupplierID) {
+    return res.status(400).json({ message: 'All fields are required' });
   }
 
+  // Insert order into database
   const query = `
-    INSERT INTO orders (SupplierID, OrderQuantity, OrderDate, DeliveryStatus, ExpectedDeliveryDate)
+    INSERT INTO Orders (MedicineName, QuantityOrdered, Price, DeliveryDate, SupplierID)
     VALUES (?, ?, ?, ?, ?)
   `;
 
-  con.query(
-    query,
-    [SupplierID, OrderQuantity, OrderDate, DeliveryStatus, ExpectedDeliveryDate],
-    (err, result) => {
-      if (err) {
-        return res.status(500).send('Error adding new order');
-      }
-      res.status(201).json({
-        OrderID: result.insertId,
-        SupplierID,
-        OrderQuantity,
-        OrderDate,
-        DeliveryStatus,
-        ExpectedDeliveryDate,
-      });
+  con.query(query, [MedicineName, QuantityOrdered, Price, DeliveryDate, SupplierID], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error adding new order', error: err });
     }
-  );
+
+    // Fetch the newly inserted order using the inserted OrderID
+    con.query('SELECT * FROM Orders WHERE OrderID = ?', [result.insertId], (fetchErr, fetchResults) => {
+      if (fetchErr) {
+        return res.status(500).json({ message: 'Error fetching new order', error: fetchErr });
+      }
+
+      res.status(201).json(fetchResults[0]); // Send the new order details to frontend
+    });
+  });
 });
 
-// UPDATE delivery status of order
+
+// UPDATE order delivery status
 app.put('/api/orders/:id', (req, res) => {
-  const { DeliveryStatus } = req.body;
+  const { Delivery_Status } = req.body;
   const { id } = req.params;
 
-  if (!DeliveryStatus) {
-    return res.status(400).send('DeliveryStatus is required');
+  if (Delivery_Status === undefined) {
+    return res.status(400).json({ message: 'Delivery status is required' });
   }
 
-  const query = 'UPDATE orders SET DeliveryStatus = ? WHERE OrderID = ?';
+  const query = 'UPDATE Orders SET Delivery_Status = ? WHERE OrderID = ?';
 
-  con.query(query, [DeliveryStatus, id], (err) => {
+  con.query(query, [Delivery_Status, id], (err) => {
     if (err) {
-      return res.status(500).send('Error updating order');
+      return res.status(500).json({ message: 'Error updating order' });
     }
-    res.json({ OrderID: id, DeliveryStatus });
+    res.json({ message: 'Order status updated successfully', OrderID: id });
   });
 });
 
 // DELETE order
 app.delete('/api/orders/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM orders WHERE OrderID = ?';
+
+  const query = 'DELETE FROM Orders WHERE OrderID = ?';
 
   con.query(query, [id], (err) => {
     if (err) {
-      return res.status(500).send('Error deleting order');
+      return res.status(500).json({ message: 'Error deleting order' });
     }
-    res.status(200).send(`Order with ID ${id} deleted successfully`);
+    res.json({ message: `Order with ID ${id} deleted successfully` });
   });
 });
+
 
 // ======================= SUPPLIERS =========================== //
 
@@ -398,6 +401,21 @@ app.post("/api/update-inventory", (req, res) => {
       }
     );
   });
+});
+
+// Fetch expired items to reports page
+
+app.get('/api/reports/expired-items', async (req, res) => {
+  try {
+    const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const [expiredItems] = await db.query(
+      'SELECT * FROM Inventory WHERE expiryDate < ?',
+      [currentDate]
+    );
+    res.json(expiredItems);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching expired items' });
+  }
 });
 
 

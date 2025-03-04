@@ -91,7 +91,6 @@ export default function Inventory() {
     setShowUpdateModal(false);
     setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '', threshold: '' });
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -119,15 +118,6 @@ export default function Inventory() {
         }
     }
 
-    // Validate quantity
-    if (name === "quantity") {
-        const numericValue = parseInt(value, 10);
-        if (!isNaN(numericValue) && numericValue < 20) {
-            alert("Quantity must be minimum 20.");
-            return; // Prevent state update
-        }
-    }
-
     // Validate name, supplier, and category
     if (["name", "supplier", "category"].includes(name)) {
         if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
@@ -147,8 +137,6 @@ export default function Inventory() {
     // Update state only if validation passes
     setNewItem({ ...newItem, [name]: value });
 };
-
-  
 
   const handleSaveItem = (e) => {
     e.preventDefault();
@@ -257,6 +245,7 @@ const handleUpdateItemDetails = (e) => {
     .catch(error => console.error('Error updating item:', error));
 };
 
+const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Date());
 
   return (
     <>
