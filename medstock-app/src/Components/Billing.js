@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './Billing.module.css';
+
 import '../App.css';
 
 
@@ -9,43 +10,25 @@ const Billing = () => {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
+  const [previousBills, setPreviousBills] = useState([]);
 
- /* const addToBill = () => {
-    if (name.trim() && quantity > 0 && price > 0) {
-      const newItem = { name, quantity, price };
-      const updatedItems = [...billItems, newItem];
-      const updatedTotal = updatedItems.reduce((sum, curr) => sum + curr.quantity * curr.price, 0);
-
-      setBillItems(updatedItems);
-      setTotalAmount(updatedTotal);
-
-      // Clear form
-      setName('');
-      setQuantity(1);
-      setPrice(0);
-    } else {
-      alert('Please enter valid values for all fields.');
-    }
-  };       */
 
   const addToBill = async () => {
     if (name.trim() && quantity > 0 && price > 0) {
       const newItem = { name, quantity, price };
   
       try {
-        // Send request to update inventory in backend
+        // Update inventory first
         const response = await fetch("http://localhost:5000/api/update-inventory", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, quantity }),
         });
   
         const result = await response.json();
   
         if (response.ok) {
-          // Proceed only if inventory update is successful
+          // Only add item to bill if inventory update is successful
           const updatedItems = [...billItems, newItem];
           const updatedTotal = updatedItems.reduce((sum, curr) => sum + curr.quantity * curr.price, 0);
   
@@ -65,6 +48,7 @@ const Billing = () => {
       alert("Please enter valid values for all fields.");
     }
   };
+  
   
 
   const generateInvoice = () => {
@@ -221,6 +205,22 @@ const Billing = () => {
     `);
     invoiceWindow.document.close();
     invoiceWindow.print();
+
+    // Save the bill to the database
+  fetch("http://localhost:5000/api/save-bill", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ billItems, totalAmount, date }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Bill saved successfully:", data);
+      // Clear the bill after saving
+      setBillItems([]);
+      setTotalAmount(0);
+    })
+    .catch(error => console.error("Error saving bill:", error));
+    
   };
   
 

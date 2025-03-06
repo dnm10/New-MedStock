@@ -9,8 +9,6 @@ const Reports = () => {
     expiredItems: 0,
   });
 
-  const [salesData, setSalesData] = useState([]);
-  const [lowStockItems, setLowStockItems] = useState([]);
   const [dateRange, setDateRange] = useState('daily');
 
   useEffect(() => {
@@ -30,36 +28,40 @@ const Reports = () => {
       }
     };
 
-    const fetchSalesData = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/reports/sales?range=${dateRange}`);
-        const data = await response.json();
-        setSalesData(data.sales);
-
-        const lowStockResponse = await fetch('http://localhost:5000/api/reports/low-stock');
-        const lowStockData = await lowStockResponse.json();
-        setLowStockItems(lowStockData.items);
-      } catch (error) {
-        console.error('Error fetching sales or low stock data:', error);
-      }
-    };
-
     fetchStockCounts();
-    fetchSalesData();
-  }, [dateRange]);
+  }, []);
+
+  // Function to generate & print the report
+  const handlePrint = () => {
+    const reportContent = `
+      <html>
+      <head>
+        <title>MedStock Inventory Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2 { text-align: center; }
+          p { font-size: 18px; margin-bottom: 10px; }
+        </style>
+      </head>
+      <body>
+        <h2>📄 MedStock Inventory Report</h2>
+        <p>The total number of items in the inventory is <strong>${stockCounts.totalItems}</strong>.</p>
+        <p>The current stock level is <strong>${stockCounts.totalStock}</strong> items.</p>
+        <p>There are <strong>${stockCounts.lowStock}</strong> low stock alerts.</p>
+        <p>The total number of expired items is <strong>${stockCounts.expiredItems}</strong>.</p>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(reportContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   return (
     <div className={styles.Reports}>
       <h1>Reports Overview</h1>
-
-      {/* 📌 NEW: Description Card */}
-      <div className={styles.DescriptionCard}>
-        <h2>📊 MedStock Reports</h2>
-        <p>
-          The MedStock Reports provide insights into **inventory levels, low stock alerts, expired products, and sales data**.
-          Use the options below to generate detailed reports for daily or monthly analysis.
-        </p>
-      </div>
 
       {/* Overview Cards */}
       <div className={styles.Overview}>
@@ -92,7 +94,9 @@ const Reports = () => {
 
       {/* 🚀 Print Button */}
       <div className={styles.ButtonContainer}>
-        <button className={styles.PrintButton}>View & Print Report</button>
+        <button className={styles.PrintButton} onClick={handlePrint}>
+          View & Print Report
+        </button>
       </div>
     </div>
   );

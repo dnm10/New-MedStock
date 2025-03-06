@@ -135,3 +135,27 @@
   background: linear-gradient(135deg, #0d47a1, #42a5f5);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #formattedReport, #formattedReport * {
+    visibility: visible;
+  }
+
+  #formattedReport {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    text-align: left;
+    font-size: 18px;
+    padding: 20px;
+  }
+
+  .PrintButton {
+    display: none;
+  }
+}

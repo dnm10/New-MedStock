@@ -419,5 +419,32 @@ app.get('/api/reports/expired-items', async (req, res) => {
 });
 
 
+// Billing history
+// ✅ Route to save a bill
+app.post("/api/save-bill", (req, res) => {
+  const { billItems, totalAmount } = req.body;
+  const billItemsJSON = JSON.stringify(billItems);  // Convert array to JSON
+
+  const sql = "INSERT INTO bills (bill_items, total_amount) VALUES (?, ?)";
+  db.query(sql, [billItemsJSON, totalAmount], (err, result) => {
+    if (err) {
+      console.error("Error saving bill:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.json({ message: "Bill saved successfully", billId: result.insertId });
+  });
+});
+
+// ✅ Route to fetch previous bills
+app.get("/api/get-bills", (req, res) => {
+  db.query("SELECT * FROM bills ORDER BY date DESC", (err, results) => {
+    if (err) {
+      console.error("Error fetching bills:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.json(results);
+  });
+});
+
 
 
