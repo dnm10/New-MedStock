@@ -123,16 +123,18 @@ app.put('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventor
 });
 
 // Delete inventory item
-app.delete('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventory'
-  const query = 'DELETE FROM inventory WHERE id = ?';
+app.delete('/api/orders/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM Orders WHERE OrderID = ?';
 
-  con.query(query, [req.params.id], (err, result) => {
+  con.query(query, [id], (err) => {
     if (err) {
-      return res.status(500).send('Error deleting item');
+      return res.status(500).json({ message: 'Error deleting order' });
     }
-    res.status(200).send('Item deleted');
+    res.json({ message: `Order with ID ${id} deleted successfully` });
   });
 });
+
 
 // Start the server
 app.listen(port, () => {
@@ -446,5 +448,21 @@ app.get("/api/get-bills", (req, res) => {
   });
 });
 
+const notifications = []; // Temporary storage
+
+// API to get notifications
+app.get("/api/notifications", (req, res) => {
+  res.json(notifications);
+});
+
+// Function to add a notification (used in other routes)
+const addNotification = (message) => {
+  notifications.unshift({ message, timestamp: new Date() });
+
+  // Keep only the last 10 notifications
+  if (notifications.length > 10) {
+    notifications.pop();
+  }
+};
 
 

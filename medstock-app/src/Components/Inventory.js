@@ -94,9 +94,50 @@ export default function Inventory() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Allow users to type freely first
+    // Regex patterns
+    const alphaNumericRegex = /^[A-Za-z0-9- ]+$/; // Alphabets, numbers, hyphens, spaces
+    const onlyLettersRegex = /^[A-Za-z ]+$/; // Only alphabets and spaces
+    const allNumbersRegex = /^\d+$/; // Only numbers
+
+    // Validate expiry date
+    if (name === "expiryDate") {
+        const selectedDate = new Date(value);
+        const minExpiryDate = new Date();
+        minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
+
+        if (selectedDate < minExpiryDate) {
+            alert("Expiry date must be at least 1 year from today.");
+            return;
+        }
+    }
+
+    // Validate name, supplier, and category
+    if (["name", "supplier", "category"].includes(name)) {
+        if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
+            alert(`${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and not be all numbers.`);
+            return;
+        }
+    }
+
+    // Validate category separately (only letters allowed)
+    if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
+        alert("Category must contain only letters.");
+        return;
+    }
+
+    // Validate threshold (should be a positive number)
+    if (name === "threshold") {
+        const thresholdValue = parseInt(value, 10);
+        if (isNaN(thresholdValue) || thresholdValue < 0) {
+            alert("Threshold must be a positive number.");
+            return;
+        }
+    }
+
+    // If all validations pass, update state
     setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
 };
+
 
 const handleInputBlur = (e) => {
     const { name, value } = e.target;
