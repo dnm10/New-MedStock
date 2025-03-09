@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+//import React, { useState } from 'react';
 import styles from './Billing.module.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 import '../App.css';
 
@@ -10,7 +12,24 @@ const Billing = () => {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
-  const [previousBills, setPreviousBills] = useState([]);
+  const [bills, setBills] = useState([]);  
+  const [previousBills, setPreviousBills] = useState([]); // Stores billing history
+
+  const fetchBills = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/get-bills");
+      const data = await response.json();
+      setPreviousBills(data); // Store fetched data in state
+    } catch (error) {
+      console.error("Error fetching previous bills:", error);
+    }
+  };
+  
+  
+  useEffect(() => {
+    fetchBills();
+  }, []);
+  
 
 
   const addToBill = async () => {
@@ -50,7 +69,6 @@ const Billing = () => {
   };
   
   
-
   const generateInvoice = () => {
     const billNumber = Math.floor(Math.random() * 1000);
     const date = new Date();
@@ -62,97 +80,19 @@ const Billing = () => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       
         <style>
-          /* General Styles */
-          body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-          }
-          .invoice-container {
-            max-width: 700px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            border: 3px solid #007BFF; /* Main Border */
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-          }
-          .invoice-header {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #007BFF; /* Separator Border */
-          }
-          .invoice-header h1 {
-            color: #007BFF;
-            margin: 0;
-            font-size: 24px;
-          }
-          .invoice-header p {
-            margin: 5px 0;
-            font-size: 14px;
-          }
-          .invoice-details {
-            margin-top: 20px;
-            font-size: 14px;
-          }
-          .invoice-details p {
-            margin: 5px 0;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-          }
-          th, td {
-            padding: 12px;
-            border: 1px solid #ccc;
-            text-align: center;
-          }
-          th {
-            background-color: #007BFF;
-            color: white;
-          }
-          tfoot td {
-            font-weight: bold;
-          }
-          .invoice-footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            color: #666;
-          }
-  
-          /* Watermark Styles */
-          .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            color: rgba(0, 123, 255, 0.1); /* Light transparent blue */
-            white-space: nowrap;
-            z-index: -1; /* Behind content */
-          }
-  
-          /* Print-Specific Styles */
-          @media print {
-            body {
-              background-color: white;
-            }
-            .invoice-container {
-              border: none;
-              box-shadow: none;
-            }
-            th {
-              background-color: #007BFF !important;
-              -webkit-print-color-adjust: exact; /* Ensures accurate color printing */
-            }
-          }
+          /* Invoice Styling */
+          body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; color: #333; }
+          .invoice-container { max-width: 700px; margin: 20px auto; padding: 20px; background: #fff; border: 3px solid #007BFF; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+          .invoice-header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid #007BFF; }
+          .invoice-header h1 { color: #007BFF; font-size: 24px; }
+          .invoice-details { margin-top: 20px; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { padding: 12px; border: 1px solid #ccc; text-align: center; }
+          th { background-color: #007BFF; color: white; }
+          tfoot td { font-weight: bold; }
+          .invoice-footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+          .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; color: rgba(0, 123, 255, 0.1); white-space: nowrap; z-index: -1; }
         </style>
       </head>
       <body>
@@ -175,18 +115,13 @@ const Billing = () => {
                 </tr>
               </thead>
               <tbody>
-                ${billItems
-                  .map(
-                    (item) => `
-                    <tr>
-                      <td>${item.name}</td>
-                      <td>${item.quantity}</td>
-                      <td>₹${item.price.toFixed(2)}</td>
-                      <td>₹${(item.quantity * item.price).toFixed(2)}</td>
-                    </tr>
-                  `
-                  )
-                  .join('')}
+                ${billItems.map(item => `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.price.toFixed(2)}</td>
+                    <td>₹${(item.quantity * item.price).toFixed(2)}</td>
+                  </tr>`).join('')}
               </tbody>
               <tfoot>
                 <tr>
@@ -205,23 +140,39 @@ const Billing = () => {
     `);
     invoiceWindow.document.close();
     invoiceWindow.print();
-
-    // Save the bill to the database
-  fetch("http://localhost:5000/api/save-bill", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ billItems, totalAmount, date }),
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Bill saved successfully:", data);
-      // Clear the bill after saving
-      setBillItems([]);
-      setTotalAmount(0);
+  
+    // ✅ Save Bill to Database
+    fetch("http://localhost:5000/api/save-bill", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ billItems, totalAmount, date: new Date().toISOString() }), // ✅ Ensure correct date format
     })
-    .catch(error => console.error("Error saving bill:", error));
-    
+      .then(response => response.json())
+      .then(data => {
+        console.log("Bill saved successfully:", data);
+  
+        fetchBills(); // ✅ Refresh billing history after saving
+  
+        setBillItems([]); // ✅ Clear bill items after successful save
+        setTotalAmount(0);
+      })
+      .catch(error => console.error("Error saving bill:", error));
   };
+  
+
+  const saveBill = async () => {
+    try {
+      await axios.post("http://localhost:5000/api/save-bill", { billItems, totalAmount });
+  
+      fetchBills();  // ✅ Refresh billing history after saving
+  
+      setBillItems([]);  // ✅ Clear bill items
+      setTotalAmount(0); // ✅ Reset total amount
+    } catch (error) {
+      console.error("Error saving bill:", error);
+    }
+  };
+  
   
 
   return (
@@ -293,6 +244,18 @@ const Billing = () => {
               ))}
             </tbody>
           </table>
+          <h3>Billing History</h3>
+           <ul>
+          {previousBills.map((bill) => (
+            <li key={bill.id}>
+              <strong>Date:</strong> {new Date(bill.date).toLocaleString()} <br />
+              <strong>Amount:</strong> ₹{bill.totalAmount.toFixed(2)} <br />
+              <strong>Items:</strong> {bill.billItems.length} items
+            </li>
+          ))}
+        </ul>
+
+
           <button onClick={generateInvoice}>Generate Invoice</button>
         </section>
       </div>

@@ -21,16 +21,16 @@ const Orders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/orders');
+        const response = await axios.get("http://localhost:5000/api/orders");
+        console.log("Fetched Orders:", response.data); // Debugging line
         setOrders(response.data);
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error("Error fetching orders:", error);
       }
     };
   
     fetchOrders();
-  }, []); // Run only on mount
-  
+  }, []);
   
   // Handle input change for new orders
   const handleNewOrderChange = (e) => {
@@ -108,17 +108,24 @@ const Orders = () => {
   
   
   // Handle delivery status update
-  const handleCheckboxChange = (orderId, delivered) => {
-    axios.put(`/api/orders/${orderId}`, { Delivery_Status: delivered })
-      .then(() => {
-        setOrders(orders.map(order =>
+  const handleCheckboxChange = async (orderId, delivered) => {
+    try {
+      // Update backend
+      await axios.put(`http://localhost:5000/api/orders/${orderId}`, { Delivery_Status: delivered });
+  
+      // Ensure only the clicked checkbox updates
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
           order.OrderID === orderId ? { ...order, Delivery_Status: delivered } : order
-        ));
-      })
-      .catch(error => console.error('Error updating order status:', error));
+        )
+      );
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      alert("Failed to update order status");
+    }
   };
   
-
+  
   const deliveredOrders = orders.filter(order => order.Delivery_Status);
   const totalOrders = orders.length;
   const deliveredPercentage = totalOrders === 0 ? 0 : ((deliveredOrders.length / totalOrders) * 100).toFixed(2);
@@ -216,12 +223,15 @@ const Orders = () => {
         <td>{order.Price}</td>
         <td>{formatDate(order.DeliveryDate)}</td>
         <td>
-          <input
-            type="checkbox"
-            checked={order.Delivery_Status}
-            onChange={(e) => handleCheckboxChange(order.OrderID, e.target.checked)}
-          />
-        </td>
+  <input
+    type="checkbox"
+    checked={order.Delivery_Status === true} // Ensure boolean comparison
+    onChange={(e) => handleCheckboxChange(order.OrderID, e.target.checked)}
+  />
+</td>
+
+
+
         <td>
           <button
             className={styles.deleteButton}

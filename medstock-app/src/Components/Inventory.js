@@ -298,6 +298,7 @@ const handleUpdateItemDetails = (e) => {
     .catch(error => console.error('Error updating item:', error));
 };
 
+
 const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Date());
 
   return (
@@ -350,6 +351,10 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
            { /*<button id="sortBtn" onClick={handleSort}>Sort</button> */}
           </div>
         </div>
+        <div className={styles.colorLegend}>
+  <p><span className={styles.expiredLegend}></span> Expired Items</p>
+  <p><span className={styles.lowStockLegend}></span> Low Stock Items</p>
+</div>
 
         {/* Inventory Table */}
         <table className={styles.inventoryTable}>
@@ -372,6 +377,7 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
       style={{
         backgroundColor:
           item.id === selectedItem ? "#cce5ff" :
+          new Date(item.expiryDate) < new Date() ? "#cce5ff" : // Light Blue for expired
           item.quantity < item.threshold ? "#ffcccc" : "transparent",
         cursor: "pointer",
       }}
