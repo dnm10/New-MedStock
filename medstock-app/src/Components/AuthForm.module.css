@@ -1,11 +1,17 @@
+/* General Styles */
 .Login {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: transparent;
+  background: linear-gradient(135deg, #e3ecff, #c1d3ff);
   padding: 20px;
-  
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .formBox {
@@ -14,26 +20,41 @@
   max-width: 900px;
   width: 100%;
   background: white;
-  box-shadow: 0 4px 8px rgba(0.1, 0.1, 0.1, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   overflow: hidden;
+  transition: transform 0.3s ease-in-out;
 }
 
+.formBox:hover {
+  transform: scale(1.03);
+}
+
+/* Left Side */
 .formDetails {
-  background-color: #5c77f0;
+  background: linear-gradient(135deg, #5c77f0, #3056ff);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 30px;
   flex: 1;
+  animation: float 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 .logoImage {
   max-width: 100%;
   height: auto;
   border-radius: 10px;
+  transition: transform 0.3s;
 }
 
+
+/* Right Side */
 .formContent {
   padding: 40px;
   flex: 2;
@@ -47,10 +68,17 @@
   font-size: 30px;
   text-align: center;
   margin-bottom: 20px;
+  transition: color 0.3s ease;
 }
 
+.formContent h2:hover {
+  color: #1e40af;
+}
+
+/* Input Fields */
 .inputField {
   margin-bottom: 20px;
+  position: relative;
 }
 
 .inputField input {
@@ -59,6 +87,13 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.inputField input:focus {
+  border-color: #3056ff;
+  box-shadow: 0 0 12px rgba(48, 86, 255, 0.5);
+  outline: none;
 }
 
 .inputField label {
@@ -69,6 +104,7 @@
   color: #555;
 }
 
+/* Login Type */
 .loginType {
   display: flex;
   gap: 120px;
@@ -81,24 +117,96 @@
   gap: 5px;
 }
 
+/* Buttons */
 .lsbtn button {
   width: 100%;
   padding: 14px;
-  background-color: #3056ff;
+  background: linear-gradient(135deg, #3056ff, #1e40af);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s ease, transform 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }
 
-button:hover {
+.lsbtn button:hover {
+  background: linear-gradient(135deg, #1e40af, #0f2c80);
+  transform: translateY(-2px);
+}
+
+.lsbtn button:active {
+  transform: scale(0.95);
+}
+
+.lsbtn button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: width 0.5s ease, height 0.5s ease, top 0.5s ease, left 0.5s ease;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.lsbtn button:active::after {
+  width: 0;
+  height: 0;
+  opacity: 1;
+}
+
+.registerButton {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 12px;
+  transition: color 0.3s ease, transform 0.2s;
+  background-color: #3056ff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.registerButton:hover {
   background-color: #1e40af;
+  color: #ffffff;
+  transform: scale(1.05);
 }
 
+.registerButton:active {
+  transform: scale(0.95);
+}
+
+.registerButton::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.registerButton:active::before {
+  width: 200%;
+  height: 200%;
+}
+
+/* Bottom Link */
 .bottomLink {
-  margin-top: 15px;
+  margin-top: 5px;
   text-align: center;
   font-size: 14px;
 }
@@ -106,26 +214,10 @@ button:hover {
 .bottomLink a {
   color: #3056ff;
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .bottomLink a:hover {
   text-decoration: underline;
+  color: #1e40af;
 }
-
-.registerButton {
-  background:none;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 12px;
-  transition: color 0.1s ease;
-  background-color: #3056ff;
-  border-radius: 10px;
-}
-
-.registerButton:hover {
-  color: #ffffff;
-
-}
-

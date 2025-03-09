@@ -4,18 +4,21 @@ import mslogo from '../Assets/mslogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from './RoleContext';
 
+
 const AuthForm = () => {
   const navigate = useNavigate();
   const { setRole } = useRole();
 
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
+    name: '',
+    contact: '',
     email: '',
     password: '',
     confirmPassword: '',
     role: 'Admin',
   });
-
+ 
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'role') {
@@ -29,11 +32,11 @@ const AuthForm = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
+
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]*@(gmail\.com|yahoo\.com)$/;
     return emailRegex.test(email);
   };
-  
 
   const validatePassword = () => {
     const { password, role } = formData;
@@ -56,34 +59,51 @@ const AuthForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate name (only letters and spaces allowed)
+    if (!isLogin && !/^[A-Za-z\s]+$/.test(formData.name)) {
+      alert("Name must contain only letters and spaces!");
+      return;
+    }
+
+    // Validate contact number (must be exactly 10 digits)
+    if (!isLogin && !/^\d{10}$/.test(formData.contact)) {
+      alert("Contact number must be exactly 10 digits!");
+      return;
+    }
+
+    // Validate email format
     if (!validateEmail(formData.email)) {
-      alert('Invalid email format!');
+      alert("Invalid email format!");
       return;
     }
 
+    // Validate password match for signup
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      alert("Passwords do not match!");
       return;
     }
 
+    // Validate password strength
     if (!validatePassword()) {
       alert(
-        formData.role === 'Admin'
-          ? 'Admin password must be at least 8 characters, with uppercase, lowercase, number, and special character.'
-          : 'User password must be at least 6 characters, with uppercase, lowercase, number, and special character.'
+        formData.role === "Admin"
+          ? "Admin password must be at least 8 characters, with uppercase, lowercase, number, and special character."
+          : "User password must be at least 6 characters, with uppercase, lowercase, number, and special character."
       );
       return;
     }
 
     const endpoint = isLogin
-      ? 'http://localhost:5000/api/login'
-      : 'http://localhost:5000/api/signup';
+      ? "http://localhost:5000/api/login"
+      : "http://localhost:5000/api/signup";
 
     try {
       const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: formData.name,
+          contact: formData.contact,
           email: formData.email,
           password: formData.password,
           role: formData.role,
@@ -93,18 +113,19 @@ const AuthForm = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`${isLogin ? 'Login' : 'Signup'} Successful`);
+        alert(`${isLogin ? "Login" : "Signup"} Successful`);
         setRole(result.user.role);
-        localStorage.setItem('role', result.user.role);
-        navigate('/Home');
+        localStorage.setItem("role", result.user.role);
+        navigate("/Home");
       } else {
-        alert(result.message || `${isLogin ? 'Login' : 'Signup'} Failed`);
+        alert(result.message || `${isLogin ? "Login" : "Signup"} Failed`);
       }
     } catch (error) {
-      console.error(`Error during ${isLogin ? 'login' : 'signup'}:`, error);
-      alert(`An error occurred during ${isLogin ? 'login' : 'signup'}.`);
+      console.error(`Error during ${isLogin ? "login" : "signup"}:`, error);
+      alert(`An error occurred during ${isLogin ? "login" : "signup"}.`);
     }
-  };
+};
+
 
   return (
     <div className={styles.Login}>
@@ -116,6 +137,33 @@ const AuthForm = () => {
         <div className={styles.formContent}>
           <h2>{isLogin ? 'LOGIN' : 'SIGN UP'}</h2>
           <form onSubmit={handleSubmit}>
+            {!isLogin && (
+              <>
+                <div className={styles.inputField}>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter Name"
+                    required
+                  />
+                  <label>Name</label>
+                </div>
+                <div className={styles.inputField}>
+                  <input
+                    type="text"
+                    name="contact"
+                    value={formData.contact}
+                    onChange={handleChange}
+                    placeholder="Enter Contact Number"
+                    required
+                  />
+                  <label>Contact Number</label>
+                </div>
+              </>
+            )}
+
             <div className={styles.inputField}>
               <input
                 type="email"
