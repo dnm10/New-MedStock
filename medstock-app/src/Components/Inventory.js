@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './Inventory.module.css';
 import '../App.css';
+import { AiOutlineDatabase, AiOutlineAppstore, AiOutlineExclamationCircle } from "react-icons/ai";
 
 
 
@@ -308,19 +309,22 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
 
         {/* Stock Overview Cards */}
         <div className={styles.cards}>
-          <div className={styles.card}>
-            <h3>Total Stock</h3>
-            <p>{totalStock}</p>
-          </div>
-          <div className={styles.card}>
-            <h3>Categories</h3>
-            <p>{categories}</p>
-          </div>
-          <div className={styles.card}>
-            <h3>Low Stock Items</h3>
-            <p>{lowStockItems}</p>
-          </div>
-        </div>
+  <div className={styles.card}>
+    <AiOutlineDatabase size={30} />
+    <h3>Total Stock</h3>
+    <p>{totalStock}</p>
+  </div>
+  <div className={styles.card}>
+    <AiOutlineAppstore size={30} />
+    <h3>Categories</h3>
+    <p>{categories}</p>
+  </div>
+  <div className={styles.card}>
+    <AiOutlineExclamationCircle size={30} color="red" />
+    <h3>Low Stock Items</h3>
+    <p>{lowStockItems}</p>
+  </div>
+</div>
 
         {/* Controls */}
         <div className={styles.controls}>

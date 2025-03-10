@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { AiOutlineShoppingCart, AiOutlineCheckCircle, AiOutlinePercentage } from 'react-icons/ai';
 import styles from './Orders.module.css';
 
 const Orders = () => {
@@ -135,9 +136,9 @@ const Orders = () => {
       <h1>Orders List</h1>
 
       <div className={styles.statsCards}>
-        <div className={styles.card}><h3>Total Orders</h3><p>{totalOrders}</p></div>
-        <div className={styles.card}><h3>Delivered Orders</h3><p>{deliveredOrders.length}</p></div>
-        <div className={styles.card}><h3>Delivery Percentage</h3><p>{deliveredPercentage}%</p></div>
+      <div className={styles.card}><AiOutlineShoppingCart size={30} /><h3>Total Orders</h3><p>{totalOrders}</p></div>
+        <div className={styles.card}><AiOutlineCheckCircle size={30} /><h3>Delivered Orders</h3><p>{deliveredOrders.length}</p></div>
+        <div className={styles.card}><AiOutlinePercentage size={30} /><h3>Delivery Percentage</h3><p>{deliveredPercentage}%</p></div>
       </div>
 
       <div className={styles.buttons}>
