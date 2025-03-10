@@ -1,15 +1,22 @@
-import React, { useState } from "react";
-import "./Profile.css";
+import React, { useState, useEffect } from "react";
 import { FaEdit, FaEnvelope, FaUser, FaUserShield } from "react-icons/fa";
+import "./Profile.css";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@gmail.com",
-    role: "Admin",
-    image: "https://via.placeholder.com/120",
+    name: "",
+    email: "",
+    role: "",
+    image: "https://via.placeholder.com/200",
   });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -22,12 +29,13 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-card">
+        <div className="profile-header"></div>
         <img src={user.image} alt="Profile" className="profile-image" />
-        <h2 className="profile-name">{user.name}</h2>
+        <h2 className="profile-name">{user.name || "Profile"}</h2>
         <div className="profile-info">
-          <p><FaUser className="profile-icon" /> <strong>Name:</strong> {user.name}</p>
-          <p><FaEnvelope className="profile-icon" /> <strong>Email:</strong> {user.email}</p>
-          <p><FaUserShield className="profile-icon" /> <strong>Role:</strong> {user.role}</p>
+          <p><FaUser className="profile-icon" /> <strong>Name:</strong> {user.name || "N/A"}</p>
+          <p><FaEnvelope className="profile-icon" /> <strong>Email:</strong> {user.email || "N/A"}</p>
+          <p><FaUserShield className="profile-icon" /> <strong>Role:</strong> {user.role || "N/A"}</p>
         </div>
         <button className="profile-button" onClick={handleEdit}>
           <FaEdit /> Edit Profile

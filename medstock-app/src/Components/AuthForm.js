@@ -112,10 +112,14 @@ const AuthForm = () => {
 
       const result = await response.json();
 
+
       if (response.ok) {
         alert(`${isLogin ? "Login" : "Signup"} Successful`);
         setRole(result.user.role);
-        localStorage.setItem("role", result.user.role);
+      
+        // Store user details in localStorage
+        localStorage.setItem("user", JSON.stringify(result.user));
+  
         navigate("/Home");
       } else {
         alert(result.message || `${isLogin ? "Login" : "Signup"} Failed`);
@@ -124,8 +128,8 @@ const AuthForm = () => {
       console.error(`Error during ${isLogin ? "login" : "signup"}:`, error);
       alert(`An error occurred during ${isLogin ? "login" : "signup"}.`);
     }
-};
-
+  };
+  
 
   return (
     <div className={styles.Login}>
