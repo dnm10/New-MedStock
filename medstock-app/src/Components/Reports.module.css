@@ -1,161 +1,121 @@
-/* 🔹 Main Container */
-.Reports {
-  max-width: 2100px;
-  margin: auto;
-  background-color: #fff;
-  padding: 30px 0;
+.reportsContainer {
+  text-align: center;
+  background: #e3f2fd;
+  padding: 40px;
+  min-height: 100vh;
 }
 
-/* 🔹 Header */
-.Reports h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #0d47a1; /* Deep blue */
+.title {
   font-size: 26px;
   font-weight: bold;
+  color: #0d47a1;
 }
 
-/* 🔹 Description Card */
-.DescriptionCard {
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb); /* Light blue shades */
+.subtitle {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #1565c0;
+}
+
+/* Cards Layout */
+.overview {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 30px auto;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
   padding: 25px;
-  margin: 20px 85px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   text-align: center;
+  width: 200px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.DescriptionCard h2 {
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+  font-size: 35px;
+  color: #0d47a1;
+  margin-bottom: 10px;
+}
+
+h3 {
+  margin: 5px 0;
+  font-size: 18px;
+}
+
+p {
   font-size: 22px;
   font-weight: bold;
   color: #0d47a1;
 }
 
-.DescriptionCard p {
-  font-size: 16px;
-  color: #0d47a1;
-  margin-top: 8px;
-}
-
-/* 🔹 Overview Cards */
-.Overview {
-  display: flex;
-  gap: 20px;
-  margin: 20px auto;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 🔹 Individual Cards */
-.Card {
-  border-radius: 12px;
-  padding: 30px 20px;
-  text-align: center;
-  width: 280px;
-  height: 150px;
-  color: white;
-  font-size: 28px;
-  font-weight: bold;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* 🔹 Card Titles */
-.Card h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-/* 🔹 Different Card Colors */
-.Card:nth-child(1) {
-  background: linear-gradient(135deg, #1565c0, #64b5f6); /* Blue shades */
-}
-
-.Card:nth-child(2) {
-  background: linear-gradient(135deg, #0d47a1, #42a5f5); /* Deep blue */
-}
-
-/* 🚨 Low Stock Alerts - RED 🚨 */
-.Card:nth-child(3) {
-  background: linear-gradient(135deg, #d32f2f, #ff5252); /* Red shades */
-}
-
-/* 🔹 Expired Items - Keep Blue */
-.Card:nth-child(4) {
-  background: linear-gradient(135deg, #1e88e5, #bbdefb); /* Light blue */
-}
-
-/* 🔹 Card Hover Effect */
-.Card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* 🔹 Date Range Selector */
-.DateRangeSelector {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.DateRangeSelector label {
-  font-size: 18px;
-  color: #0d47a1;
-  font-weight: bold;
-}
-
-.DateRangeSelector select {
-  font-size: 16px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #0d47a1;
-  color: #0d47a1;
-  margin-left: 10px;
-}
-
-/* 🔹 Print Button */
-.ButtonContainer {
-  text-align: center;
+/* Print Button */
+.buttonContainer {
   margin-top: 20px;
 }
 
-.PrintButton {
-  background: linear-gradient(135deg, #1565c0, #64b5f6);
+.printButton {
+  background: #1565c0;
   color: white;
-  border: none;
-  padding: 12px 20px;
+  padding: 12px 24px;
   font-size: 18px;
-  font-weight: bold;
-  border-radius: 8px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease-in-out;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.PrintButton:hover {
-  background: linear-gradient(135deg, #0d47a1, #42a5f5);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.printButton:hover {
+  background: #0d47a1;
+  transform: scale(1.05);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
 }
 
-@media print {
-  body * {
-    visibility: hidden;
-  }
+.printIcon {
+  margin-right: 8px;
+}
 
-  #formattedReport, #formattedReport * {
-    visibility: visible;
-  }
+.benefitsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
 
-  #formattedReport {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    text-align: left;
-    font-size: 18px;
-    padding: 20px;
-  }
+.benefitCard {
+  background: linear-gradient(135deg, #0d47a1, #1565c0);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  transition: transform 0.3s ease-in-out;
+}
 
-  .PrintButton {
-    display: none;
-  }
+.benefitCard:hover {
+  transform: translateY(-5px);
+}
+
+.benefitCard h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.benefitCard p {
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.9;
 }
