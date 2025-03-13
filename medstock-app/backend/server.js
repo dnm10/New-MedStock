@@ -3,8 +3,15 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const con = require('./connections'); // Import the MySQL connection
 
+
 const app = express();
 const port = 5000;
+
+const mysql = require("mysql2/promise");
+
+
+app.use(express.json());
+app.use(cors());
 
 // Middleware
 app.use(cors({
@@ -70,6 +77,29 @@ app.post('/api/login', (req, res) => {
       message: 'Login successful',
       user: { id: user.id, email: user.email, role: user.role },
     });
+  });
+});
+
+// Forget pass
+
+//  Reset Password Route 
+app.post("/api/reset-password", (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ message: "Email and new password are required!" });
+  }
+
+  const query = "UPDATE users SET password = ? WHERE email = ?";
+  db.query(query, [newPassword, email], (err, result) => {
+    if (err) {
+      console.error("Error updating password:", err);
+      return res.status(500).json({ message: "Server error while resetting password" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ message: "Password reset successful!" });
   });
 });
 

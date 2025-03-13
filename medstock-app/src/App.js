@@ -16,6 +16,8 @@ import Profile from './Components/Profile';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { RoleProvider, useRole } from './Components/RoleContext';
+ import ForgotResetPassword from "./Components/ForgotResetPassword";
+
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -121,7 +123,7 @@ function App() {
                 }
               />
 
-<Route
+                <Route
                 path="/Profile"
                 element={
                   <ProtectedRoute>
@@ -129,7 +131,11 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-            </Routes>
+             <Route path="/login" element={<AuthForm />} />
+        <Route path="/forgot-password" element={<ForgotResetPassword />} />
+        <Route path="/reset-password/:token" element={<ForgotResetPassword />} />
+         
+            </Routes> 
           </Layout>
         </Router>
       </RoleProvider>

@@ -228,8 +228,18 @@ const AuthForm = () => {
                 User
               </label>
             </div>
+         
+          <div className={styles.forgotPassword}>
+            <button
+              type="button"
+              className={styles.forgotPasswordBtn}
+              onClick={() => navigate("/forgot-password")}
+            >
+              Forgot Password?
+            </button>
+          </div>
 
-            <button className={styles.lsbtn} type="submit">
+       <button className={styles.lsbtn} type="submit">
               {isLogin ? 'Log In' : 'Sign Up'}
             </button>
           </form>

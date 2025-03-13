@@ -280,7 +280,7 @@ textarea {
 }
 
 button[type="button"] {
-  background-color: #4caf50; /* Green background for save */
+  background-color: #6b70ff; /* Green background for save */
   color: white;
   padding: 10px 20px;
   font-size: 1rem;
@@ -291,5 +291,5 @@ button[type="button"] {
 }
 
 button[type="button"]:hover {
-  background-color: #388e3c; /* Darker green on hover */
+  background-color: #484be0; /* Darker green on hover */
 }
