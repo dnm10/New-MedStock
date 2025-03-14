@@ -65,7 +65,8 @@ const Reports = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
-
+  
+    // Open a new print window
     const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -74,16 +75,20 @@ const Reports = () => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>MedStock Inventory Report</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> 
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; background: #f0f8ff; color: #0d47a1; text-align: center; }
-          .report-container { max-width: 700px; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+          .report-container { max-width: 600px; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
           h2 { color: #1565c0; margin-bottom: 10px; }
           h3 { color: #0d47a1; margin-bottom: 10px; }
-          .date-time { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+          .date-time { font-size: 16px; font-weight: bold; margin-bottom: 15px; }
           table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-          th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+          th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
           th { background: #0d47a1; color: white; }
-          td { font-size: 16px; font-weight: bold; }
+          td { font-size: 14px; font-weight: bold; }
+          .chart-container { display: flex; justify-content: center; margin-top: 15px; }
+          canvas { width: 220px !important; height: 220px !important; } /* Reduce Chart Size */
         </style>
       </head>
       <body>
@@ -112,13 +117,54 @@ const Reports = () => {
               <td>${stockCounts.expiredItems}</td>
             </tr>
           </table>
+  
+          <!-- Smaller Doughnut Chart -->
+          <div class="chart-container">
+            <canvas id="stockChart"></canvas>
+          </div>
         </div>
-        <script> window.onload = function() { window.print(); } </script>
+  
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById("stockChart").getContext("2d");
+            new Chart(ctx, {
+              type: "doughnut",
+              data: {
+                labels: ["Total Items", "Current Stock", "Low Stock", "Expired Items"],
+                datasets: [{
+                  data: [${stockCounts.totalItems}, ${stockCounts.totalStock}, ${stockCounts.lowStock}, ${stockCounts.expiredItems}],
+                  backgroundColor: ["#1976D2", "#4CAF50", "#FFC107", "#D32F2F"],
+                  hoverOffset: 8
+                }]
+              },
+              options: {
+                responsive: false, /* Disable auto-resizing */
+                maintainAspectRatio: false,
+                plugins: { 
+                  legend: { position: "bottom" }, 
+                  datalabels: { 
+                    color: "white", 
+                    font: { weight: "bold" },
+                    formatter: (value, ctx) => {
+                      let total = ctx.chart.data.datasets[0].data.reduce((acc, cur) => acc + cur, 0);
+                      let percentage = ((value / total) * 100).toFixed(1) + "%";
+                      return value > 0 ? percentage : ""; // Hide labels for 0 values
+                    }
+                  }
+                }
+              },
+              plugins: [ChartDataLabels]
+            });
+  
+            setTimeout(() => window.print(), 800); // Wait for chart to render before printing
+          });
+        </script>
       </body>
       </html>
     `);
     printWindow.document.close();
   };
+  
 
   return (
     <div className={styles.reportsContainer}>

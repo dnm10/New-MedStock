@@ -6,32 +6,32 @@ const ResetPassword = () => {
 
   const handleResetPassword = async () => {
     if (!email || !newPassword) {
-      alert("Please enter both email and new password");
+      alert("⚠ Please enter both email and new password");
       return;
     }
-
+  
     try {
       const response = await fetch("http://localhost:5000/api/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword }),
+        body: JSON.stringify({ email, newPassword }), // ✅ Ensure correct JSON format
       });
-
+  
       const data = await response.json();
-
+      
       if (response.ok) {
-        alert("Password reset successful!");
+        alert("✅ Password reset successful!");
         setEmail("");
         setNewPassword("");
       } else {
-        alert(data.message);
+        alert(`❌ ${data.message}`);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("❌ Fetch Error:", error);
       alert("Something went wrong!");
     }
   };
-
+  
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>RESET PASSWORD</h2>

@@ -3,7 +3,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const con = require('./connections'); // Import the MySQL connection
 
-
 const app = express();
 const port = 5000;
 
@@ -81,28 +80,36 @@ app.post('/api/login', (req, res) => {
 });
 
 // Forget pass
-
-//  Reset Password Route 
 app.post("/api/reset-password", (req, res) => {
   const { email, newPassword } = req.body;
 
+  // ✅ Step 1: Check if email and password are provided
   if (!email || !newPassword) {
     return res.status(400).json({ message: "Email and new password are required!" });
   }
 
+  // ✅ Step 2: Log incoming request data for debugging
+  console.log("Reset Password Request Received:");
+  console.log("Email:", email);
+  console.log("New Password:", newPassword);
+
+  // ✅ Step 3: Update password in database
   const query = "UPDATE users SET password = ? WHERE email = ?";
   db.query(query, [newPassword, email], (err, result) => {
     if (err) {
-      console.error("Error updating password:", err);
+      console.error("❌ Database Error:", err);
       return res.status(500).json({ message: "Server error while resetting password" });
     }
+
     if (result.affectedRows === 0) {
+      console.log("❌ No user found with this email:", email);
       return res.status(404).json({ message: "User not found" });
     }
+
+    console.log("✅ Password reset successful for:", email);
     res.json({ message: "Password reset successful!" });
   });
 });
-
 
 
 // GET inventory items
