@@ -160,9 +160,10 @@ app.put('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventor
 });
 
 // Delete inventory item
-app.delete('/api/orders/:id', (req, res) => {
+app.delete('/api/inventory/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM Orders WHERE OrderID = ?';
+  const query = 'DELETE FROM inventory WHERE id = ?';
+
 
   con.query(query, [id], (err) => {
     if (err) {
@@ -487,21 +488,100 @@ app.get("/api/get-bills", (req, res) => {
 
 const notifications = []; // Temporary storage
 
-// API to get notifications
-app.get("/api/notifications", (req, res) => {
-  res.json(notifications);
+// Update inventory and trigger notification if stock is low
+app.post("/api/update-inventory", (req, res) => {
+  const { name, quantity } = req.body;
+
+  con.query(
+    "SELECT quantity, threshold FROM inventory WHERE name = ?",
+    [name],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: "Database error." });
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Item not found in inventory." });
+      }
+
+      const currentStock = results[0].quantity;
+      const threshold = results[0].threshold;
+
+      if (currentStock < quantity) {
+        return res.status(400).json({ message: "Insufficient stock available." });
+      }
+
+      // Update inventory quantity
+      con.query(
+        "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
+        [quantity, name],
+        (updateErr) => {
+          if (updateErr) {
+            return res.status(500).json({ message: "Error updating inventory." });
+          }
+
+          res.json({ message: "Inventory updated successfully." });
+        }
+      );
+    }
+  );
 });
 
-// Function to add a notification (used in other routes)
-const addNotification = (message) => {
-  notifications.unshift({ message, timestamp: new Date() });
+// Get real-time notifications from database
+app.get("/api/notifications", (req, res) => {
+  const query = `
+    SELECT name, quantity, threshold, expiry_date 
+    FROM inventory
+  `;
 
-  // Keep only the last 10 notifications
-  if (notifications.length > 10) {
-    notifications.pop();
-  }
-};
+  con.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Database error." });
+    }
 
+    let outOfStock = 0;
+    let lowStock = 0;
+    let arrivingStock = 0; // You can modify this logic if needed
+    let totalStock = 0;
+    let stockPercentage = 100;
+
+    let lowStockItems = [];
+    let expiredItems = [];
+
+    results.forEach((item) => {
+      totalStock += item.quantity;
+
+      // Check for expired items
+      if (item.expiry_date && new Date(item.expiry_date) < new Date()) {
+        expiredItems.push({ name: item.name, expiry_date: item.expiry_date });
+      }
+
+      // Check for low stock
+      if (item.quantity <= item.threshold && item.quantity > 0) {
+        lowStock++;
+        lowStockItems.push({ name: item.name, quantity: item.quantity });
+      }
+
+      // Check for out of stock
+      if (item.quantity === 0) {
+        outOfStock++;
+      }
+    });
+
+    if (totalStock > 0) {
+      stockPercentage = Math.round((totalStock / (totalStock + outOfStock)) * 100);
+    }
+
+    res.json({
+      summary: {
+        outOfStock,
+        lowStock,
+        arrivingStock,
+        stockPercentage,
+      },
+      lowStockItems,
+      expiredItems,
+    });
+  });
+});
 
 
 
