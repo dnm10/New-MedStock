@@ -71,7 +71,7 @@ header h1 {
 /* Card Colors */
 .card.low-stock {
   background-color: #ffe6e6;
-  color: #d9534f;
+  color: #ff8181;
 }
 
 .card.arriving-stock {
@@ -157,3 +157,20 @@ header h1 {
   border: none;
   font-size: 16px;
 }
+
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  background-color: #f8d7da;
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.stock-marquee {
+  font-weight: bold;
+  color: #721c24;
+}
+
+

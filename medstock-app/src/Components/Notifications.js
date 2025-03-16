@@ -10,14 +10,18 @@ const Notifications = () => {
   });
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/notifications")
-      .then((response) => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/notifications");
         console.log("Received Notifications Data:", response.data); // Debugging
         setNotifications(response.data);
-      })
-      .catch((error) => console.error("Error fetching notifications:", error));
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+
+    fetchNotifications();
   }, []);
-  
 
   return (
     <div className="notification-page">
@@ -25,13 +29,24 @@ const Notifications = () => {
         <h1>Notifications</h1>
       </header>
 
+      {/* Marquee for stock levels */}
+      <div className="marquee-container">
+        <marquee className="stock-marquee" behavior="scroll" direction="left">
+          📢 Current Stock Level: {notifications.summary.stockPercentage}% | 
+          ⚠ Low Stock Items: {notifications.lowStockItems.map((item) => `${item.name} (${item.quantity} left)`).join(", ")} | 
+          🛑 Expired Items: {notifications.expiredItems.map((item) => `${item.name} (Expired on ${new Date(item.expiryDate).toLocaleDateString()})`).join(", ")}
+        </marquee>
+      </div>
+
       <div className="cards-container">
+        {/* Out of Stock */}
         <div className="card out-of-stock">
           <span className="icon">❌</span>
           <h3>Out of Stock</h3>
           <p>{notifications.summary.outOfStock} Products</p>
         </div>
 
+        {/* Low Stock */}
         <div className="card low-stock">
           <span className="icon">⚠</span>
           <h3>Low Stock</h3>
@@ -45,6 +60,7 @@ const Notifications = () => {
           )}
         </div>
 
+        {/* Expired Items */}
         <div className="card expired-stock">
           <span className="icon">🛑</span>
           <h3>Expired Items</h3>
@@ -52,24 +68,17 @@ const Notifications = () => {
           {notifications.expiredItems.length > 0 && (
             <ul>
               {notifications.expiredItems.map((item, index) => (
-                <li key={index}>{item.name} (Expired on {new Date(item.expiry_date).toLocaleDateString()})</li>
+                <li key={index}>{item.name} (Expired on {new Date(item.expiryDate).toLocaleDateString()})</li>
               ))}
             </ul>
           )}
         </div>
 
+        {/* Arriving Stock */}
         <div className="card arriving-stock">
           <span className="icon">🟢</span>
           <h3>Arriving Stock</h3>
           <p>{notifications.summary.arrivingStock} Products</p>
-        </div>
-      </div>
-
-      <div className="gauge-container">
-        <h3>Stock Percentage</h3>
-        <div className="gauge">
-          <div className="semi-circle"></div>
-          <div className="percentage">{notifications.summary.stockPercentage}%</div>
         </div>
       </div>
     </div>

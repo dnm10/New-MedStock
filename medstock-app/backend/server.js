@@ -527,19 +527,19 @@ app.post("/api/update-inventory", (req, res) => {
 
 // Get real-time notifications from database
 app.get("/api/notifications", (req, res) => {
-  const query = `
-    SELECT name, quantity, threshold, expiry_date 
-    FROM inventory
-  `;
+  const query = `SELECT name, category, quantity, expiryDate, supplier, threshold FROM inventory`;
 
   con.query(query, (err, results) => {
     if (err) {
-      return res.status(500).json({ message: "Database error." });
+      console.error("❌ Database query failed:", err.sqlMessage || err);
+      return res.status(500).json({ message: "Database error.", error: err });
     }
+
+    console.log("✅ Fetched inventory data:", results);
 
     let outOfStock = 0;
     let lowStock = 0;
-    let arrivingStock = 0; // You can modify this logic if needed
+    let arrivingStock = 0; // Modify this logic if needed
     let totalStock = 0;
     let stockPercentage = 100;
 
@@ -550,8 +550,8 @@ app.get("/api/notifications", (req, res) => {
       totalStock += item.quantity;
 
       // Check for expired items
-      if (item.expiry_date && new Date(item.expiry_date) < new Date()) {
-        expiredItems.push({ name: item.name, expiry_date: item.expiry_date });
+      if (item.expiryDate && new Date(item.expiryDate) < new Date()) {
+        expiredItems.push({ name: item.name, expiryDate: item.expiryDate });
       }
 
       // Check for low stock
@@ -582,10 +582,3 @@ app.get("/api/notifications", (req, res) => {
     });
   });
 });
-
-
-
-
-
-
-

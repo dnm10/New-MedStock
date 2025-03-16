@@ -53,22 +53,6 @@ export default function Inventory() {
   const handleRemoveItem = () => setShowRemoveModal(true);
   const closeRemoveModal = () => setShowRemoveModal(false);
 
- /* const handleUpdateItem = () => {
-    if (selectedItem) {
-      const newItem = inventory.find(item => item.id === selectedItem);
-      setNewItem({
-        name: newItem.name,
-        category: newItem.category,
-        quantity: newItem.quantity,
-        expiryDate: newItem.expiryDate,
-        supplier: newItem.supplier,
-        threshold: newItem.threshold,
-      });
-      setShowUpdateModal(true);
-    } else {
-      alert('Please select an item to update!');
-    }
-  }; */
 
   const handleUpdateItem = () => {
     if (!selectedItem) {
