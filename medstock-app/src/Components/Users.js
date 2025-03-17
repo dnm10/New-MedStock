@@ -1,38 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./Users.css";
 
 const Users = () => {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Arjun Mehta", role: "Admin", email: "arjunmehta@gmail.com", phone: "9876543210", status: "Active" }
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [formValues, setFormValues] = useState({ name: "", role: "", email: "", phone: "", password: "", confirmPassword: "", status: "Active" });
+  const [formValues, setFormValues] = useState({ name: "", role: "", email: "", phone: "" });
 
-  // Handle input changes
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Fetch Users from Backend
+  const fetchUsers = async () => {
+    try {
+        const response = await axios.get("http://localhost:5000/users");
+        if (response.status === 200) {
+            setUsers(response.data);
+        } else {
+            console.error("Error: ", response.data);
+        }
+    } catch (error) {
+        console.error("Error fetching users:", error);
+    }
+};
+
+
+  // Handle Input Change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
   };
 
-  // Open modal
+  // Open Modal for Add/Edit
   const openModal = (user = null) => {
     setCurrentUser(user);
-    setFormValues(user || { name: "", role: "", email: "", phone: "", password: "", confirmPassword: "", status: "Active" });
+    setFormValues(user || { name: "", role: "", email: "", phone: "" });
     setIsModalOpen(true);
   };
 
-  // Save user (add/edit)
-  const saveUser = () => {
-    if (currentUser) {
-      setUsers(users.map((user) => (user.id === currentUser.id ? { ...currentUser, ...formValues } : user)));
-    } else {
-      const newUser = { ...formValues, id: users.length + 1 };
-      setUsers([...users, newUser]);
+  // Save User (Add/Edit)
+  const saveUser = async () => {
+    try {
+        console.log("Form values before sending:", formValues); // Debugging line
+
+        let response;
+        if (currentUser) {
+            response = await axios.put(`http://localhost:5000/users/${currentUser.id}`, formValues);
+        } else {
+            response = await axios.post("http://localhost:5000/users", formValues);
+        }
+
+        console.log("Response:", response);
+
+        if (response.status === 201 || response.status === 200) {
+            fetchUsers(); // Refresh user list after save
+            setIsModalOpen(false);
+        } else {
+            console.error("Error response:", response.data);
+            alert("Failed to save user.");
+        }
+    } catch (error) {
+        console.error("Error saving user:", error.response ? error.response.data : error);
+        alert("Something went wrong while saving the user!");
     }
-    setIsModalOpen(false);
+};
+
+
+
+  // Delete User
+  const deleteUser = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/users/${id}`);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
   };
+  
 
   return (
     <div className="users-page">
@@ -47,7 +93,6 @@ const Users = () => {
             <th>Role</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -59,10 +104,9 @@ const Users = () => {
               <td>{user.role}</td>
               <td>{user.email}</td>
               <td>{user.phone}</td>
-              <td>{user.status}</td>
               <td>
-               { /*<button className="edit-btn" onClick={() => openModal(user)}>Edit</button> */}
-                <button className="delete-btn" onClick={() => setUsers(users.filter((u) => u.id !== user.id))}>Delete</button>
+                <button className="edit-btn" onClick={() => openModal(user)}>Edit</button>
+                <button className="delete-btn" onClick={() => deleteUser(user.id)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -72,7 +116,7 @@ const Users = () => {
       {/* MODAL */}
       {isModalOpen && (
         <div className="users-modal">
-          <div className="users-modal-content modalContent">
+          <div className="users-modal-content">
             <h2>{currentUser ? "Edit User" : "Add New User"}</h2>
             <form>
               <label>Name:</label>
@@ -82,7 +126,7 @@ const Users = () => {
               <select name="role" value={formValues.role} onChange={handleInputChange}>
                 <option value="">Select Role</option>
                 <option value="Admin">Admin</option>
-                <option value="Pharmacist">Pharmacist</option>
+                <option value="User">User</option>
               </select>
 
               <label>Email:</label>
@@ -90,12 +134,6 @@ const Users = () => {
 
               <label>Phone:</label>
               <input type="text" name="phone" value={formValues.phone} onChange={handleInputChange} />
-
-              <label>Password:</label>
-              <input type="password" name="password" value={formValues.password} onChange={handleInputChange} />
-
-              <label>Confirm Password:</label>
-              <input type="password" name="confirmPassword" value={formValues.confirmPassword} onChange={handleInputChange} />
 
               <button type="button" className="saveOrderButton" onClick={saveUser}>Save</button>
               <button type="button" className="cancelButton" onClick={() => setIsModalOpen(false)}>Cancel</button>

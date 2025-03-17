@@ -38,7 +38,7 @@
   align-items: center;
   padding: 30px;
   flex: 1;
-  animation: float 3s infinite ease-in-out;
+  
 }
 
 @keyframes float {

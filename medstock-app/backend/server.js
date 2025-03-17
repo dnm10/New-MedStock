@@ -582,3 +582,64 @@ app.get("/api/notifications", (req, res) => {
     });
   });
 });
+
+
+// for user page data
+const router = express.Router();
+
+// Fetch all users
+router.get("/users", (req, res) => {
+  const query = "SELECT * FROM user_data";
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching users:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.json(result);
+  });
+});
+
+// Add a new user
+router.post("/users", (req, res) => {
+  const { name, role, email, phone } = req.body;
+  if (!name || !role || !email || !phone) {
+    return res.status(400).json({ message: "All fields are required!" });
+  }
+  const query = "INSERT INTO user_data (name, role, email, phone) VALUES (?, ?, ?, ?)";
+  db.query(query, [name, role, email, phone], (err, result) => {
+    if (err) {
+      console.error("Error adding user:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.status(201).json({ id: result.insertId, name, role, email, phone });
+  });
+});
+
+// Update a user
+router.put("/users/:id", (req, res) => {
+  const { name, role, email, phone } = req.body;
+  const { id } = req.params;
+
+  const query = "UPDATE user_data SET name=?, role=?, email=?, phone=? WHERE id=?";
+  db.query(query, [name, role, email, phone, id], (err) => {
+    if (err) {
+      console.error("Error updating user:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.json({ message: "User updated successfully" });
+  });
+});
+
+// Delete a user
+router.delete("/users/:id", (req, res) => {
+  const { id } = req.params;
+  db.query("DELETE FROM user_data WHERE id=?", [id], (err) => {
+    if (err) {
+      console.error("Error deleting user:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.json({ message: "User deleted successfully" });
+  });
+});
+
+module.exports = router;
