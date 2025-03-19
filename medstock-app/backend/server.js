@@ -244,168 +244,116 @@ app.get('/api/reports/low-stock', (req, res) => {
 
 // ORDERS ///////////////////////////////////////////////
 
-// GET all orders
-app.get('/api/orders', (req, res) => {
-  con.query('SELECT * FROM Orders', (err, results) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error fetching orders' });
-    }
-    res.json(results);
-  });
-});
-
-// ADD new order
-app.post('/api/orders', (req, res) => {
-  const { MedicineName, QuantityOrdered, Price, DeliveryDate, SupplierID } = req.body;
-
-  // Check if all required fields are provided
-  if (!MedicineName || !QuantityOrdered || !Price || !DeliveryDate || !SupplierID) {
-    return res.status(400).json({ message: 'All fields are required' });
+// ✅ Get all orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    const [rows] = await con.execute('SELECT * FROM Orders');
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching orders:', err.sqlMessage);
+    res.status(500).json({ error: err.message });
   }
+});
 
-  // Insert order into database
-  const query = `
-    INSERT INTO Orders (MedicineName, QuantityOrdered, Price, DeliveryDate, SupplierID)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-
-  con.query(query, [MedicineName, QuantityOrdered, Price, DeliveryDate, SupplierID], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error adding new order', error: err });
-    }
-
-    // Fetch the newly inserted order using the inserted OrderID
-    con.query('SELECT * FROM Orders WHERE OrderID = ?', [result.insertId], (fetchErr, fetchResults) => {
-      if (fetchErr) {
-        return res.status(500).json({ message: 'Error fetching new order', error: fetchErr });
-      }
-
-      res.status(201).json(fetchResults[0]); // Send the new order details to frontend
-    });
-  });
+// ✅ Add a new order
+app.post('/api/orders', async (req, res) => {
+  const { OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status } = req.body;
+  try {
+    const sql = `
+      INSERT INTO Orders (OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    await con.execute(sql, [OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status]);
+    res.json({ message: 'Order added successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
-// UPDATE order delivery status
-app.put('/api/orders/:id', (req, res) => {
+// ✅ Delete an order
+app.delete('/api/orders/:orderId', async (req, res) => {
+  const { orderId } = req.params;
+  try {
+    await con.execute('DELETE FROM Orders WHERE OrderID = ?', [orderId]);
+    res.json({ message: 'Order deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting order:', err.sqlMessage);
+    res.status(500).json({ error: err.message, sqlError: err.sqlMessage });
+  }
+});
+
+// ✅ Update delivery status
+app.put('/api/orders/:orderId', async (req, res) => {
+  const { orderId } = req.params;
   const { Delivery_Status } = req.body;
-  const { id } = req.params;
-
-  if (Delivery_Status === undefined) {
-    return res.status(400).json({ message: 'Delivery status is required' });
+  try {
+    await con.execute('UPDATE Orders SET Delivery_Status = ? WHERE OrderID = ?', [Delivery_Status, orderId]);
+    res.json({ message: 'Order delivery status updated' });
+  } catch (err) {
+    console.error('Error updating delivery status:', err.sqlMessage);
+    res.status(500).json({ error: err.message, sqlError: err.sqlMessage });
   }
+});
 
-  const query = 'UPDATE Orders SET Delivery_Status = ? WHERE OrderID = ?';
 
-  con.query(query, [Delivery_Status, id], (err) => {
+// --- SUPPLIERS ROUTES ---
+
+// Get all suppliers
+app.get("/api/suppliers", (req, res) => {
+  con.query("SELECT * FROM Suppliers", (err, result) => {
     if (err) {
-      return res.status(500).json({ message: 'Error updating order' });
+      console.error("Error fetching suppliers:", err);
+      res.status(500).send("Error fetching suppliers");
+    } else {
+      res.json(result);
     }
-    res.json({ message: 'Order status updated successfully', OrderID: id });
   });
 });
 
-// DELETE order
-app.delete('/api/orders/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = 'DELETE FROM Orders WHERE OrderID = ?';
-
-  con.query(query, [id], (err) => {
+// Add a new supplier
+app.post("/api/suppliers", (req, res) => {
+  const { SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address } = req.body;
+  const query = `INSERT INTO Suppliers (SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate) VALUES (?, ?, ?, ?, ?, ?, CURDATE())`;
+  con.query(query, [SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address], (err, result) => {
     if (err) {
-      return res.status(500).json({ message: 'Error deleting order' });
+      console.error("Error adding supplier:", err);
+      res.status(500).send("Error adding supplier");
+    } else {
+      res.send("Supplier added successfully");
     }
-    res.json({ message: `Order with ID ${id} deleted successfully` });
   });
 });
 
 
-// ======================= SUPPLIERS =========================== //
-
-// GET all suppliers
-app.get('/api/suppliers', (req, res) => {
-  con.query('SELECT * FROM Suppliers', (err, results) => {
+// Update supplier
+app.put("/api/suppliers/:id", (req, res) => {
+  const supplierId = req.params.id;
+  const { SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address } = req.body;
+  const query = `UPDATE Suppliers SET SupplierName=?, ContactPerson=?, PhoneNumber=?, EmailAddress=?, Address=? WHERE SupplierID=?`;
+  con.query(query, [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, supplierId], (err, result) => {
     if (err) {
-      return res.status(500).json({ error: 'Error fetching suppliers' });
+      console.error("Error updating supplier:", err);
+      res.status(500).send("Error updating supplier");
+    } else {
+      res.send("Supplier updated successfully");
     }
-    res.json(results);
   });
 });
 
-// ADD a new supplier
-app.post('/api/suppliers', (req, res) => {
-  const { SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate } = req.body;
-
-  if (!SupplierName || !ContactPerson || !PhoneNumber || !EmailAddress || !Address) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
-  const query = `
-    INSERT INTO Suppliers (SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate) 
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-
-  con.query(
-    query,
-    [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate || null],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error adding supplier' });
-      }
-      res.status(201).json({
-        SupplierID: result.insertId,
-        SupplierName,
-        ContactPerson,
-        PhoneNumber,
-        EmailAddress,
-        Address,
-        LastDeliveryDate,
-      });
-    }
-  );
-});
-
-// UPDATE a supplier
-app.put('/api/suppliers/:id', (req, res) => {
-  const { SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate } = req.body;
-  const { id } = req.params;
-
-  if (!SupplierName || !ContactPerson || !PhoneNumber || !EmailAddress || !Address) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
-  const query = `
-    UPDATE Suppliers 
-    SET SupplierName = ?, ContactPerson = ?, PhoneNumber = ?, EmailAddress = ?, Address = ?, LastDeliveryDate = ?
-    WHERE SupplierID = ?
-  `;
-
-  con.query(
-    query,
-    [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate || null, id],
-    (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error updating supplier' });
-      }
-      res.json({ message: 'Supplier updated successfully' });
-    }
-  );
-});
-
-// DELETE a supplier
-app.delete('/api/suppliers/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = 'DELETE FROM Suppliers WHERE SupplierID = ?';
-
-  con.query(query, [id], (err) => {
+// Delete supplier
+app.delete("/api/suppliers/:id", (req, res) => {
+  const supplierId = req.params.id;
+  con.query("DELETE FROM Suppliers WHERE SupplierID=?", [supplierId], (err, result) => {
     if (err) {
-      return res.status(500).json({ message: 'Error deleting supplier' });
+      console.error("Error deleting supplier:", err);
+      res.status(500).send("Error deleting supplier");
+    } else {
+      res.send("Supplier deleted successfully");
     }
-    res.json({ message: `Supplier with ID ${id} deleted successfully` });
   });
 });
-
 
 // for billing
 app.post("/api/update-inventory", (req, res) => {
@@ -585,28 +533,22 @@ app.get("/api/notifications", (req, res) => {
 
 
 // for user page data
-const router = express.Router();
-
 // Fetch all users
-router.get("/users", (req, res) => {
-  const query = "SELECT * FROM user_data";
-  db.query(query, (err, result) => {
-    if (err) {
-      console.error("Error fetching users:", err);
-      return res.status(500).json({ message: "Database error" });
-    }
+app.get("/users", (req, res) => {
+  con.query("SELECT * FROM user_data", (err, result) => {
+    if (err) return res.status(500).json({ message: "Database error" });
     res.json(result);
   });
 });
 
 // Add a new user
-router.post("/users", (req, res) => {
+app.post("/users", (req, res) => {
   const { name, role, email, phone } = req.body;
   if (!name || !role || !email || !phone) {
     return res.status(400).json({ message: "All fields are required!" });
   }
   const query = "INSERT INTO user_data (name, role, email, phone) VALUES (?, ?, ?, ?)";
-  db.query(query, [name, role, email, phone], (err, result) => {
+  con.query(query, [name, role, email, phone], (err, result) => {
     if (err) {
       console.error("Error adding user:", err);
       return res.status(500).json({ message: "Database error" });
@@ -616,12 +558,12 @@ router.post("/users", (req, res) => {
 });
 
 // Update a user
-router.put("/users/:id", (req, res) => {
+app.put("/users/:id", (req, res) => {
   const { name, role, email, phone } = req.body;
   const { id } = req.params;
 
   const query = "UPDATE user_data SET name=?, role=?, email=?, phone=? WHERE id=?";
-  db.query(query, [name, role, email, phone, id], (err) => {
+  con.query(query, [name, role, email, phone, id], (err, result) => {
     if (err) {
       console.error("Error updating user:", err);
       return res.status(500).json({ message: "Database error" });
@@ -631,9 +573,9 @@ router.put("/users/:id", (req, res) => {
 });
 
 // Delete a user
-router.delete("/users/:id", (req, res) => {
+app.delete("/users/:id", (req, res) => {
   const { id } = req.params;
-  db.query("DELETE FROM user_data WHERE id=?", [id], (err) => {
+  con.query("DELETE FROM user_data WHERE id=?", [id], (err, result) => {
     if (err) {
       console.error("Error deleting user:", err);
       return res.status(500).json({ message: "Database error" });
@@ -642,4 +584,3 @@ router.delete("/users/:id", (req, res) => {
   });
 });
 
-module.exports = router;

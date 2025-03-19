@@ -57,17 +57,17 @@ const Orders = () => {
         const response = await axios.post('http://localhost:5000/api/orders', {
           OrderID: newOrder.orderID, 
           MedicineName: newOrder.medicineName, 
-          QuantityOrdered: newOrder.quantityOrdered, 
+          QuantityOrdered: Number(newOrder.quantityOrdered), 
           SupplierID: newOrder.supplierID, 
-          Price: newOrder.price, 
+          Price: Number(newOrder.price), 
           DeliveryDate: newOrder.deliveryDate,
+          Delivery_Status: false
         });
   
         console.log('Order added:', response.data);
   
-        // Fetch updated orders after adding a new one
         const updatedOrders = await axios.get('http://localhost:5000/api/orders');
-        setOrders(updatedOrders.data); 
+        setOrders(updatedOrders.data);
   
         setIsAddModalOpen(false);
         setNewOrder({
@@ -87,8 +87,6 @@ const Orders = () => {
     } else {
       alert('Please fill out all fields.');
     }
-
-    
   };
   
   const deleteOrder = async (orderId) => {

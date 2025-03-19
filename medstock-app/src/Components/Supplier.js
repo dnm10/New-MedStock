@@ -7,6 +7,7 @@ const Supplier = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editSupplier, setEditSupplier] = useState(null);
   const [formValues, setFormValues] = useState({
+    SupplierID: "",
     SupplierName: "",
     ContactPerson: "",
     PhoneNumber: "",
@@ -31,44 +32,33 @@ const Supplier = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    
-    // Regex patterns
-    const nameRegex = /^[A-Za-z\s]+$/; // Only alphabets and spaces
-    const phoneRegex = /^[0-9]{10}$/; // Exactly 10 digits
-    const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com)$/; // Must be Gmail or Yahoo
 
-    // Validate Supplier Name (Only alphabets and spaces)
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com)$/;
+
+    if (!formValues.SupplierID || isNaN(formValues.SupplierID)) {
+      newErrors.SupplierID = "Supplier ID is required and must be a number.";
+    }
     if (!formValues.SupplierName.trim() || !nameRegex.test(formValues.SupplierName)) {
-        newErrors.SupplierName = "Supplier name should contain only alphabets.";
+      newErrors.SupplierName = "Supplier name should contain only alphabets.";
     }
-
-    // Validate Contact Person (Only alphabets and spaces)
     if (!formValues.ContactPerson.trim() || !nameRegex.test(formValues.ContactPerson)) {
-        newErrors.ContactPerson = "Contact person should contain only alphabets.";
+      newErrors.ContactPerson = "Contact person should contain only alphabets.";
     }
-
-    // Validate Phone Number (Exactly 10 digits)
     if (!formValues.PhoneNumber.match(phoneRegex)) {
-        newErrors.PhoneNumber = "Phone number must be exactly 10 digits.";
+      newErrors.PhoneNumber = "Phone number must be exactly 10 digits.";
     }
-
-    // Validate Email (Only Gmail or Yahoo)
     if (!formValues.EmailAddress.match(emailRegex)) {
-        newErrors.EmailAddress = "Enter a valid email address";
+      newErrors.EmailAddress = "Enter a valid email address (gmail.com or yahoo.com)";
     }
-
-    // Validate Address (Required)
     if (!formValues.Address.trim()) {
-        newErrors.Address = "Address is required.";
+      newErrors.Address = "Address is required.";
     }
 
-    // Set errors in state
     setErrors(newErrors);
-
-    // Return true if no errors exist
     return Object.keys(newErrors).length === 0;
-};
-
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -79,6 +69,7 @@ const Supplier = () => {
     setModalOpen(true);
     setEditSupplier(null);
     setFormValues({
+      SupplierID: "",
       SupplierName: "",
       ContactPerson: "",
       PhoneNumber: "",
@@ -92,6 +83,7 @@ const Supplier = () => {
     setModalOpen(true);
     setEditSupplier(supplier.SupplierID);
     setFormValues({
+      SupplierID: supplier.SupplierID,
       SupplierName: supplier.SupplierName,
       ContactPerson: supplier.ContactPerson,
       PhoneNumber: supplier.PhoneNumber,
@@ -102,7 +94,7 @@ const Supplier = () => {
   };
 
   const handleSaveSupplier = async () => {
-    if (!validateForm()) return; // Stop if validation fails
+    if (!validateForm()) return;
 
     try {
       const method = editSupplier ? "PUT" : "POST";
@@ -188,31 +180,72 @@ const Supplier = () => {
             <div className={styles.supplierModalContent}>
               <h3>{editSupplier ? "Edit Supplier" : "Add New Supplier"}</h3>
               <form onSubmit={(e) => e.preventDefault()}>
+                <label>Supplier ID:</label>
+                <input
+                  type="number"
+                  name="SupplierID"
+                  value={formValues.SupplierID}
+                  onChange={handleInputChange}
+                />
+                {errors.SupplierID && <span className="error">{errors.SupplierID}</span>}
+
                 <label>Name:</label>
-                <input type="text" name="SupplierName" value={formValues.SupplierName} onChange={handleInputChange} />
+                <input
+                  type="text"
+                  name="SupplierName"
+                  value={formValues.SupplierName}
+                  onChange={handleInputChange}
+                />
                 {errors.SupplierName && <span className="error">{errors.SupplierName}</span>}
 
                 <label>Contact Person:</label>
-                <input type="text" name="ContactPerson" value={formValues.ContactPerson} onChange={handleInputChange} />
+                <input
+                  type="text"
+                  name="ContactPerson"
+                  value={formValues.ContactPerson}
+                  onChange={handleInputChange}
+                />
                 {errors.ContactPerson && <span className="error">{errors.ContactPerson}</span>}
 
                 <label>Phone:</label>
-                <input type="text" name="PhoneNumber" value={formValues.PhoneNumber} onChange={handleInputChange} />
+                <input
+                  type="text"
+                  name="PhoneNumber"
+                  value={formValues.PhoneNumber}
+                  onChange={handleInputChange}
+                />
                 {errors.PhoneNumber && <span className="error">{errors.PhoneNumber}</span>}
 
                 <label>Email:</label>
-                <input type="email" name="EmailAddress" value={formValues.EmailAddress} onChange={handleInputChange} />
+                <input
+                  type="email"
+                  name="EmailAddress"
+                  value={formValues.EmailAddress}
+                  onChange={handleInputChange}
+                />
                 {errors.EmailAddress && <span className="error">{errors.EmailAddress}</span>}
 
                 <label>Address:</label>
-                <textarea name="Address" value={formValues.Address} onChange={handleInputChange}></textarea>
+                <textarea
+                  name="Address"
+                  value={formValues.Address}
+                  onChange={handleInputChange}
+                ></textarea>
                 {errors.Address && <span className="error">{errors.Address}</span>}
 
                 <div className={styles.modalActions}>
-                  <button type="button" className={styles.saveButton} onClick={handleSaveSupplier}>
+                  <button
+                    type="button"
+                    className={styles.saveButton}
+                    onClick={handleSaveSupplier}
+                  >
                     Save
                   </button>
-                  <button type="button" className={styles.closeButton} onClick={() => setModalOpen(false)}>
+                  <button
+                    type="button"
+                    className={styles.closeButton}
+                    onClick={() => setModalOpen(false)}
+                  >
                     Close
                   </button>
                 </div>
