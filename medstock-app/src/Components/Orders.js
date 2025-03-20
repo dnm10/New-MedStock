@@ -171,13 +171,13 @@ const Orders = () => {
             {newOrder.medicines.map((medicine, index) => (
               <div key={medicine.id} className={styles.medicineCard}>
                 <input type="text" placeholder="Medicine Name" value={medicine.name} onChange={(e) => updateMedicine(medicine.id, "name", e.target.value)} required />
-                <input type="number" placeholder="Quantity" min="1" value={medicine.quantity} onChange={(e) => updateMedicine(medicine.id, "quantity", Number(e.target.value))} required />
-                <input type="number" placeholder="Price" min="0.01" step="0.01" value={medicine.price} onChange={(e) => updateMedicine(medicine.id, "price", Number(e.target.value))} required />
+                <input type="number" placeholder="Quantity"  value={medicine.quantity} onChange={(e) => updateMedicine(medicine.id, "quantity", Number(e.target.value))} required />
+                <input type="number" placeholder="Price"  value={medicine.price} onChange={(e) => updateMedicine(medicine.id, "price", Number(e.target.value))} required />
                 <button onClick={() => removeMedicine(medicine.id)}>❌</button>
               </div>
             ))}
 
-            <button onClick={addMedicine}>+ Add Medicine</button>
+            <button className={styles.addorderaddmedbtn} onClick={addMedicine}>+ Add Medicine</button>
             <h3>Total Price: ${calculateTotal().toFixed(2)}</h3>
 
             <button onClick={addOrder}>Save Order</button>
