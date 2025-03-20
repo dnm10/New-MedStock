@@ -9,110 +9,94 @@ const Orders = () => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const [newOrder, setNewOrder] = useState({
-    orderID: '',  
-    medicineName: '',
-    quantityOrdered: '',
-    supplierID: '',
-    price: '',
-    deliveryDate: '',
+    OrderID: '',
+    MedicineName: '',
+    QuantityOrdered: '',
+    SupplierID: '',
+    Price: '',
+    DeliveryDate: '',
   });
-  
 
   // Fetch orders from the backend
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/orders");
+      setOrders(response.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/orders");
-        console.log("Fetched Orders:", response.data); // Debugging line
-        setOrders(response.data);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
-  
     fetchOrders();
   }, []);
-  
+
   // Handle input change for new orders
   const handleNewOrderChange = (e) => {
     setNewOrder({ ...newOrder, [e.target.name]: e.target.value });
   };
 
   const formatDate = (dateString) => {
-    return dateString ? dateString.split('T')[0] : ''; // Extracts only YYYY-MM-DD
+    return dateString ? dateString.split('T')[0] : '';
   };
-  
 
-  // Add new order to the backend
+  // Add new order
   const addOrder = async () => {
-    if (
-      newOrder.orderID &&
-      newOrder.medicineName &&
-      newOrder.quantityOrdered &&
-      newOrder.supplierID &&
-      newOrder.price &&
-      newOrder.deliveryDate
-    ) {
-      try {
-        const response = await axios.post('http://localhost:5000/api/orders', {
-          OrderID: newOrder.orderID, 
-          MedicineName: newOrder.medicineName, 
-          QuantityOrdered: Number(newOrder.quantityOrdered), 
-          SupplierID: newOrder.supplierID, 
-          Price: Number(newOrder.price), 
-          DeliveryDate: newOrder.deliveryDate,
-          Delivery_Status: false
-        });
+    const { OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate } = newOrder;
   
-        console.log('Order added:', response.data);
-  
-        const updatedOrders = await axios.get('http://localhost:5000/api/orders');
-        setOrders(updatedOrders.data);
-  
-        setIsAddModalOpen(false);
-        setNewOrder({
-          orderID: '',
-          medicineName: '',
-          quantityOrdered: '',
-          supplierID: '',
-          price: '',
-          deliveryDate: '',
-        });
-  
-        alert('Order added successfully!');
-      } catch (error) {
-        console.error('Error adding order:', error.response ? error.response.data : error);
-        alert('Failed to add order');
-      }
-    } else {
+    if (!OrderID || !MedicineName || !QuantityOrdered || !SupplierID || !Price || !DeliveryDate) {
       alert('Please fill out all fields.');
+      return;
+    }
+  
+    try {
+      const response = await axios.post("http://localhost:5000/api/orders", {
+        OrderID,
+        MedicineName,
+        QuantityOrdered: parseInt(QuantityOrdered, 10),  // Ensure number type
+        SupplierID: parseInt(SupplierID, 10),  // Ensure number type
+        Price: parseFloat(Price),  // Ensure decimal type
+        DeliveryDate,
+      });
+  
+      fetchOrders(); // Refresh the table after adding
+      setIsAddModalOpen(false);
+      setNewOrder({ OrderID: '', MedicineName: '', QuantityOrdered: '', SupplierID: '', Price: '', DeliveryDate: '' });
+      alert("Order added successfully!");
+    } catch (error) {
+      console.error("Error adding order:", error.response ? error.response.data : error);
+      alert("Failed to add order.");
     }
   };
   
+
+  // Delete order
   const deleteOrder = async (orderId) => {
     if (!window.confirm("Are you sure you want to delete this order?")) return;
   
     try {
-      await axios.delete(`http://localhost:5000/api/orders/${orderId}`);
-      
-      // Update the orders state after deletion
-      setOrders((prevOrders) => prevOrders.filter(order => order.OrderID !== orderId));
+      const response = await axios.delete(`http://localhost:5000/api/orders/${orderId}`);
   
-      alert("Order deleted successfully!");
+      if (response.data.success) {
+        // Update state by filtering out the deleted order
+        setOrders((prevOrders) => prevOrders.filter(order => order.OrderID !== orderId));
+        alert("Order deleted successfully!");
+      } else {
+        alert("Failed to delete order.");
+      }
     } catch (error) {
       console.error("Error deleting order:", error);
-      alert("Failed to delete order.");
+      alert("Failed to delete order. Please check the console for details.");
     }
-  };
-  
-  
-  // Handle delivery status update
+  };  
+
+  // Update delivery status
   const handleCheckboxChange = async (orderId, delivered) => {
     try {
-      // Update backend
-      await axios.put(`http://localhost:5000/api/orders/${orderId}`, { Delivery_Status: delivered });
+      // Ensure we're sending a boolean value
+      await axios.put(`http://localhost:5000/api/orders/${orderId}`, { Delivery_Status: delivered ? 1 : 0 });
   
-      // Ensure only the clicked checkbox updates
+      // Update the state after a successful update
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.OrderID === orderId ? { ...order, Delivery_Status: delivered } : order
@@ -120,11 +104,11 @@ const Orders = () => {
       );
     } catch (error) {
       console.error("Error updating order status:", error);
-      alert("Failed to update order status");
+      alert("Failed to update order status.");
     }
   };
   
-  
+
   const deliveredOrders = orders.filter(order => order.Delivery_Status);
   const totalOrders = orders.length;
   const deliveredPercentage = totalOrders === 0 ? 0 : ((deliveredOrders.length / totalOrders) * 100).toFixed(2);
@@ -134,7 +118,7 @@ const Orders = () => {
       <h1>Orders List</h1>
 
       <div className={styles.statsCards}>
-      <div className={styles.card}><AiOutlineShoppingCart size={30} /><h3>Total Orders</h3><p>{totalOrders}</p></div>
+        <div className={styles.card}><AiOutlineShoppingCart size={30} /><h3>Total Orders</h3><p>{totalOrders}</p></div>
         <div className={styles.card}><AiOutlineCheckCircle size={30} /><h3>Delivered Orders</h3><p>{deliveredOrders.length}</p></div>
         <div className={styles.card}><AiOutlinePercentage size={30} /><h3>Delivery Percentage</h3><p>{deliveredPercentage}%</p></div>
       </div>
@@ -149,14 +133,12 @@ const Orders = () => {
           <div className={styles.modalContent}>
             <button className={styles.closeButton} onClick={() => setIsAddModalOpen(false)}>&times;</button>
             <h3>Add New Order</h3>
-            <label>Order ID:<input type="text" name="orderID" value={newOrder.orderID} onChange={handleNewOrderChange} /></label>
-            <label>Medicine Name: <input type="text" name="medicineName" value={newOrder.medicineName} onChange={handleNewOrderChange} /></label>
-            <label>Quantity: <input type="number" name="quantityOrdered" value={newOrder.quantityOrdered} onChange={handleNewOrderChange} /></label>
-            <label>Supplier ID: <input type="text" name="supplierID" value={newOrder.supplierID} onChange={handleNewOrderChange} /></label>
-            <label>Price: <input type="number" name="price" value={newOrder.price} onChange={handleNewOrderChange} /></label>
-            <label>Delivery Date: <input type="date" name="deliveryDate" value={newOrder.deliveryDate} onChange={handleNewOrderChange} /></label>
-            
-
+            <label>Order ID:<input type="text" name="OrderID" value={newOrder.OrderID} onChange={handleNewOrderChange} /></label>
+            <label>Medicine Name: <input type="text" name="MedicineName" value={newOrder.MedicineName} onChange={handleNewOrderChange} /></label>
+            <label>Quantity: <input type="number" name="QuantityOrdered" value={newOrder.QuantityOrdered} onChange={handleNewOrderChange} /></label>
+            <label>Supplier ID: <input type="text" name="SupplierID" value={newOrder.SupplierID} onChange={handleNewOrderChange} /></label>
+            <label>Price: <input type="number" name="Price" value={newOrder.Price} onChange={handleNewOrderChange} /></label>
+            <label>Delivery Date: <input type="date" name="DeliveryDate" value={newOrder.DeliveryDate} onChange={handleNewOrderChange} /></label>
             <button className={styles.saveOrderButton} onClick={addOrder}>Save Order</button>
           </div>
         </div>
@@ -193,59 +175,42 @@ const Orders = () => {
                 </tbody>
               </table>
             ) : (
-              <p>No orders delivered till date.</p>
+              <p>No orders delivered yet.</p>
             )}
           </div>
         </div>
       )}
 
-<table className={styles.ordersTable}>
-  <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>Medicine Name</th>
-      <th>Quantity</th>
-      <th>Supplier ID</th>
-      <th>Price</th>
-      <th>Delivery Date</th>
-      <th>Delivered</th>
-      <th>Remove</th> {/* New Column */}
-    </tr>
-  </thead>
-  <tbody>
-    {orders.map((order) => (
-      <tr key={order.OrderID}>
-        <td>{order.OrderID}</td>
-        <td>{order.MedicineName}</td>
-        <td>{order.QuantityOrdered}</td>
-        <td>{order.SupplierID}</td>
-        <td>{order.Price}</td>
-        <td>{formatDate(order.DeliveryDate)}</td>
-        <td>
-  <input
-    type="checkbox"
-    checked={order.Delivery_Status === true} // Ensure boolean comparison
-    onChange={(e) => handleCheckboxChange(order.OrderID, e.target.checked)}
-  />
-</td>
-
-
-
-        <td>
-          <button
-            className={styles.deleteButton}
-            onClick={() => deleteOrder(order.OrderID)}
-          >
-            ❌ Remove
-          </button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+      <table className={styles.ordersTable}>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Medicine Name</th>
+            <th>Quantity</th>
+            <th>Supplier ID</th>
+            <th>Price</th>
+            <th>Delivery Date</th>
+            <th>Delivered</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.OrderID}>
+              <td>{order.OrderID}</td>
+              <td>{order.MedicineName}</td>
+              <td>{order.QuantityOrdered}</td>
+              <td>{order.SupplierID}</td>
+              <td>{order.Price}</td>
+              <td>{formatDate(order.DeliveryDate)}</td>
+              <td><input type="checkbox" checked={order.Delivery_Status} onChange={(e) => handleCheckboxChange(order.OrderID, e.target.checked)} /></td>
+              <td><button className={styles.deleteButton} onClick={() => deleteOrder(order.OrderID)}>❌ Remove</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-export default Orders;  
+export default Orders;

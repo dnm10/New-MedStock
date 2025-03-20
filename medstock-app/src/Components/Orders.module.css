@@ -70,13 +70,8 @@
   border-color: green;
 }
 
-.buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  margin-left: 400px;
-  margin-right: 250px;
-}/* Button Styling */
+
+/* Button Styling */
 .addOrderButton, .orderHistoryButton {
   background: #007bff; /* Gradient blue button */
   color: white;
@@ -86,14 +81,14 @@
   cursor: pointer;
   margin-bottom: 20px;
   margin-top: 10px;
-  margin-left: 150px;
+  margin-left: 15px;
   border-radius: 8px;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: background 0.3s ease;
   box-shadow: 0 6px 15px rgba(100, 181, 246, 0.5);
 }
 
 .addOrderButton:hover, .orderHistoryButton:hover {
-  background: #007bff;
+  background: #0056b3;
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(30, 136, 229, 0.6);
 }

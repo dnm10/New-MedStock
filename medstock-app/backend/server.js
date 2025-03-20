@@ -243,63 +243,92 @@ app.get('/api/reports/low-stock', (req, res) => {
 });
 
 // ORDERS ///////////////////////////////////////////////
-
-// ✅ Get all orders
 app.get('/api/orders', async (req, res) => {
   try {
-    const [rows] = await con.execute('SELECT * FROM Orders');
+    const [rows] = await con.promise().execute('SELECT * FROM Orders'); // Use `.promise()`
+    
+    if (!Array.isArray(rows)) {
+      throw new Error("Database query did not return an array.");
+    }
+
     res.json(rows);
   } catch (err) {
-    console.error('Error fetching orders:', err.sqlMessage);
-    res.status(500).json({ error: err.message });
+    console.error('Error fetching orders:', err); // Log the full error
+    res.status(500).json({ error: "Failed to fetch orders", details: err.message });
   }
 });
+
 
 // ✅ Add a new order
 app.post('/api/orders', async (req, res) => {
-  const { OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status } = req.body;
   try {
-    const sql = `
+    const { OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate } = req.body;
+
+    // Ensure required fields are present
+    if (!OrderID || !MedicineName || !QuantityOrdered || !SupplierID || !Price || !DeliveryDate) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Insert order into the database
+    const query = `
       INSERT INTO Orders (OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    await con.execute(sql, [OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status]);
-    res.json({ message: 'Order added successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+      VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, false]; // Default false for Delivery_Status
+
+    await con.execute(query, values);
+    
+    res.status(201).json({ message: "Order added successfully" });
+  } catch (error) {
+    console.error('Error adding order:', error);
+    res.status(500).json({ error: "Failed to add order", details: error.message });
   }
 });
-
 
 // ✅ Delete an order
 app.delete('/api/orders/:orderId', async (req, res) => {
-  const { orderId } = req.params;
   try {
-    await con.execute('DELETE FROM Orders WHERE OrderID = ?', [orderId]);
-    res.json({ message: 'Order deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting order:', err.sqlMessage);
-    res.status(500).json({ error: err.message, sqlError: err.sqlMessage });
+    const { orderId } = req.params;
+
+    // Check if the order exists before attempting deletion
+    const [rows] = await con.promise().execute('SELECT * FROM Orders WHERE OrderID = ?', [orderId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Delete the order
+    await con.promise().execute('DELETE FROM Orders WHERE OrderID = ?', [orderId]);
+
+    res.json({ success: true, message: "Order deleted successfully" });
+  } catch (error) {
+    console.error('Error deleting order:', error.message);
+    res.status(500).json({ error: "Failed to delete order", details: error.message });
   }
 });
+
 
 // ✅ Update delivery status
 app.put('/api/orders/:orderId', async (req, res) => {
-  const { orderId } = req.params;
-  const { Delivery_Status } = req.body;
   try {
-    await con.execute('UPDATE Orders SET Delivery_Status = ? WHERE OrderID = ?', [Delivery_Status, orderId]);
-    res.json({ message: 'Order delivery status updated' });
-  } catch (err) {
-    console.error('Error updating delivery status:', err.sqlMessage);
-    res.status(500).json({ error: err.message, sqlError: err.sqlMessage });
+    const { orderId } = req.params;
+    const { Delivery_Status } = req.body;
+
+    // Convert boolean to 0 or 1 for MySQL
+    const statusValue = Delivery_Status ? 1 : 0;
+
+    await con.promise().execute(
+      'UPDATE Orders SET Delivery_Status = ? WHERE OrderID = ?',
+      [statusValue, orderId]
+    );
+
+    res.json({ success: true, message: "Order status updated successfully" });
+  } catch (error) {
+    console.error('Error updating delivery status:', error.message);
+    res.status(500).json({ error: "Failed to update order status", details: error.message });
   }
 });
 
-
 // --- SUPPLIERS ROUTES ---
-
 // Get all suppliers
 app.get("/api/suppliers", (req, res) => {
   con.query("SELECT * FROM Suppliers", (err, result) => {
