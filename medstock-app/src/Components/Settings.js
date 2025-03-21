@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import styles from "./Settings.module.css";
+import styles from "./Settings.modules.css";
+
 
 const Settings = () => {
   const [darkMode, setDarkMode] = useState(() => {
@@ -105,7 +106,7 @@ const Settings = () => {
       </div>
       
       <button className={styles.saveBtn} onClick={handleSave}>Save Settings</button>
-      {saved && <p className={styles.savedMessage}>✅ Settings Saved!</p>}
+      {saved && <p className={styles.savedMessage}> Settings Saved!</p>}
     </div>
   );
 };
