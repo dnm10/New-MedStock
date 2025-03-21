@@ -114,7 +114,16 @@ export default function Inventory() {
     if (name === "threshold") {
         const thresholdValue = parseInt(value, 10);
         if (isNaN(thresholdValue) || thresholdValue < 0) {
-            alert("Threshold must be a positive number.");
+            alert("Threshold must be a above 0.");
+            return;
+        }
+    }
+
+    // ✅ Validate quantity (must be a positive number above 0)
+    if (name === "quantity") {
+        const quantityValue = parseInt(value, 10);
+        if (isNaN(quantityValue) || quantityValue <= 0) {
+            alert("Quantity must be greater than 0.");
             return;
         }
     }
