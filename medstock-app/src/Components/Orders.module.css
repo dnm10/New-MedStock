@@ -4,7 +4,7 @@
   background: white;
 }
 
-.Orders h1 {
+.ordersmainheading {
   text-align: center;
   margin-bottom: 20px;
   margin-left: 85px;
@@ -95,7 +95,7 @@
 
 /* Modal Overlay */
 /* Fullscreen dark background overlay */
-.modal {
+.ordersmodal {
   position: fixed;
   top: 0;
   left: 0;
@@ -110,7 +110,7 @@
 }
 
 /* Modal box styling */
-.modalContent {
+.ordersmodalContent {
   background: #ffffff; /* Clean white background */
   padding: 30px;
   border-radius: 16px;
@@ -124,7 +124,7 @@
 }
 
 /* Close button styling */
-.closeButton {
+.orderscloseButton {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -136,12 +136,12 @@
   transition: transform 0.3s ease;
 }
 
-.closeButton:hover {
+.orderscloseButton:hover {
   transform: scale(1.2);
 }
 
 /* Form labels */
-.modal label {
+.ordersmodal label {
   display: block;
   font-weight: bold;
   color: #0d47a1;
@@ -152,9 +152,9 @@
 }
 
 /* Input fields */
-.modal input[type="text"],
-.modal input[type="date"],
-.modal input[type="number"] {
+.ordersmodal input[type="text"],
+.ordersmodal input[type="date"],
+.ordersmodal input[type="number"] {
   width: 100%;
   padding: 10px;
   margin-top: 5px;
@@ -164,7 +164,7 @@
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.modal input:focus {
+.ordersmodal input:focus {
   border-color: #1e88e5;
   box-shadow: 0 0 8px rgba(30, 136, 229, 0.5);
   outline: none;
@@ -182,7 +182,7 @@
   transition: background-color 0.3s ease;
 }
 /* Medicine section */
-.medicineCard {
+.ordersmedicineCard {
   display: flex;
   gap: 10px;
   align-items: center;
@@ -193,12 +193,12 @@
   background: #f9f9f9;
 }
 
-.medicineCard input {
+.ordersmedicineCard input {
   flex: 1;
 }
 
 /* Remove medicine button */
-.medicineCard button {
+.ordersmedicineCard button {
   background: #ff3d00;
   color: white;
   font-size: 1rem;
@@ -209,12 +209,12 @@
   transition: background-color 0.3s ease;
 }
 
-.medicineCard button:hover {
+.ordersmedicineCard button:hover {
   background: #d32f2f;
 }
 
 /* Add Medicine Button */
-.medicineCard button {
+.ordersmedicineCard button {
   background: #007bff;
   color: white;
   font-size: 1rem;
@@ -226,21 +226,21 @@
   /* margin-top: 0px; */
 }
 
-.medicineCard button:hover {
+.ordersmedicineCard button:hover {
   background: #0056b3;
 }
 
 /* Save Order Button */
-.medicineCard button:last-of-type {
+.ordersmedicineCard button:last-of-type {
   background: #ffff;
 }
 
-.medicineCard button:last-of-type:hover {
+.ordersmedicineCard button:last-of-type:hover {
   background: #0056b3;
 }
 
 /* Total Price Styling */
-.modal h3 {
+.ordersmodal h1 h3 {
   font-size: 1.2rem;
   color: #1565c0;
   margin-top: 15px;
@@ -268,7 +268,7 @@
 }
 
 /* History Table */
-.historyTable {
+.ordershistoryTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
@@ -278,27 +278,27 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.historyTable th,
-.historyTable td {
+.ordershistoryTable th,
+.ordershistoryTable td {
   border: 1px solid #ddd;
   padding: 12px;
 }
 
-.historyTable th {
+.ordershistoryTable th {
   background: #1e88e5; /* Vibrant blue header */
   color: white;
   text-align: left;
   font-weight: bold;
 }
 
-.statsCards {
+.ordersstatsCards {
   display: flex; /* Aligns items in a row */
   gap: 15px; /* Space between the cards */
   margin-bottom: 20px;
   justify-content: center; /* Centers the cards horizontally */
 }
 
-.card {
+.orderscard {
   border-radius: 8px;
   padding: 20px 15px;
   padding-top: 35px;
@@ -310,33 +310,33 @@
 }
 
 /* Styling for card titles */
-.card h3 {
+.orderscard h3 {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
 }
 
 /* Styling for card numbers */
-.card p {
+.orderscard p {
   font-size: 1.5rem;
   font-weight: bold;
 }
 
 /* Background colors for each card */
-.card:nth-child(1) {
+.orderscard:nth-child(1) {
   background: linear-gradient(135deg, #4CAF50, #8BC34A); /* Green tones */
 }
 
-.card:nth-child(2) {
+.orderscard:nth-child(2) {
   background: linear-gradient(135deg, #2196F3, #64B5F6); /* Blue tones */
 }
 
-.card:nth-child(3) {
+.orderscard:nth-child(3) {
   background: linear-gradient(135deg, #FF5722, #FF8A65); /* Orange tones */
 }
 
 /* Optional hover effect */
-.card:hover {
+.orderscard:hover {
   transform: translateY(-5px); /* Slight lift on hover */
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Darker shadow */
 }

@@ -24,10 +24,11 @@ const Orders = () => {
       console.error("Error fetching orders:", error);
     }
   };
-
+  
+  // Fetch orders when the component mounts
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, []);  
 
   // Handle input change for order details
   const handleNewOrderChange = (e) => {
@@ -85,8 +86,9 @@ const Orders = () => {
         OrderID,
         SupplierID: parseInt(SupplierID, 10),
         DeliveryDate,
-        medicines,
-      });
+        TotalPrice: calculateTotal(), // Ensure TotalPrice is included
+        medicines, // Medicines array sent separately
+      });      
 
       fetchOrders();
       setIsAddModalOpen(false);
@@ -136,12 +138,12 @@ const Orders = () => {
 
   return (
     <div className={styles.Orders}>
-      <h1>Orders List</h1>
+      <h1 className={styles.ordersmainheading}>Orders List</h1>
 
-      <div className={styles.statsCards}>
-      <div className={styles.card}><AiOutlineShoppingCart size={30} /><h3>Total Orders</h3><p>{totalOrders}</p></div>
-        <div className={styles.card}><AiOutlineCheckCircle size={30} /><h3>Delivered Orders</h3><p>{deliveredOrders.length}</p></div>
-        <div className={styles.card}><AiOutlinePercentage size={30} /><h3>Delivery Percentage</h3><p>{deliveredPercentage}%</p></div>
+      <div className={styles.ordersstatsCards}>
+      <div className={styles.orderscard}><AiOutlineShoppingCart size={30} /><h3>Total Orders</h3><p>{totalOrders}</p></div>
+        <div className={styles.orderscard}><AiOutlineCheckCircle size={30} /><h3>Delivered Orders</h3><p>{deliveredOrders.length}</p></div>
+        <div className={styles.orderscard}><AiOutlinePercentage size={30} /><h3>Delivery Percentage</h3><p>{deliveredPercentage}%</p></div>
       </div>
 
       <div className={styles.buttons}>
@@ -150,9 +152,9 @@ const Orders = () => {
       </div>
 
       {isAddModalOpen && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <button className={styles.closeButton} onClick={() => setIsAddModalOpen(false)}>&times;</button>
+        <div className={styles.ordersmodal}>
+          <div className={styles.ordersmodalContent}>
+            <button className={styles.orderscloseButton} onClick={() => setIsAddModalOpen(false)}>&times;</button>
             <h3>Add New Order</h3>
 
             <label>Order ID:
@@ -169,7 +171,7 @@ const Orders = () => {
 
             <h3>Medicines</h3>
             {newOrder.medicines.map((medicine, index) => (
-           <div key={medicine.id} className={styles.medicineCard}>
+           <div key={medicine.id} className={styles.ordersmedicineCard}>
            <input
              type="text"
              placeholder="Medicine Name"
@@ -201,82 +203,109 @@ const Orders = () => {
         </div>
       )}
 
-      {isHistoryModalOpen && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <button className={styles.closeButton} onClick={() => setIsHistoryModalOpen(false)}>&times;</button>
-            <h1>Order History</h1>
-            {deliveredOrders.length > 0 ? (
-              <table className={styles.historyTable}>
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Medicine Name</th>
-                    <th>Quantity Ordered</th>
-                    <th>Supplier ID</th>
-                    <th>Price</th>
-                    <th>Delivery Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deliveredOrders.map((order) => (
-                    <tr key={order.OrderID}>
-                      <td>{order.OrderID}</td>
-                      <td>{order.MedicineName}</td>
-                      <td>{order.QuantityOrdered}</td>
-                      <td>{order.SupplierID}</td>
-                      <td>{order.Price}</td>
-                      <td>{formatDate(order.DeliveryDate)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No orders delivered till date.</p>
-            )}
-          </div>
-        </div>
+{isHistoryModalOpen && (
+  <div className={styles.ordersmodal}>
+    <div className={styles.ordersmodalContent}>
+      <button className={styles.orderscloseButton} onClick={() => setIsHistoryModalOpen(false)}>
+        &times;
+      </button>
+      <h1>Order History</h1>
+      {deliveredOrders.length > 0 ? (
+        <table className={styles.ordershistoryTable}>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Medicines</th>
+              <th>Supplier ID</th>
+              <th>Total Price</th>
+              <th>Delivery Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deliveredOrders.map((order) => (
+              <tr key={order.OrderID}>
+                <td>{order.OrderID}</td>
+                <td>
+                  {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
+                    order.Medicines.map((med, index) => (
+                      <div key={index}>
+                        {med.MedicineName} - {med.Quantity} units - ₹{med.Price}
+                      </div>
+                    ))
+                  ) : (
+                    <em>No medicines</em>
+                  )}
+                </td>
+                <td>{order.SupplierID}</td>
+                <td>₹{order.TotalPrice}</td>
+                <td>{order.DeliveryDate ? formatDate(order.DeliveryDate) : "N/A"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No orders delivered till date.</p>
       )}
+    </div>
+  </div>
+)}
+
 
 <table className={styles.ordersTable}>
   <thead>
     <tr>
       <th>Order ID</th>
-      <th>Medicine Name</th>
-      <th>Quantity</th>
+      <th>Medicines</th>
       <th>Supplier ID</th>
-      <th>Price</th>
+      <th>Total Price</th>
       <th>Delivery Date</th>
       <th>Delivered</th>
-      <th>Remove</th> {/* New Column */}
+      <th>Remove</th>
     </tr>
   </thead>
   <tbody>
-    {orders.map((order) => (
-      <tr key={order.OrderID}>
-        <td>{order.OrderID}</td>
-        <td>{order.MedicineName}</td>
-        <td>{order.QuantityOrdered}</td>
-        <td>{order.SupplierID}</td>
-        <td>{order.Price}</td>
-        <td>{formatDate(order.DeliveryDate)}</td>
-        <td>
-  <input
-    type="checkbox"
-    checked={order.Delivery_Status === true} // Ensure boolean comparison
-    onChange={(e) => handleCheckboxChange(order.OrderID, e.target.checked)}
-  />
-</td>
-        <td>
-          <button
-            className={styles.deleteButton}
-            onClick={() => deleteOrder(order.OrderID)}
-          >
-            ❌ Remove
-          </button>
+    {orders.length > 0 ? (
+      orders.map((order) => (
+        <tr key={order.OrderID}>
+          <td>{order.OrderID}</td>
+          <td>
+            {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
+              order.Medicines.map((med, index) => (
+                <div key={index}>
+                  {med.MedicineName} - {med.Quantity} units - ₹{med.Price}
+                </div>
+              ))
+            ) : (
+              <em>No medicines</em>
+            )}
+          </td>
+          <td>{order.SupplierID}</td>
+          <td>₹{order.TotalPrice}</td>
+          <td>{order.DeliveryDate ? formatDate(order.DeliveryDate) : "N/A"}</td>
+          <td>
+            <input
+              type="checkbox"
+              checked={Boolean(order.Delivery_Status)}
+              onChange={(e) => handleCheckboxChange(order.OrderID, e.target.checked)}
+            />
+          </td>
+          <td>
+            <button
+              className={styles.deleteButton}
+              onClick={() => deleteOrder(order.OrderID)}
+            >
+              ❌ Remove
+            </button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="7" style={{ textAlign: "center" }}>
+          No orders found
         </td>
       </tr>
-    ))}
+    )}
   </tbody>
 </table>
 

@@ -243,17 +243,44 @@ app.get('/api/reports/low-stock', (req, res) => {
 });
 
 // ORDERS ///////////////////////////////////////////////
+// ✅ Fetch all orders
 app.get('/api/orders', async (req, res) => {
   try {
-    const [rows] = await con.promise().execute('SELECT * FROM Orders'); // Use `.promise()`
-    
-    if (!Array.isArray(rows)) {
-      throw new Error("Database query did not return an array.");
-    }
+    const query = `
+      SELECT o.OrderID, o.SupplierID, o.TotalPrice, o.DeliveryDate, o.Delivery_Status, 
+             oi.MedicineName, oi.Quantity, oi.Price 
+      FROM Orders o 
+      LEFT JOIN OrderItems oi ON o.OrderID = oi.OrderID
+    `;
+    const [rows] = await con.promise().query(query);
 
-    res.json(rows);
+    // Group orders by OrderID
+    const orders = rows.reduce((acc, row) => {
+      let order = acc.find(o => o.OrderID === row.OrderID);
+      if (!order) {
+        order = {
+          OrderID: row.OrderID,
+          SupplierID: row.SupplierID,
+          TotalPrice: row.TotalPrice,
+          DeliveryDate: row.DeliveryDate,
+          Delivery_Status: row.Delivery_Status,
+          Medicines: []
+        };
+        acc.push(order);
+      }
+      if (row.MedicineName) {
+        order.Medicines.push({
+          MedicineName: row.MedicineName,
+          Quantity: row.Quantity,
+          Price: row.Price
+        });
+      }
+      return acc;
+    }, []);
+
+    res.json(orders);
   } catch (err) {
-    console.error('Error fetching orders:', err); // Log the full error
+    console.error('Error fetching orders:', err);
     res.status(500).json({ error: "Failed to fetch orders", details: err.message });
   }
 });
@@ -261,59 +288,68 @@ app.get('/api/orders', async (req, res) => {
 
 // ✅ Add a new order
 app.post('/api/orders', async (req, res) => {
-  try {
-    const { OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate } = req.body;
+  const connection = await con.promise();
+  const { OrderID, SupplierID, DeliveryDate, TotalPrice, medicines } = req.body;
 
-    // Ensure required fields are present
-    if (!OrderID || !MedicineName || !QuantityOrdered || !SupplierID || !Price || !DeliveryDate) {
-      return res.status(400).json({ error: "All fields are required" });
+  console.log("📥 Received Order Data:", req.body);
+
+  if (!OrderID || !SupplierID || !DeliveryDate || !TotalPrice || !medicines || medicines.length === 0) {
+    console.error("⚠️ Missing fields:", { OrderID, SupplierID, DeliveryDate, TotalPrice, medicines });
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    await connection.beginTransaction();
+
+    // Insert into Orders table
+    const orderQuery = `
+      INSERT INTO Orders (OrderID, SupplierID, TotalPrice, DeliveryDate, Delivery_Status)
+      VALUES (?, ?, ?, ?, ?)`;
+    
+    await connection.execute(orderQuery, [OrderID, SupplierID, TotalPrice, DeliveryDate, false]);
+
+    console.log(`✅ Order ${OrderID} inserted into Orders table`);
+
+    // Insert medicines into OrderItems table
+    const orderItemsQuery = `
+      INSERT INTO OrderItems (OrderID, MedicineName, Quantity, Price)
+      VALUES (?, ?, ?, ?)`;
+
+    for (const medicine of medicines) {
+      console.log(`📝 Inserting medicine:`, medicine);
+      await connection.execute(orderItemsQuery, [OrderID, medicine.name, medicine.quantity, medicine.price]);
     }
 
-    // Insert order into the database
-    const query = `
-      INSERT INTO Orders (OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, Delivery_Status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    await connection.commit();
+    console.log(`✅ Order ${OrderID} committed successfully`);
 
-    const values = [OrderID, MedicineName, QuantityOrdered, SupplierID, Price, DeliveryDate, false]; // Default false for Delivery_Status
-
-    await con.execute(query, values);
-    
     res.status(201).json({ message: "Order added successfully" });
+
   } catch (error) {
-    console.error('Error adding order:', error);
+    await connection.rollback();
+    console.error('❌ Error adding order:', error.message, error.stack);
     res.status(500).json({ error: "Failed to add order", details: error.message });
   }
 });
+
 
 // ✅ Delete an order
 app.delete('/api/orders/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
-
-    // Check if the order exists before attempting deletion
-    const [rows] = await con.promise().execute('SELECT * FROM Orders WHERE OrderID = ?', [orderId]);
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-
-    // Delete the order
     await con.promise().execute('DELETE FROM Orders WHERE OrderID = ?', [orderId]);
-
     res.json({ success: true, message: "Order deleted successfully" });
   } catch (error) {
-    console.error('Error deleting order:', error.message);
+    console.error('Error deleting order:', error);
     res.status(500).json({ error: "Failed to delete order", details: error.message });
   }
 });
-
 
 // ✅ Update delivery status
 app.put('/api/orders/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
     const { Delivery_Status } = req.body;
-
-    // Convert boolean to 0 or 1 for MySQL
     const statusValue = Delivery_Status ? 1 : 0;
 
     await con.promise().execute(
@@ -323,7 +359,7 @@ app.put('/api/orders/:orderId', async (req, res) => {
 
     res.json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
-    console.error('Error updating delivery status:', error.message);
+    console.error('Error updating delivery status:', error);
     res.status(500).json({ error: "Failed to update order status", details: error.message });
   }
 });
