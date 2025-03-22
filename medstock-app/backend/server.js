@@ -472,32 +472,81 @@ app.get('/api/reports/expired-items', async (req, res) => {
 });
 
 
-// Billing history
-// ✅ Route to save a bill
-app.post("/api/save-bill", (req, res) => {
-  const { billItems, totalAmount } = req.body;
-  const billItemsJSON = JSON.stringify(billItems);  // Convert array to JSON
-
-  const sql = "INSERT INTO bills (bill_items, total_amount) VALUES (?, ?)";
-  db.query(sql, [billItemsJSON, totalAmount], (err, result) => {
-    if (err) {
-      console.error("Error saving bill:", err);
-      return res.status(500).json({ message: "Database error" });
-    }
-    res.json({ message: "Bill saved successfully", billId: result.insertId });
-  });
+// Billing PAGE///////////////////////////////////////////////////////
+// ✅ Get Delivered Orders (Only orders that are delivered but not yet billed)
+app.get("/api/get-delivered-orders", async (req, res) => {
+  try {
+    const [deliveredOrders] = await con.promise().query(`
+      SELECT OrderID, TotalPrice, DeliveryDate
+      FROM Orders
+      WHERE Delivery_Status = TRUE
+      AND OrderID NOT IN (SELECT OrderID FROM Bills);
+    `);
+    res.json(deliveredOrders);
+  } catch (error) {
+    console.error("Error fetching delivered orders:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// ✅ Route to fetch previous bills
-app.get("/api/get-bills", (req, res) => {
-  db.query("SELECT * FROM bills ORDER BY date DESC", (err, results) => {
-    if (err) {
-      console.error("Error fetching bills:", err);
-      return res.status(500).json({ message: "Database error" });
-    }
-    res.json(results);
-  });
+// ✅ Get Previous Bills
+app.get("/api/get-bills", async (req, res) => {
+  try {
+    const [bills] = await con.promise().query(`
+      SELECT BillID, OrderID, BillingDate, CAST(TotalAmount AS DECIMAL(10,2)) AS TotalAmount
+      FROM Bills
+      ORDER BY BillingDate DESC;
+    `);
+    
+    res.json(bills);
+  } catch (error) {
+    console.error("Error fetching previous bills:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
+
+// ✅ Generate a Bill for a Delivered Order
+app.post("/api/generate-bill", async (req, res) => {
+  try {
+    const { orderID } = req.body;
+
+    // Check if order exists and is delivered
+    const [order] = await con.promise().query(
+      `SELECT TotalPrice FROM Orders WHERE OrderID = ? AND Delivery_Status = TRUE`,
+      [orderID]
+    );
+    if (order.length === 0) {
+      return res.status(404).json({ error: "Order not found or not delivered" });
+    }
+
+    // Generate unique Bill ID
+    const billID = `BILL${Date.now()}`;
+    await con.promise().query(
+      `INSERT INTO Bills (BillID, OrderID, TotalAmount) VALUES (?, ?, ?)`,
+      [billID, orderID, order[0].TotalPrice]
+    );
+
+    // Fetch order items
+    const [orderItems] = await con.promise().query(
+      `SELECT MedicineName, Quantity, Price FROM OrderItems WHERE OrderID = ?`,
+      [orderID]
+    );
+
+    // Insert order items into BillItems
+    for (const item of orderItems) {
+      await con.promise().query(
+        `INSERT INTO BillItems (BillID, MedicineName, Quantity, Price) VALUES (?, ?, ?, ?)`,
+        [billID, item.MedicineName, item.Quantity, item.Price]
+      );
+    }
+
+    res.json({ message: "Bill generated successfully", billID });
+  } catch (error) {
+    console.error("Error generating bill:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 const notifications = []; // Temporary storage
 
