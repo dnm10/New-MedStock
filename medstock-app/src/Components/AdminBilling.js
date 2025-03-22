@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import styles from "./Billing.module.css";
+import styles from "./AdminBilling.module.css";
 import "../App.css";
 
 const Billing = () => {

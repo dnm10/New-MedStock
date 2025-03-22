@@ -1,14 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const con = require('./connections'); // Import the MySQL connection
-
+const { authDB, adminDB, userDB, medstockDB } = require('./connections');  // Import the MySQL connection
 const app = express();
-const port = 5000;
-
+const bcrypt = require('bcrypt');
 const mysql = require("mysql2/promise");
+const validator = require('validator');
 
-
+const port = 5000;
 app.use(express.json());
 app.use(cors());
 
@@ -19,62 +18,112 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
-// Test MySQL connection
-con.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL: ' + err.stack);
-    return;
-  }
-  console.log('Connected to MySQL as id ' + con.threadId);
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
 
-
-const validator = require('validator');
-
 // User Signup
-app.post('/api/signup', (req, res) => {
+app.post('/api/signup', async (req, res) => {
   const { email, password, role } = req.body;
 
   if (!validator.isEmail(email)) {
-    return res.status(400).json({ message: 'Invalid email format' });
+      return res.status(400).json({ message: 'Invalid email format' });
   }
 
-  const checkEmailQuery = 'SELECT * FROM users WHERE email = ?';
-  con.query(checkEmailQuery, [email], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
+  // Check if email already exists with a different role
+  authDB.query('SELECT role FROM users WHERE email = ?', [email], async (err, results) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Database error', error: err });
+      }
 
-    if (results.length > 0) {
-      return res.status(400).json({ message: 'Email already exists' });
-    }
+      if (results.length > 0) {
+          if (results[0].role !== role) {
+              return res.status(400).json({ message: `This email is already registered as ${results[0].role}. Please use a different email.` });
+          } else {
+              return res.status(400).json({ message: 'Email already exists' });
+          }
+      }
 
-    const query = 'INSERT INTO users (email, password, role) VALUES (?, ?, ?)';
-    con.query(query, [email, password, role], (err, result) => {
-      if (err) return res.status(500).json({ message: 'Error signing up' });
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-      res.status(201).json({
-        message: 'Signup successful',
-        user: { id: result.insertId, email, role },
-      });
-    });
+      // Insert user into auth_db
+      authDB.query(
+          'INSERT INTO users (email, password, role) VALUES (?, ?, ?)',
+          [email, hashedPassword, role],
+          (err, result) => {
+              if (err) {
+                  console.error('Signup error:', err);
+                  return res.status(500).json({ message: 'Error signing up' });
+              }
+
+              // Insert into role-specific database
+              const targetDB = role === 'Admin' ? adminDB : userDB;
+              targetDB.query(
+                  'INSERT INTO users (id, email, password, created_at) VALUES (?, ?, ?, NOW())',
+                  [result.insertId, email, hashedPassword],
+                  (err) => {
+                      if (err) {
+                          console.error('Error syncing user data:', err);
+                          return res.status(500).json({ message: 'Error syncing user data' });
+                      }
+
+                      res.status(201).json({
+                          message: 'Signup successful',
+                          user: { id: result.insertId, email, role },
+                      });
+                  }
+              );
+          }
+      );
   });
 });
 
+
 // User Login
 app.post('/api/login', (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body; // Now role is required during login
 
-  const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
-  con.query(query, [email, password], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error' });
+  authDB.query('SELECT * FROM users WHERE email = ? AND role = ?', [email, role], async (err, results) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Database error', error: err });
+      }
 
-    if (results.length === 0) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+      if (results.length === 0) {
+          return res.status(401).json({ message: 'Invalid email, password, or role' });
+      }
 
-    const user = results[0];
+      const user = results[0];
+
+      // Compare hashed password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+          return res.status(401).json({ message: 'Invalid email, password, or role' });
+      }
+
+      res.status(200).json({
+          message: 'Login successful',
+          user: { id: user.id, email: user.email, role: user.role },
+          redirectTo: user.role === 'Admin' ? '/admin/dashboard' : '/user/home',
+      });
+  });
+});
+
+
+// Protected Route Example
+app.get('/api/dashboard', (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) return res.status(401).json({ message: 'Access Denied' });
+
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) return res.status(403).json({ message: 'Invalid token' });
+
     res.status(200).json({
-      message: 'Login successful',
-      user: { id: user.id, email: user.email, role: user.role },
+      message: `Welcome ${decoded.role}`,
+      dashboard: decoded.role === 'Admin' ? 'Admin Dashboard' : 'User Dashboard',
     });
   });
 });
@@ -114,7 +163,7 @@ app.post("/api/reset-password", (req, res) => {
 
 // GET inventory items
 app.get('/api/inventory', (req, res) => {  
-  con.query('SELECT * FROM inventory', (err, results) => {
+  medstockDB.query('SELECT * FROM inventory', (err, results) => {
     if (err) {
       return res.status(500).send('Error fetching inventory');
     }
@@ -127,7 +176,7 @@ app.post('/api/inventory', (req, res) => {
   const { name, category, quantity, expiryDate, supplier, threshold } = req.body;
   const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold) VALUES (?, ?, ?, ?, ?, ?)';
 
-  con.query(query, [name, category, quantity, expiryDate, supplier, threshold], (err, result) => {    if (err) {
+  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold], (err, result) => {    if (err) {
       return res.status(500).send('Error adding new item');
     }
     res.status(201).json({
@@ -148,7 +197,7 @@ app.put('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventor
 
   const query = 'UPDATE inventory SET name = ?, category = ?, quantity = ?, expiryDate = ?, supplier = ?, threshold = ? WHERE id = ?';
 
-  con.query(query, [name, category, quantity, expiryDate, supplier, threshold, req.params.id], (err, result) => {
+  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold, req.params.id], (err, result) => {
     if (err) {
       return res.status(500).send('Error updating item');
     }
@@ -165,18 +214,12 @@ app.delete('/api/inventory/:id', (req, res) => {
   const query = 'DELETE FROM inventory WHERE id = ?';
 
 
-  con.query(query, [id], (err) => {
+  medstockDB.query(query, [id], (err) => {
     if (err) {
       return res.status(500).json({ message: 'Error deleting order' });
     }
     res.json({ message: `Order with ID ${id} deleted successfully` });
   });
-});
-
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
 });
 
 
@@ -190,7 +233,7 @@ app.get('/api/reports/stock', (req, res) => {
       (SELECT COUNT(*) FROM inventory WHERE expiryDate < NOW()) AS expiredItems
   `;
 
-  con.query(stockQuery, (err, results) => {
+  medstockDB.query(stockQuery, (err, results) => {
     if (err) {
       console.error('Error fetching stock data:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -222,7 +265,7 @@ app.get('/api/reports/sales', (req, res) => {
     return res.status(400).json({ error: 'Invalid range' });
   }
 
-  con.query(salesQuery, (err, results) => {
+  medstockDB.query(salesQuery, (err, results) => {
     if (err) {
       console.error('Error fetching sales data:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -233,7 +276,7 @@ app.get('/api/reports/sales', (req, res) => {
 
 // Fetch low stock items
 app.get('/api/reports/low-stock', (req, res) => {
-  con.query('SELECT name, quantity, threshold FROM inventory WHERE quantity < threshold', (err, results) => {
+  medstockDB.query('SELECT name, quantity, threshold FROM inventory WHERE quantity < threshold', (err, results) => {
     if (err) {
       console.error('Error fetching low stock items:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -367,7 +410,7 @@ app.put('/api/orders/:orderId', async (req, res) => {
 // --- SUPPLIERS ROUTES ---
 // Get all suppliers
 app.get("/api/suppliers", (req, res) => {
-  con.query("SELECT * FROM Suppliers", (err, result) => {
+  medstockDB.query("SELECT * FROM Suppliers", (err, result) => {
     if (err) {
       console.error("Error fetching suppliers:", err);
       res.status(500).send("Error fetching suppliers");
@@ -381,7 +424,7 @@ app.get("/api/suppliers", (req, res) => {
 app.post("/api/suppliers", (req, res) => {
   const { SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address } = req.body;
   const query = `INSERT INTO Suppliers (SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, LastDeliveryDate) VALUES (?, ?, ?, ?, ?, ?, CURDATE())`;
-  con.query(query, [SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address], (err, result) => {
+  medstockDB.query(query, [SupplierID, SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address], (err, result) => {
     if (err) {
       console.error("Error adding supplier:", err);
       res.status(500).send("Error adding supplier");
@@ -397,7 +440,7 @@ app.put("/api/suppliers/:id", (req, res) => {
   const supplierId = req.params.id;
   const { SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address } = req.body;
   const query = `UPDATE Suppliers SET SupplierName=?, ContactPerson=?, PhoneNumber=?, EmailAddress=?, Address=? WHERE SupplierID=?`;
-  con.query(query, [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, supplierId], (err, result) => {
+  medstockDB.query(query, [SupplierName, ContactPerson, PhoneNumber, EmailAddress, Address, supplierId], (err, result) => {
     if (err) {
       console.error("Error updating supplier:", err);
       res.status(500).send("Error updating supplier");
@@ -410,7 +453,7 @@ app.put("/api/suppliers/:id", (req, res) => {
 // Delete supplier
 app.delete("/api/suppliers/:id", (req, res) => {
   const supplierId = req.params.id;
-  con.query("DELETE FROM Suppliers WHERE SupplierID=?", [supplierId], (err, result) => {
+  medstockDB.query("DELETE FROM Suppliers WHERE SupplierID=?", [supplierId], (err, result) => {
     if (err) {
       console.error("Error deleting supplier:", err);
       res.status(500).send("Error deleting supplier");
@@ -425,7 +468,7 @@ app.post("/api/update-inventory", (req, res) => {
   const { name, quantity } = req.body;
 
   // Check current stock
-  con.query("SELECT quantity FROM inventory WHERE name = ?", [name], (err, results) => {
+  medstockDB.query("SELECT quantity FROM inventory WHERE name = ?", [name], (err, results) => {
     if (err) {
       console.error("Database error:", err);
       return res.status(500).json({ message: "Internal server error." });
@@ -442,7 +485,7 @@ app.post("/api/update-inventory", (req, res) => {
     }
 
     // Update stock
-    con.query(
+    medstockDB.query(
       "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
       [quantity, name],
       (updateErr) => {

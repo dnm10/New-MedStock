@@ -5,7 +5,8 @@ import FormPopup from './Components/FormPopup';
 import Sidebar from './Components/Sidebar';
 import Home from './Components/Home/Home';
 import Inventory from './Components/Inventory';
-import Billing from './Components/Billing';
+import AdminBilling from './Components/AdminBilling';
+import UserBilling from './Components/UserBilling';
 import Orders from './Components/Orders';
 import Supplier from './Components/Supplier';
 import Reports from './Components/Reports';
@@ -17,8 +18,7 @@ import Settings from './Components/Settings';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { RoleProvider, useRole } from './Components/RoleContext';
- import ForgotResetPassword from "./Components/ForgotResetPassword";
-
+import ForgotResetPassword from "./Components/ForgotResetPassword";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -83,14 +83,25 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
+              {/* Billing Route Based on Role */}
               <Route
-                path="/Billing"
+                path="/Billing/Admin"
                 element={
                   <ProtectedRoute>
-                    <Billing />
+                    <AdminBilling />
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/Billing/User"
+                element={
+                  <ProtectedRoute>
+                    <UserBilling />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/Orders"
                 element={
@@ -131,9 +142,9 @@ function App() {
                     <Settings />
                   </ProtectedRoute>
                 }
-              /> 
+              />
 
-                <Route
+              <Route
                 path="/Profile"
                 element={
                   <ProtectedRoute>
@@ -141,11 +152,10 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-             <Route path="/login" element={<AuthForm />} />
-        <Route path="/forgot-password" element={<ForgotResetPassword />} />
-        <Route path="/reset-password/:token" element={<ForgotResetPassword />} />
-         
-            </Routes> 
+              <Route path="/login" element={<AuthForm />} />
+              <Route path="/forgot-password" element={<ForgotResetPassword />} />
+              <Route path="/reset-password/:token" element={<ForgotResetPassword />} />
+            </Routes>
           </Layout>
         </Router>
       </RoleProvider>

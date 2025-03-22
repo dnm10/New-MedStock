@@ -15,7 +15,7 @@ function Sidebar() {
     if (storedRole) {
       setUserRole(storedRole);
     }
-  }, [role]);
+  }, []);
 
   const handleMouseEnter = () => {
     setIsExpanded(true);
@@ -72,12 +72,12 @@ function Sidebar() {
                 <span className="material-symbols-outlined">bar_chart</span>Reports
               </Link>
             </li>
-            
+
             <li>
-          <Link to="/Notifications">
-            <span className="material-symbols-outlined">notifications</span>Notifications
-          </Link>
-        </li>
+              <Link to="/Notifications">
+                <span className="material-symbols-outlined">notifications</span>Notifications
+              </Link>
+            </li>
 
             <li>
               <Link to="/Users">
@@ -87,13 +87,12 @@ function Sidebar() {
           </>
         )}
 
-        {/* Common Links for Both Admin & User */}
+        {/* Billing Link with Role-Based Routing */}
         <li>
-          <Link to="/Billing">
+          <Link to={userRole === 'Admin' ? "/Billing/Admin" : "/Billing/User"}>
             <span className="material-symbols-outlined">receipt_long</span>Billing
           </Link>
         </li>
-
 
         <li>
           <Link to="/Profile">
