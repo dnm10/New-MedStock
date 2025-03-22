@@ -1,49 +1,32 @@
+/* General Styles */
 .notification-page {
-  font-family: Arial, sans-serif;
-  padding: 40px;
-  background-color: #f4f4f9; /* Light background for a modern look */
+  background: white;
+  color: black;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Header Styling */
-header h1 {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  
-  margin-bottom: 30px;
-  margin-top: 20px;
-  margin-left: 1px;
-}
-
-/* Notifications Header */
-.notifications-header {
+  padding: 20px;
   text-align: center;
-  margin-bottom: 40px;
 }
 
-.notifications-header button {
-  padding: 12px 25px;
-  font-size: 16px;
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #0056b3;
+}
+
+/* Marquee Styles */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  background-color: #92abff;
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  color: black;
   font-weight: bold;
-  background-color: #6c63ff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.notifications-header button:hover {
-  background-color: #5a54d3;
-  transform: scale(1.05);
-}
-
-/* Cards Layout */
+/* Cards Layout - Replaced with flex-based layout */
 .cards-container {
   display: flex;
   justify-content: center;
@@ -51,126 +34,62 @@ header h1 {
   flex-wrap: wrap;
   width: 100%;
   max-width: 1200px;
+  padding: 10px;
+  margin-left: 130px;
 }
 
 .card {
+  background: white; /* White background */
+  color: black;
+  padding: 20px;
   width: 30%;
   min-width: 250px;
-  padding: 25px;
-  text-align: center;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  position: relative;
+  border: none;
 }
 
 .card:hover {
-  transform: translateY(-12px);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6); /* Darker shadow on hover */
 }
 
-/* Card Colors */
-.card.low-stock {
-  background-color: #ffe6e6;
-  color: #ff8181;
+.icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 10px;
 }
 
-.card.arriving-stock {
-  background-color: #e6ffe6;
-  color: #5cb85c;
-}
-
-.card.out-of-stock {
-  background-color: #fff9e6;
-  color: #f0ad4e;
-}
-
-/* Card Icons */
-.card .icon {
-  font-size: 45px;
-  margin-bottom: 15px;
-}
-
-/* Gauge Styling */
-.gauge-container {
-  text-align: center;
-  margin-top: 50px;
-}
-
-.gauge {
-  position: relative;
-  width: 160px;
-  height: 80px;
-  margin: 0 auto;
-  background-color: #6c63ff;
-  border-top-left-radius: 160px;
-  border-top-right-radius: 160px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 40px;
-}
-
-.gauge .semi-circle {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: #5a54d3;
-  clip-path: polygon(0 100%, 50% 0, 100% 100%);
-}
-
-.gauge .percentage {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 20px;
+/* Ensure uniform styling for all cards */
+.out-of-stock, .low-stock, .expired-stock, .arriving-stock, .stock-level {
+  background: #d0e8ff; /* Softer light blue shade */
+  color: #004080;
   font-weight: bold;
-  color: white;
 }
 
-/* Calendar Card */
-.calendar-card {
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  background: white;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  padding: 20px;
-  width: 280px;
-  z-index: 10;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+/* Remove unwanted lines inside cards */
+.card h3 {
+  border-bottom: none;
+  margin-bottom: 10px;
+  padding-bottom: 0;
 }
 
-.calendar-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+/* Gauge Chart Styling */
+.stock-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.calendar-card h3 {
-  margin: 0 0 15px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
+.gauge-chart {
+  width: 100px;
+  height: 100px;
+  margin-top: 10px;
 }
-
-.calendar-card .react-calendar {
-  border: none;
-  font-size: 16px;
-}
-
-.marquee-container {
-  width: 100%;
-  overflow: hidden;
-  background-color: #f8d7da;
-  padding: 10px;
-  text-align: center;
-  border-radius: 5px;
-  margin-bottom: 15px;
-}
-
-.stock-marquee {
-  font-weight: bold;
-  color: #721c24;
-}
-
-

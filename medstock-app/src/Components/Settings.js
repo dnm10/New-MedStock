@@ -1,112 +1,130 @@
 import React, { useState, useEffect } from "react";
-import styles from "./Settings.modules.css";
-
+import "./Settings.modules.css";
 
 const Settings = () => {
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
-
-  const [textSize, setTextSize] = useState("medium");
+  // State variables
+  const [darkMode, setDarkMode] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [textSize, setTextSize] = useState("Medium");
+  const [language, setLanguage] = useState("English");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [username, setUsername] = useState("JohnDoe");
   const [email, setEmail] = useState("johndoe@example.com");
   const [password, setPassword] = useState("");
-  const [language, setLanguage] = useState("English");
-  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
-  const [saved, setSaved] = useState(false);
 
+  // Load saved settings from localStorage
   useEffect(() => {
-    document.body.classList.toggle("dark-mode", darkMode);
-    localStorage.setItem("darkMode", darkMode);
-  }, [darkMode]);
+    const savedSettings = JSON.parse(localStorage.getItem("userSettings"));
+    if (savedSettings) {
+      setDarkMode(savedSettings.darkMode);
+      setHighContrast(savedSettings.highContrast);
+      setTextSize(savedSettings.textSize);
+      setLanguage(savedSettings.language);
+      setEmailNotifications(savedSettings.emailNotifications);
+      setSmsNotifications(savedSettings.smsNotifications);
+      setPushNotifications(savedSettings.pushNotifications);
+      setUsername(savedSettings.username);
+      setEmail(savedSettings.email);
+      setPassword(savedSettings.password);
+    }
+  }, []);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  // Save settings to localStorage
+  const handleSaveSettings = () => {
+    const settings = {
+      darkMode,
+      highContrast,
+      textSize,
+      language,
+      emailNotifications,
+      smsNotifications,
+      pushNotifications,
+      username,
+      email,
+      password,
+    };
+    localStorage.setItem("userSettings", JSON.stringify(settings));
+    alert("Settings saved successfully!");
   };
 
   return (
-    <div className={styles.settingsContainer}>
-      <h2>Settings</h2>
-      <div className={styles.settingGroup}>
-        <h3>Display Settings</h3>
-        <div className={styles.settingOption}>
-          <label>Dark Mode</label>
+    <div className={`settings-page ${darkMode ? "dark-mode" : ""} ${highContrast ? "high-contrast" : ""}`}>
+      <h1>Settings</h1>
+
+      {/* Display Settings */}
+      <div className="section">
+        <h2>Display Settings</h2>
+        <label>
           <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
-        </div>
-        <div className={styles.settingOption}>
-          <label>Text Size</label>
+          Dark Mode
+        </label>
+        <label>
+          Text Size:
           <select value={textSize} onChange={(e) => setTextSize(e.target.value)}>
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
+            <option>Small</option>
+            <option>Medium</option>
+            <option>Large</option>
           </select>
-        </div>
-        <div className={styles.settingOption}>
-          <label>High Contrast Mode</label>
+        </label>
+        <label>
           <input type="checkbox" checked={highContrast} onChange={() => setHighContrast(!highContrast)} />
-        </div>
+          High Contrast Mode
+        </label>
       </div>
-      
-      <div className={styles.settingGroup}>
-        <h3>Notifications</h3>
-        <div className={styles.settingOption}>
-          <label>Email Notifications</label>
+
+      {/* Notifications */}
+      <div className="section">
+        <h2>Notifications</h2>
+        <label>
           <input type="checkbox" checked={emailNotifications} onChange={() => setEmailNotifications(!emailNotifications)} />
-        </div>
-        <div className={styles.settingOption}>
-          <label>SMS Notifications</label>
+          Email Notifications
+        </label>
+        <label>
           <input type="checkbox" checked={smsNotifications} onChange={() => setSmsNotifications(!smsNotifications)} />
-        </div>
-        <div className={styles.settingOption}>
-          <label>Push Notifications</label>
+          SMS Notifications
+        </label>
+        <label>
           <input type="checkbox" checked={pushNotifications} onChange={() => setPushNotifications(!pushNotifications)} />
-        </div>
+          Push Notifications
+        </label>
       </div>
-      
-      <div className={styles.settingGroup}>
-        <h3>Account</h3>
-        <div className={styles.settingOption}>
-          <label>Username</label>
+
+      {/* Account */}
+      <div className="section">
+        <h2>Account</h2>
+        <label>
+          Username:
           <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-        </div>
-        <div className={styles.settingOption}>
-          <label>Email</label>
+        </label>
+        <label>
+          Email:
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        <div className={styles.settingOption}>
-          <label>Password</label>
+        </label>
+        <label>
+          Password:
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
+        </label>
       </div>
-      
-      <div className={styles.settingGroup}>
-        <h3>Language</h3>
-        <div className={styles.settingOption}>
-          <label>Select Language</label>
+
+      {/* Language Selection */}
+      <div className="section">
+        <h2>Language</h2>
+        <label>
+          Select Language:
           <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="English">English</option>
-            <option value="Hindi">Hindi</option>
-            <option value="Spanish">Spanish</option>
-            <option value="French">French</option>
+            <option>English</option>
+            <option>Spanish</option>
+            <option>French</option>
+            <option>German</option>
+            <option>Hindi</option>
           </select>
-        </div>
+        </label>
       </div>
-      
-      <div className={styles.settingGroup}>
-        <h3>Security</h3>
-        <div className={styles.settingOption}>
-          <label>Two-Factor Authentication</label>
-          <input type="checkbox" checked={twoFactorAuth} onChange={() => setTwoFactorAuth(!twoFactorAuth)} />
-        </div>
-      </div>
-      
-      <button className={styles.saveBtn} onClick={handleSave}>Save Settings</button>
-      {saved && <p className={styles.savedMessage}> Settings Saved!</p>}
+
+      {/* Save Button */}
+      <button className="save-button" onClick={handleSaveSettings}>Save Settings</button>
     </div>
   );
 };

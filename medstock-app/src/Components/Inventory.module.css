@@ -436,31 +436,32 @@ button {
   .colorLegend {
     display: flex;
     gap: 20px;
-    margin-left: 580px;
-    margin-bottom: 10px;
+    justify-content: center;
     margin-top: 20px;
   }
   
   .colorLegend p {
     display: flex;
     align-items: center;
-    font-size: 17px;
-  }
-  
-  .colorLegend span {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    margin-right: 5px;
-    border-radius: 3px;
+    gap: 8px;
   }
   
   .expiredLegend {
-    background-color: #cce5ff; /* Light Blue */
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #ffcccc; /* Reddish for expired */
+    border: 1px solid #999;
+    border-radius: 4px;
   }
   
   .lowStockLegend {
-    background-color: #ffcccc; /* Light Red */
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #cce5ff; /* Light blue for low stock */
+    border: 1px solid #999;
+    border-radius: 4px;
   }
   
   

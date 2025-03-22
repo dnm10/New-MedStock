@@ -1,92 +1,79 @@
-:root {
-    --bg-color: #f4f4f4;
-    --text-color: #333;
-    --container-bg: white;
-    --border-color: #ddd;
-    --input-bg: white;
-    --input-border: #ccc;
-    --button-bg: #007bff;
-    --button-hover: #0056b3;
-  }
-  
-  .dark-mode {
-    --bg-color: #121212;
-    --text-color: white;
-    --container-bg: #222;
-    --border-color: #555;
-    --input-bg: #333;
-    --input-border: #555;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-  
-  .settingsContainer {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: var(--container-bg);
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: background 0.3s, color 0.3s;
-  }
-  
-  h2, h3 {
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-  }
-  
-  .settingGroup {
-    margin-bottom: 20px;
-  }
-  
-  .settingOption {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
-  }
-  
-  label {
-    font-size: 1rem;
-  }
-  
-  input, select {
-    padding: 8px;
-    font-size: 1rem;
-    border: 1px solid var(--input-border);
-    border-radius: 5px;
-    background: var(--input-bg);
-    color: var(--text-color);
-    transition: background 0.3s, color 0.3s;
-  }
-  
-  .saveBtn {
-    background-color: var(--button-bg);
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 20px;
-    font-size: 1rem;
-    transition: background 0.3s;
-  }
-  
-  .saveBtn:hover {
-    background-color: var(--button-hover);
-  }
-  
-  .savedMessage {
-    color: green;
-    margin-top: 15px;
-    font-size: 1rem;
-    font-weight: bold;
-  }
-  
+/* General Styles */
+.settings-page {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: white;
+  color: black;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Sections */
+.section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+/* Inputs */
+input[type="text"], input[type="email"], input[type="password"], select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Save Button */
+.save-button {
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.save-button:hover {
+  background: #0056b3;
+}
+
+/* Dark Mode & High Contrast Mode */
+.dark-mode, .high-contrast {
+  color: white;
+}
+
+.dark-mode {
+  background: #121212;
+}
+
+.high-contrast {
+  background: black;
+  color: yellow;
+}
+
+.dark-mode input, .high-contrast input {
+  background: #333;
+  color: white;
+  border: 1px solid #888;
+}
+
+.dark-mode .save-button {
+  background: #0d6efd;
+}
+
+.high-contrast .save-button {
+  background: yellow;
+  color: black;
+}

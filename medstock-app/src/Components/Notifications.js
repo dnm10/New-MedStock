@@ -13,7 +13,7 @@ const Notifications = () => {
     const fetchNotifications = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/notifications");
-        console.log("Received Notifications Data:", response.data); // Debugging
+        console.log("Received Notifications Data:", response.data);
         setNotifications(response.data);
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -29,7 +29,6 @@ const Notifications = () => {
         <h1>Notifications</h1>
       </header>
 
-      {/* Marquee for stock levels */}
       <div className="marquee-container">
         <marquee className="stock-marquee" behavior="scroll" direction="left">
           📢 Current Stock Level: {notifications.summary.stockPercentage}% | 
@@ -39,14 +38,12 @@ const Notifications = () => {
       </div>
 
       <div className="cards-container">
-        {/* Out of Stock */}
         <div className="card out-of-stock">
           <span className="icon">❌</span>
           <h3>Out of Stock</h3>
           <p>{notifications.summary.outOfStock} Products</p>
         </div>
 
-        {/* Low Stock */}
         <div className="card low-stock">
           <span className="icon">⚠</span>
           <h3>Low Stock</h3>
@@ -60,7 +57,6 @@ const Notifications = () => {
           )}
         </div>
 
-        {/* Expired Items */}
         <div className="card expired-stock">
           <span className="icon">🛑</span>
           <h3>Expired Items</h3>
@@ -74,7 +70,6 @@ const Notifications = () => {
           )}
         </div>
 
-        {/* Arriving Stock */}
         <div className="card arriving-stock">
           <span className="icon">🟢</span>
           <h3>Arriving Stock</h3>

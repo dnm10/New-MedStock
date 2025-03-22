@@ -368,17 +368,18 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
   </thead>
   <tbody>
   {filteredInventory.map((item, index) => (
-    <tr
-      key={item.id}
-      onClick={() => setSelectedItem(item.id)}
-      style={{
-        backgroundColor:
-          item.id === selectedItem ? "#cce5ff" :
-          new Date(item.expiryDate) < new Date() ? "#cce5ff" : // Light Blue for expired
-          item.quantity < item.threshold ? "#ffcccc" : "transparent",
-        cursor: "pointer",
-      }}
-    >
+<tr
+  key={item.id}
+  onClick={() => setSelectedItem(item.id)}
+  style={{
+    backgroundColor:
+      item.id === selectedItem ? "#cce5ff" :
+      new Date(item.expiryDate) < new Date() ? "#ffcccc" : // Reddish for expired
+      item.quantity < item.threshold ? "#cce5ff" : "transparent", // Light blue for low stock
+    cursor: "pointer",
+  }}
+>
+
       <td>{index + 1}</td>
       <td>{item.name}</td>
       <td>{item.category}</td>
