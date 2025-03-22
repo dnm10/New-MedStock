@@ -109,6 +109,7 @@
   display: flex;
   gap: 120px;
   margin: 15px 0;
+  margin-left: 25px;
 }
 
 .loginType label {

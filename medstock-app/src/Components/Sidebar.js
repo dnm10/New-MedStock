@@ -72,6 +72,12 @@ function Sidebar() {
                 <span className="material-symbols-outlined">bar_chart</span>Reports
               </Link>
             </li>
+            
+            <li>
+          <Link to="/Notifications">
+            <span className="material-symbols-outlined">notifications</span>Notifications
+          </Link>
+        </li>
 
             <li>
               <Link to="/Users">
@@ -88,11 +94,6 @@ function Sidebar() {
           </Link>
         </li>
 
-        <li>
-          <Link to="/Notifications">
-            <span className="material-symbols-outlined">notifications</span>Notifications
-          </Link>
-        </li>
 
         <li>
           <Link to="/Profile">
