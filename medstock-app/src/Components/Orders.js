@@ -117,11 +117,18 @@ const Orders = () => {
   // Update delivery status
   const handleCheckboxChange = async (orderId, delivered) => {
     try {
-      await axios.put(`http://localhost:5000/api/orders/${orderId}`, { Delivery_Status: delivered ? 1 : 0 });
-
+      const deliveryDate = delivered ? new Date().toISOString().split('T')[0] : null;
+  
+      await axios.put(`http://localhost:5000/api/orders/${orderId}`, { 
+        Delivery_Status: delivered ? 1 : 0,
+        DeliveryDate: deliveryDate
+      });
+  
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.OrderID === orderId ? { ...order, Delivery_Status: delivered } : order
+          order.OrderID === orderId 
+            ? { ...order, Delivery_Status: delivered, DeliveryDate: deliveryDate } 
+            : order
         )
       );
     } catch (error) {
@@ -129,6 +136,7 @@ const Orders = () => {
       alert("Failed to update order status.");
     }
   };
+  
 
   const formatDate = (dateString) => dateString ? dateString.split("T")[0] : "";
 

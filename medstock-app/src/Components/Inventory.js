@@ -79,12 +79,10 @@ export default function Inventory() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Regex patterns
-    const alphaNumericRegex = /^[A-Za-z0-9- ]+$/; // Alphabets, numbers, hyphens, spaces
-    const onlyLettersRegex = /^[A-Za-z ]+$/; // Only alphabets and spaces
-    const allNumbersRegex = /^\d+$/; // Only numbers
+    const alphaNumericRegex = /^[A-Za-z0-9- ]+$/;
+    const onlyLettersRegex = /^[A-Za-z ]+$/;
+    const allNumbersRegex = /^\d+$/;
 
-    // Validate expiry date
     if (name === "expiryDate") {
         const selectedDate = new Date(value);
         const minExpiryDate = new Date();
@@ -94,33 +92,23 @@ export default function Inventory() {
             alert("Expiry date must be at least 1 year from today.");
             return;
         }
-    }  
-
-    // Validate supplier (only alphabets and spaces)
-    if (name === "supplier") {
-        if (!onlyLettersRegex.test(value)) {
-            alert("Supplier name should contain only alphabets and spaces.");
-            return;
-        }
     }
 
-    // Validate category (only alphabets and spaces)
-    if (name === "category") {
-        if (!onlyLettersRegex.test(value)) {
-            alert("Category must contain only alphabets and spaces.");
-            return;
-        }
+    if (name === "supplier" && !onlyLettersRegex.test(value)) {
+        alert("Supplier name should contain only alphabets and spaces.");
+        return;
     }
 
-    // Validate name (at least one letter, not all numbers)
-    if (name === "name") {
-        if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
-            alert("Name should contain letters and not be all numbers.");
-            return;
-        }
+    if (name === "category" && !onlyLettersRegex.test(value)) {
+        alert("Category must contain only alphabets and spaces.");
+        return;
     }
 
-    // Validate threshold (positive number)
+    if (name === "name" && (!alphaNumericRegex.test(value) || allNumbersRegex.test(value))) {
+        alert("Name should contain letters and not be all numbers.");
+        return;
+    }
+
     if (name === "threshold") {
         const thresholdValue = parseInt(value, 10);
         if (isNaN(thresholdValue) || thresholdValue < 0) {
@@ -129,16 +117,14 @@ export default function Inventory() {
         }
     }
 
-    // Validate quantity (positive number > 0)
+    // Quantity input filtering (optional)
     if (name === "quantity") {
-        const quantityValue = parseInt(value, 10);
-        if (isNaN(quantityValue) || quantityValue <= 0) {
-            alert("Quantity must be greater than 0.");
+        // Allow only digits or empty string (so they can delete)
+        if (value !== "" && !/^\d*$/.test(value)) {
             return;
         }
     }
 
-    // Update state
     setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
 };
 
