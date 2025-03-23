@@ -1,149 +1,149 @@
 .Billinguser {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Header */
+.Billinguser h1 {
+  text-align: center;
+  padding: 15px;
+  background-color: #3056ff;
+  color: #fff;
+  font-size: 28px;
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+/* Main container */
+.billingMainuser {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Form styles */
+.Billingformuser {
+  width: 100%;
+}
+
+.Billingformuser form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.Billingformuser label {
+  font-weight: 600;
+  color: #0056b3;
+}
+
+.Billinguserinput[type="text"], 
+.Billinguser input[type="number"] {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.Billinguser input:focus {
+  border-color: #0056b3;
+  outline: none;
+}
+
+/* Button */
+.Billinguser button {
+  padding: 12px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  width: 100%;
+}
+
+.Billinguser button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+/* Table styles */
+.billingSummaryuser {
+  margin-top: 30px;
+  width: 100%;
+}
+
+.billingTableuser {
+  width: 100%;
+  margin-left: 0px;
+  border-collapse: collapse;
+}
+
+.billingSummaryuser th, 
+.billingSummaryuser td {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+.billingSummaryuser th {
+  background-color: #007bff;
+  color: white;
+}
+
+.billingSummaryuser tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.billingSummaryuser tr td {
+  font-size: 0.95rem;
+}
+
+/* Footer */
+.billingFooteruser {
+  text-align: center;
+  padding: 10px 0;
+  margin-top: 20px;
+  background-color: #333;
+  color: #fff;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .Billinguser h1 {
+    font-size: 1.8rem;
+  }
+
+  .billingMainuser {
     padding: 20px;
   }
-  
-  /* Header */
-  .Billinguser h1 {
-    text-align: center;
-    padding: 15px;
-    background-color: #3056ff;
-    color: #fff;
-    font-size: 28px;
-    font-weight: bold;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 20px;
+
+  .billingSummaryuser table {
+    font-size: 0.9rem;
   }
-  
-  /* Main container */
-  .billingMainuser {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 600px;
-  }
-  
-  /* Form styles */
-  .billinguserform {
-    width: 100%;
-  }
-  
-  .billinguserform form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .billinguserform label {
-    font-weight: 600;
-    color: #0056b3;
-  }
-  
-  .Billinguser input[type="text"], 
-  .Billinguser input[type="number"] {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    width: 100%;
-  }
-  
-  .Billinguser input:focus {
-    border-color: #0056b3;
-    outline: none;
-  }
-  
-  /* Button */
+
   .Billinguser button {
     padding: 12px;
-    background-color: #007bff;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    width: 100%;
   }
-  
-  .Billinguser button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-  }
-  
-  /* Table styles */
-  .billinguserSummary {
-    margin-top: 30px;
-    width: 100%;
-  }
-  
-  .billinguserTable {
-    width: 100%;
-    margin-left: 0px;
-    border-collapse: collapse;
-  }
-  
-  .billinguserSummary th, 
-  .billinguserSummary td {
-    padding: 12px;
-    border: 1px solid #ccc;
-    text-align: center;
-  }
-  
-  .billinguserSummary th {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .billinguserSummary tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-  
-  .billinguserSummary tr td {
-    font-size: 0.95rem;
-  }
-  
-  /* Footer */
-  .billinguserFooter {
-    text-align: center;
-    padding: 10px 0;
-    margin-top: 20px;
-    background-color: #333;
-    color: #fff;
-    font-size: 0.9rem;
-    border-radius: 5px;
-    width: 100%;
-    max-width: 600px;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .Billinguser h1 {
-      font-size: 1.8rem;
-    }
-  
-    .billingMainuser {
-      padding: 20px;
-    }
-  
-    .billinguserSummary table {
-      font-size: 0.9rem;
-    }
-  
-    .Billinguser button {
-      padding: 12px;
-    }
-  }
+}

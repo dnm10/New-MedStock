@@ -223,28 +223,40 @@ app.delete('/api/inventory/:id', (req, res) => {
 });
 
 // BILLING PAGE (user role)///////////////////////
-app.post("/api/update-inventory", async (req, res) => {
+// for billing
+app.post("/api/update-inventory", (req, res) => {
   const { name, quantity } = req.body;
 
-  try {
-    const medicine = await Inventory.findOne({ name });
-
-    if (!medicine) {
-      return res.status(404).json({ message: "Medicine not found in inventory" });
+  // Check current stock
+  medstockDB.query("SELECT quantity FROM inventory WHERE name = ?", [name], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Internal server error." });
     }
 
-    if (medicine.quantity < quantity) {
-      return res.status(400).json({ message: "Insufficient stock" });
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Item not found in inventory." });
     }
 
-    medicine.quantity -= quantity; // Reduce quantity
-    await medicine.save();
+    const currentStock = results[0].quantity;
 
-    res.status(200).json({ message: "Inventory updated successfully" });
-  } catch (error) {
-    console.error("Error updating inventory:", error);
-    res.status(500).json({ message: "Server error" });
-  }
+    if (currentStock < quantity) {
+      return res.status(400).json({ message: "Insufficient stock available." });
+    }
+
+    // Update stock
+    medstockDB.query(
+      "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
+      [quantity, name],
+      (updateErr) => {
+        if (updateErr) {
+          console.error("Error updating inventory:", updateErr);
+          return res.status(500).json({ message: "Error updating inventory." });
+        }
+        res.json({ message: "Inventory updated successfully." });
+      }
+    );
+  });
 });
 
 
