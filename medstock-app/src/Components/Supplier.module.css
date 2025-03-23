@@ -8,9 +8,12 @@
 .supplier h1 {
   text-align: center;
   margin-bottom: 20px;
+  margin-top: -19px;
+  margin-left: 65px;
+  margin-right: -20px;
   padding: 20px 0;
-  background: linear-gradient(135deg, #3056ff, #1e40af);
-  color: white;
+  background:linear-gradient(135deg, #3056ff, #1e40af);
+  color: rgb(255, 255, 255);
   font-size: 24px;
   font-weight: bold;
   border-radius: 10px;

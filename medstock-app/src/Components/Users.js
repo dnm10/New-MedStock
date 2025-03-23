@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./Users.css";
+import styles from './Users.module.css';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -81,11 +81,11 @@ const Users = () => {
   
 
   return (
-    <div className="users-page">
+    <div className={styles.users}>
       <h1>Users Management</h1>
-      <button className="add-user-btn" onClick={() => openModal()}> Add New User</button>
+      <button className={styles.addusersbtn}  onClick={() => openModal()}> Add New User</button>
 
-      <table className="users-table">
+      <table className={styles.usersTable}>
         <thead>
           <tr>
             <th>ID</th>
@@ -105,8 +105,8 @@ const Users = () => {
               <td>{user.email}</td>
               <td>{user.phone}</td>
               <td>
-                <button className="edit-btn" onClick={() => openModal(user)}>Edit</button>
-                <button className="delete-btn" onClick={() => deleteUser(user.id)}>Delete</button>
+                <button className={styles.userseditbtn} onClick={() => openModal(user)}>Edit</button>
+                <button className={styles.usersdeletebtn} onClick={() => deleteUser(user.id)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -115,8 +115,8 @@ const Users = () => {
 
       {/* MODAL */}
       {isModalOpen && (
-        <div className="users-modal">
-          <div className="users-modal-content">
+        <div className={styles.usersmodal}>
+          <div className={styles.usersmodalcontent}>
             <h2>{currentUser ? "Edit User" : "Add New User"}</h2>
             <form>
               <label>Name:</label>
@@ -135,8 +135,8 @@ const Users = () => {
               <label>Phone:</label>
               <input type="text" name="phone" value={formValues.phone} onChange={handleInputChange} />
 
-              <button type="button" className="saveOrderButton" onClick={saveUser}>Save</button>
-              <button type="button" className="cancelButton" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <button type="button" className={styles.usersSaveOrderButton} onClick={saveUser}>Save</button>
+              <button type="button" className={styles.usersCancelButton} onClick={() => setIsModalOpen(false)}>Cancel</button>
             </form>
           </div>
         </div>

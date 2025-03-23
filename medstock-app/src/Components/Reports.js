@@ -167,52 +167,51 @@ const Reports = () => {
   
 
   return (
-    <div className={styles.reportsContainer}>
-      <h1 className={styles.title}>Smart Inventory Solutions!</h1>
-      <h2 className={styles.subtitle}>📊 MedStock Reports Overview</h2>
+    <div className={styles.reports}>
+      <h1>📊 MedStock Reports Overview</h1>
 
       {/* Overview Cards */}
-      <div className={styles.overview}>
-        <div className={styles.card}>
-          <FaBox className={styles.icon} />
+      <div className={styles.reportsoverview}>
+        <div className={styles.reportscard}>
+          <FaBox className={styles.reportsicon} />
           <h3>Total Items</h3>
           <p>{stockCounts.totalItems}</p>
         </div>
-        <div className={styles.card}>
-          <FaChartLine className={styles.icon} />
+        <div className={styles.reportscard}>
+          <FaChartLine className={styles.reportsicon} />
           <h3>Current Stock</h3>
           <p>{stockCounts.totalStock}</p>
         </div>
-        <div className={styles.card} onClick={handleLowStockClick}> {/* ✅ Clickable card */}
-          <FaExclamationTriangle className={styles.icon} />
+        <div className={styles.reportscard} onClick={handleLowStockClick}> {/* ✅ Clickable card */}
+          <FaExclamationTriangle className={styles.reportsicon} />
           <h3>Low Stock</h3>
           <p>{stockCounts.lowStock}</p>
         </div>
-        <div className={styles.card}>
-          <FaTrashAlt className={styles.icon} />
+        <div className={styles.reportscard}>
+          <FaTrashAlt className={styles.reportsicon} />
           <h3>Expired Items</h3>
           <p>{stockCounts.expiredItems}</p>
         </div>
       </div>
 
       {/* Print Button */}
-      <div className={styles.buttonContainer}>
-        <button className={styles.printButton} onClick={handlePrint}>
-          <FaPrint className={styles.printIcon} /> PRINT REPORT
+      <div className={styles.reportsbuttonContainer}>
+        <button className={styles.reportsprintButton} onClick={handlePrint}>
+          <FaPrint className={styles.reportsprintIcon} /> PRINT REPORT
         </button>
       </div>
             {/* Benefits of Smart Inventory Reports */}
-            <h2 className={styles.subtitle}>🚀 Why Use Smart Inventory Reports?</h2>
-      <div className={styles.benefitsContainer}>
-        <div className={styles.card}>
+            <h2 className={styles.reportssubtitle}>🚀 Why Use Smart Inventory Reports?</h2>
+      <div className={styles.reportsbenefitsContainer}>
+        <div className={styles.reportscard}>
           <h3>📦 Accurate Tracking</h3>
           <p>Monitor stock levels with precision, reducing waste and shortages.</p>
         </div>
-        <div className={styles.card}>
+        <div className={styles.reportscard}>
           <h3>📡 Real-Time Updates</h3>
           <p>Get instant alerts on low stock, ensuring timely restocking.</p>
         </div>
-        <div className={styles.card}>
+        <div className={styles.reportscard}>
           <h3>📊 Data-Driven Decisions</h3>
           <p>Analyze trends and optimize inventory management for better efficiency.</p>
         </div>
@@ -221,8 +220,8 @@ const Reports = () => {
 
       {/* Low Stock Items Modal */}
       {showLowStock && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
+        <div className={styles.reportsmodalOverlay}>
+          <div className={styles.reportsmodalContent}>
             <h3>Low Stock Items</h3>
             <ul>
               {lowStockItems.length > 0 ? (
@@ -235,7 +234,7 @@ const Reports = () => {
                 <p>No low stock items.</p>
               )}
             </ul>
-            <button className={styles.closeButton} onClick={() => setShowLowStock(false)}>Close</button>
+            <button className={styles.reportscloseButton} onClick={() => setShowLowStock(false)}>Close</button>
           </div>
         </div>
       )}

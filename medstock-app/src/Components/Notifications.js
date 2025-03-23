@@ -25,9 +25,8 @@ const Notifications = () => {
 
   return (
     <div className="notification-page">
-      <header>
         <h1>Notifications</h1>
-      </header>
+    
 
       <div className="marquee-container">
         <marquee className="stock-marquee" behavior="scroll" direction="left">

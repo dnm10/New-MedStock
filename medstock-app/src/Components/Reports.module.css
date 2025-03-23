@@ -1,25 +1,24 @@
-.reportsContainer {
+.reports {
+  max-width: 2100px;
+  margin: auto;
+  background: white;
+}
+
+.reports h1 {
   text-align: center;
-  background: #e3f2fd;
-  padding: 40px;
-  min-height: 100vh;
-}
-
-.title {
-  font-size: 26px;
+  margin-bottom: 20px;
+  margin-left: 85px;
+  padding: 20px 0;
+  background:linear-gradient(135deg, #3056ff, #1e40af);
+  color: rgb(255, 255, 255);
+  font-size: 24px;
   font-weight: bold;
-  color: #0d47a1;
-}
-
-.subtitle {
-  font-size: 22px;
-  font-weight: bold;
-  margin-top: 10px;
-  color: #1565c0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Cards Layout */
-.overview {
+.reportsoverview {
   display: flex;
   justify-content: center;
   gap: 25px;
@@ -27,7 +26,7 @@
   flex-wrap: wrap;
 }
 
-.card {
+.reportscard {
   background: white;
   padding: 25px;
   border-radius: 12px;
@@ -37,34 +36,34 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card:hover {
+.reportscard:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.icon {
+.reportsicon {
   font-size: 35px;
   color: #0d47a1;
   margin-bottom: 10px;
 }
 
-h3 {
+.reports h3 {
   margin: 5px 0;
   font-size: 18px;
 }
 
-p {
+.reports p {
   font-size: 22px;
   font-weight: bold;
   color: #0d47a1;
 }
 
 /* Print Button */
-.buttonContainer {
+.reportsbuttonContainer {
   margin-top: 20px;
 }
 
-.printButton {
+.reportsprintButton {
   background: #1565c0;
   color: white;
   padding: 12px 24px;
@@ -76,17 +75,17 @@ p {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.printButton:hover {
+.reportsprintButton:hover {
   background: #0d47a1;
   transform: scale(1.05);
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
 }
 
-.printIcon {
+.reportsprintIcon {
   margin-right: 8px;
 }
 
-.benefitsContainer {
+.reportsbenefitsContainer {
   display: flex;
   justify-content: center;
   gap: 30px;
@@ -94,7 +93,7 @@ p {
   flex-wrap: wrap;
 }
 
-.benefitCard {
+.reportsbenefitCard {
   background: linear-gradient(135deg, #0d47a1, #1565c0);
   color: white;
   padding: 20px;
@@ -105,16 +104,16 @@ p {
   transition: transform 0.3s ease-in-out;
 }
 
-.benefitCard:hover {
+.reportsbenefitCard:hover {
   transform: translateY(-5px);
 }
 
-.benefitCard h3 {
+.reportsbenefitCard h3 {
   font-size: 20px;
   margin-bottom: 10px;
 }
 
-.benefitCard p {
+.reportsbenefitCard p {
   font-size: 14px;
   line-height: 1.5;
   opacity: 0.9;

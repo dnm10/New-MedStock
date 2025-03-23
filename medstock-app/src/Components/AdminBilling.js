@@ -63,16 +63,16 @@ const Billing = () => {
   };
 
   return (
-    <div className={styles.Billing}>
+    <div className={styles.Billingadmin}>
       <h1>MedStock Billing System</h1>
 
       {loading ? <p>Loading...</p> : error && <p className="error">{error}</p>}
 
       {/* ✅ Display pending delivered orders for billing */}
-      <section className={styles.billingMain}>
+      <section className={styles.billingMainadmin}>
         <h2>Pending Orders for Billing</h2>
         {pendingOrders.length > 0 ? (
-          <table className={styles.billingTable}>
+          <table className={styles.billingTableadmin}>
             <thead>
               <tr>
                 <th>Order ID</th>
@@ -100,7 +100,7 @@ const Billing = () => {
       </section>
 
       {/* ✅ Display previous billing history */}
-      <section className={styles.billingHistory}>
+      <section className={styles.billingHistoryadmin}>
         <h2>Billing History</h2>
         {previousBills.length > 0 ? (
           <ul>
@@ -117,7 +117,7 @@ const Billing = () => {
           <p>No previous bills found.</p>
         )}
       </section>
-      <footer className={styles.billingfooter}>
+      <footer className={styles.billingfooteradmin}>
         <p>&copy; 2025 MedStock. All Rights Reserved.</p>
       </footer>
 
