@@ -160,7 +160,7 @@ app.post("/api/reset-password", (req, res) => {
   });
 });
 
-
+//INVENTORY PAGE/////////////////////////////////////
 // GET inventory items
 app.get('/api/inventory', (req, res) => {  
   medstockDB.query('SELECT * FROM inventory', (err, results) => {
@@ -222,8 +222,84 @@ app.delete('/api/inventory/:id', (req, res) => {
   });
 });
 
+// BILLING PAGE (user role)///////////////////////
+app.post("/api/update-inventory", async (req, res) => {
+  const { name, quantity } = req.body;
 
-// Fetch stock summary
+  try {
+    const medicine = await Inventory.findOne({ name });
+
+    if (!medicine) {
+      return res.status(404).json({ message: "Medicine not found in inventory" });
+    }
+
+    if (medicine.quantity < quantity) {
+      return res.status(400).json({ message: "Insufficient stock" });
+    }
+
+    medicine.quantity -= quantity; // Reduce quantity
+    await medicine.save();
+
+    res.status(200).json({ message: "Inventory updated successfully" });
+  } catch (error) {
+    console.error("Error updating inventory:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+// Add a new bill
+app.post("/api/add-bill", async (req, res) => {
+  const { name, quantity, price } = req.body;
+  
+  if (!name || !quantity || !price) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    const sql = `INSERT INTO userRole_billingPage (name, quantity, price) VALUES (?, ?, ?)`;
+    const values = [name, quantity, price];
+
+    medstockDB.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Database Error:", err);
+        return res.status(500).json({ message: "Database error", error: err });
+      }
+      res.status(201).json({ message: "Bill added successfully", billId: result.insertId });
+    });
+  } catch (error) {
+    console.error("Error adding bill:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
+// Get all bills
+app.get("/api/get-bills", (req, res) => {
+  medstockDB.query("SELECT * FROM userRole_billingPage ORDER BY id DESC", (err, results) => {
+    if (err) {
+      console.error("Error fetching bills:", err);
+      return res.status(500).json({ message: "Error fetching bills." });
+    }
+    res.json(results);
+  });
+});
+
+// Clear all bills after invoice is generated
+app.delete("/api/clear-bills", (req, res) => {
+  medstockDB.query("DELETE FROM userRole_billingPage", (err) => {
+    if (err) {
+      console.error("Error clearing bills:", err);
+      return res.status(500).json({ message: "Error clearing bills." });
+    }
+    res.json({ message: "All bills cleared successfully." });
+  });
+});
+
+
+
+
+// Fetch stock summary 
 app.get('/api/reports/stock', (req, res) => {
   const stockQuery = `
     SELECT 
@@ -285,7 +361,23 @@ app.get('/api/reports/low-stock', (req, res) => {
   });
 });
 
-// ORDERS ///////////////////////////////////////////////
+// Fetch expired items to reports page
+app.get('/api/reports/expired-items', async (req, res) => {
+  try {
+    const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const [expiredItems] = await db.query(
+      'SELECT * FROM Inventory WHERE expiryDate < ?',
+      [currentDate]
+    );
+    res.json(expiredItems);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching expired items' });
+  }
+});
+
+
+
+// ORDERS PAGE ///////////////////////////////////////////////
 // ✅ Fetch all orders
 app.get('/api/orders', async (req, res) => {
   try {
@@ -407,7 +499,9 @@ app.put('/api/orders/:orderId', async (req, res) => {
   }
 });
 
-// --- SUPPLIERS ROUTES ---
+
+
+// SUPPLIERS PAGE//////////////////////////////////
 // Get all suppliers
 app.get("/api/suppliers", (req, res) => {
   medstockDB.query("SELECT * FROM Suppliers", (err, result) => {
@@ -433,7 +527,6 @@ app.post("/api/suppliers", (req, res) => {
     }
   });
 });
-
 
 // Update supplier
 app.put("/api/suppliers/:id", (req, res) => {
@@ -463,60 +556,9 @@ app.delete("/api/suppliers/:id", (req, res) => {
   });
 });
 
-// for billing
-app.post("/api/update-inventory", (req, res) => {
-  const { name, quantity } = req.body;
-
-  // Check current stock
-  medstockDB.query("SELECT quantity FROM inventory WHERE name = ?", [name], (err, results) => {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ message: "Internal server error." });
-    }
-
-    if (results.length === 0) {
-      return res.status(404).json({ message: "Item not found in inventory." });
-    }
-
-    const currentStock = results[0].quantity;
-
-    if (currentStock < quantity) {
-      return res.status(400).json({ message: "Insufficient stock available." });
-    }
-
-    // Update stock
-    medstockDB.query(
-      "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
-      [quantity, name],
-      (updateErr) => {
-        if (updateErr) {
-          console.error("Error updating inventory:", updateErr);
-          return res.status(500).json({ message: "Error updating inventory." });
-        }
-        res.json({ message: "Inventory updated successfully." });
-      }
-    );
-  });
-});
-
-// Fetch expired items to reports page
-
-app.get('/api/reports/expired-items', async (req, res) => {
-  try {
-    const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-    const [expiredItems] = await db.query(
-      'SELECT * FROM Inventory WHERE expiryDate < ?',
-      [currentDate]
-    );
-    res.json(expiredItems);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching expired items' });
-  }
-});
-
 
 // Billing PAGE///////////////////////////////////////////////////////
-// ✅ Get Delivered Orders (Only orders that are delivered but not yet billed)
+// Get Delivered Orders (Only orders that are delivered but not yet billed)
 app.get("/api/get-delivered-orders", async (req, res) => {
   try {
     const [deliveredOrders] = await con.promise().query(`
@@ -532,7 +574,7 @@ app.get("/api/get-delivered-orders", async (req, res) => {
   }
 });
 
-// ✅ Get Previous Bills
+// Get Previous Bills
 app.get("/api/get-bills", async (req, res) => {
   try {
     const [bills] = await con.promise().query(`
@@ -548,7 +590,7 @@ app.get("/api/get-bills", async (req, res) => {
   }
 });
 
-// ✅ Generate a Bill for a Delivered Order
+// Generate a Bill for a Delivered Order
 app.post("/api/generate-bill", async (req, res) => {
   try {
     const { orderID } = req.body;
@@ -689,7 +731,7 @@ app.get("/api/notifications", (req, res) => {
 });
 
 
-// for user page data
+//USER PAGE///////////////////////////////////////////////
 // ✅ GET all users
 app.get("/users", (req, res) => {
   medstockDB.query("SELECT * FROM user_data ORDER BY id DESC", (err, results) => {

@@ -8,21 +8,27 @@ const UserBilling = () => {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
-  const [previousBills, setPreviousBills] = useState([]); // Stores billing history
+  const [previousBills, setPreviousBills] = useState([]);
+  const [inventory, setInventory] = useState([]); // Define inventory state
+
 
   // Fetch previous bills
   const fetchBills = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/get-bills");
       const data = await response.json();
+      console.log("Fetched Bills:", data);
       if (Array.isArray(data)) {
-        setPreviousBills(data); // Ensure data is an array
+        setPreviousBills(data);
+        updateTotalAmount(data);
       } else {
         setPreviousBills([]);
+        setTotalAmount(0);
       }
     } catch (error) {
       console.error("Error fetching previous bills:", error);
       setPreviousBills([]);
+      setTotalAmount(0);
     }
   };
 
@@ -30,45 +36,103 @@ const UserBilling = () => {
     fetchBills();
   }, []);
 
-  const addToBill = async () => {
-    if (name.trim() && quantity > 0 && price > 0) {
-      const newItem = { name, quantity, price };
-  
-      try {
-        const response = await fetch("http://localhost:5000/api/update-inventory", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, quantity }),
-        });
-  
-        const text = await response.text(); // Read as text first
-        console.log("Server Response:", text);
-  
-        try {
-          const result = JSON.parse(text); // Convert to JSON safely
-          if (response.ok) {
-            setBillItems([...billItems, newItem]);
-            setTotalAmount((prevTotal) => prevTotal + quantity * price);
-            setName("");
-            setQuantity(0);
-            setPrice(0);
-          } else {
-            alert(result.message || "Failed to update inventory.");
-          }
-        } catch (jsonError) {
-          alert("Server returned an invalid response. Check console.");
-        }
-      } catch (error) {
-        console.error("Error updating inventory:", error);
-        alert("Error connecting to server.");
+
+  useEffect(() => {
+    fetchInventory(); // Call function to get updated inventory when component mounts
+  }, []); // Runs only on component mount
+
+  const fetchInventory = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/get-inventory");
+      const data = await response.json();
+      setInventory(data); // Update state with latest inventory
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+    }
+  };
+
+  // Call fetchInventory again after updating inventory
+  const updateInventory = async (medicineName, quantitySold) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/update-inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: medicineName, quantity: quantitySold }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setInventory((prevInventory) =>
+          prevInventory.map((item) =>
+            item.name === medicineName ? { ...item, quantity: item.quantity - quantitySold } : item
+          )
+        );
+        fetchInventory(); // Refresh inventory after successful update
+      } else {
+        alert(result.message);
       }
-    } else {
-      alert("Please enter valid values for all fields.");
+    } catch (error) {
+      console.error("Error updating inventory:", error);
     }
   };
   
+  // Function to update total amount
+  const updateTotalAmount = (bills) => {
+    const total = bills.reduce((sum, item) => sum + item.quantity * parseFloat(item.price), 0);
+    setTotalAmount(total);
+  };
 
-  const generateInvoice = () => {
+  
+    const addToBill = async () => {
+      if (name.trim() && quantity > 0 && price > 0) {
+        const newItem = { name, quantity, price };
+    
+        try {
+          const response = await fetch("http://localhost:5000/api/add-bill", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newItem),
+          });
+    
+          const result = await response.json();
+          if (response.ok) {
+            const updatedBills = [...billItems, newItem];
+            setBillItems(updatedBills);
+            updateTotalAmount(updatedBills);
+    
+            // Update Inventory Automatically
+            await updateInventory(name, quantity);
+    
+            // Reset Input Fields
+            setName("");
+            setQuantity(0);
+            setPrice(0);
+    
+            fetchBills(); // Refresh bills
+          } else {
+            alert(result.message || "Failed to add bill.");
+          }
+        } catch (error) {
+          console.error("Error adding bill:", error);
+          alert("Error connecting to server.");
+        }
+      } else {
+        alert("Please enter valid values for all fields.");
+      }
+    };
+    
+
+  const clearBillData = async () => {
+    try {
+      await fetch("http://localhost:5000/api/clear-bills", { method: "DELETE" });
+      setPreviousBills([]); // Reset state in frontend
+      setTotalAmount(0);
+    } catch (error) {
+      console.error("Error clearing bills:", error);
+    }
+  };
+
+  const generateInvoice = async () => {
     const billNumber = Math.floor(Math.random() * 1000);
     const date = new Date();
 
@@ -109,14 +173,14 @@ const UserBilling = () => {
               </tr>
             </thead>
             <tbody>
-              ${billItems
+              ${previousBills
                 .map(
                   (item) => `
                 <tr>
                   <td>${item.name}</td>
                   <td>${item.quantity}</td>
-                  <td>₹${item.price.toFixed(2)}</td>
-                  <td>₹${(item.quantity * item.price).toFixed(2)}</td>
+                  <td>₹${parseFloat(item.price).toFixed(2)}</td>
+                  <td>₹${(item.quantity * parseFloat(item.price)).toFixed(2)}</td>
                 </tr>
               `
                 )
@@ -124,7 +188,7 @@ const UserBilling = () => {
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="3">Total Amount</td>
+                <td colSpan="3">Total Amount</td>
                 <td>₹${totalAmount.toFixed(2)}</td>
               </tr>
             </tfoot>
@@ -138,76 +202,74 @@ const UserBilling = () => {
     `);
     invoiceWindow.document.close();
     invoiceWindow.print();
+
+    // Clear the bill after invoice generation
+    await clearBillData();
   };
 
   return (
     <div className={styles.Billinguser}>
       <h1>MedStock Billing System</h1>
-
       <div className={styles.billingMainuser}>
         <section className={styles.billinguserform}>
           <h2>Add Medicine</h2>
           <form>
-            <div className={styles.Billinguserinputgroup}>
-              <label htmlFor="medicine-name">Medicine Name:</label>
-              <input
-                type="text"
-                id="medicine-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter medicine name"
-                required
-              />
-            </div>
-            <div className={styles.Billinguserinputgroup}>
-              <label htmlFor="quantity">Quantity:</label>
-              <input
-                type="number"
-                id="quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
-                min="0"
-                required
-              />
-            </div>
-            <div className={styles.Billinguserinputgroup}>
-              <label htmlFor="price">Price per Unit (₹):</label>
-              <input
-                type="number"
-                id="price"
-                value={price}
-                onChange={(e) => setPrice(Math.max(0, parseFloat(e.target.value) || 0))}
-                min="0"
-                step="0.01"
-                required
-              />
-            </div>
-            <button type="button" onClick={addToBill}>
-              Add to Bill
-            </button>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Medicine Name" />
+            <input type="number" value={quantity} onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))} />
+            <input type="number" value={price} onChange={(e) => setPrice(Math.max(0, parseFloat(e.target.value) || 0))} />
+            <button type="button" onClick={addToBill}>Add to Bill</button>
           </form>
         </section>
-
         <section className={styles.billinguserSummary}>
           <h2>Bill Summary</h2>
-          <ul>
-            {previousBills.length > 0 ? (
-              previousBills.map((bill) => (
-                <div key={bill.id}>
-                  <p>{bill.name}</p>
-                </div>
-              ))
-            ) : (
-              <p>No previous bills available.</p>
-            )}
-          </ul>
+          {previousBills.length > 0 ? (
+            <table className={styles.billTable}>
+              <thead>
+                <tr>
+                  <th>Medicine Name</th>
+                  <th>Quantity</th>
+                  <th>Price (₹)</th>
+                  <th>Total Price (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {previousBills.map((bill, index) => (
+                  <tr key={index}>
+                    <td>{bill.name}</td>
+                    <td>{bill.quantity}</td>
+                    <td>₹{parseFloat(bill.price).toFixed(2)}</td>
+                    <td>₹{(bill.quantity * parseFloat(bill.price)).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No previous bills found.</p>
+          )}
+          <p><strong>Total Amount: ₹{totalAmount.toFixed(2)}</strong></p>
           <button onClick={generateInvoice}>Generate Invoice</button>
         </section>
-      </div>
+        <section className={styles.inventorySection}>
+  <h2>Available Inventory</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Medicine</th>
+        <th>Quantity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {inventory.map((item, index) => (
+        <tr key={index}>
+          <td>{item.name}</td>
+          <td>{item.quantity}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</section>
 
-      <footer className={styles.billinguserFooter}>
-        <p>&copy; 2025 MedStock. All Rights Reserved.</p>
-      </footer>
+      </div>
     </div>
   );
 };
