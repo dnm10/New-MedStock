@@ -50,7 +50,7 @@ const Supplier = () => {
       newErrors.PhoneNumber = "Phone number must be exactly 10 digits.";
     }
     if (!formValues.EmailAddress.match(emailRegex)) {
-      newErrors.EmailAddress = "Enter a valid email address (gmail.com or yahoo.com)";
+      newErrors.EmailAddress = "Enter a valid email (gmail.com or yahoo.com).";
     }
     if (!formValues.Address.trim()) {
       newErrors.Address = "Address is required.";
@@ -62,6 +62,32 @@ const Supplier = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com)$/;
+
+    let fieldError = "";
+
+    if (name === "SupplierID" && (isNaN(value) || value.trim() === "")) {
+      fieldError = "Supplier ID must be a number.";
+    }
+    if (name === "SupplierName" && (!value.trim() || !nameRegex.test(value))) {
+      fieldError = "Supplier name should contain only alphabets.";
+    }
+    if (name === "ContactPerson" && (!value.trim() || !nameRegex.test(value))) {
+      fieldError = "Contact person should contain only alphabets.";
+    }
+    if (name === "PhoneNumber" && !phoneRegex.test(value)) {
+      fieldError = "Phone number must be exactly 10 digits.";
+    }
+    if (name === "EmailAddress" && !emailRegex.test(value)) {
+      fieldError = "Enter a valid email (gmail.com or yahoo.com).";
+    }
+    if (name === "Address" && value.trim() === "") {
+      fieldError = "Address is required.";
+    }
+
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: fieldError }));
     setFormValues({ ...formValues, [name]: value });
   };
 

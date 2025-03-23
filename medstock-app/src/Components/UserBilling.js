@@ -6,7 +6,7 @@ const UserBilling = () => {
   const [billItems, setBillItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [name, setName] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
   const [previousBills, setPreviousBills] = useState([]); // Stores billing history
 
@@ -50,7 +50,7 @@ const UserBilling = () => {
             setBillItems([...billItems, newItem]);
             setTotalAmount((prevTotal) => prevTotal + quantity * price);
             setName("");
-            setQuantity(1);
+            setQuantity(0);
             setPrice(0);
           } else {
             alert(result.message || "Failed to update inventory.");
@@ -165,8 +165,8 @@ const UserBilling = () => {
                 type="number"
                 id="quantity"
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                min="1"
+                onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
                 required
               />
             </div>

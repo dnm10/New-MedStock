@@ -58,36 +58,31 @@ const AuthForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate name (only letters and spaces allowed)
     if (!isLogin && !/^[A-Za-z\s]+$/.test(formData.name.trim())) {
-      alert('Invalid name!Name must contain only alphabets and spaces!');
+      alert('Invalid name! Name must contain only alphabets and spaces.');
       return;
     }
 
-    // Validate contact number (must be exactly 10 digits)
     if (!isLogin && !/^\d{10}$/.test(formData.contact.trim())) {
-      alert('Contact number must be exactly 10 digits!');
+      alert('Contact number must be exactly 10 digits.');
       return;
     }
 
-    // Validate email format
     if (!validateEmail(formData.email.trim())) {
-      alert('Invalid email! Please enter correct email.');
+      alert('Invalid email! Use a valid gmail.com or yahoo.com email.');
       return;
     }
 
-    // Validate password match for signup
     if (!isLogin && formData.password !== formData.confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
 
-    // Validate password strength
     if (!validatePassword()) {
       alert(
         formData.role === 'Admin'
-          ? 'Admin password must be at least 8 characters, with uppercase, lowercase, number, and special character.'
-          : 'User password must be at least 6 characters, with uppercase, lowercase, number, and special character.'
+          ? 'Admin password must be at least 8 characters long with uppercase, lowercase, number, and special character.'
+          : 'User password must be at least 6 characters long with uppercase, lowercase, number, and special character.'
       );
       return;
     }
@@ -114,10 +109,7 @@ const AuthForm = () => {
       if (response.ok) {
         alert(`${isLogin ? 'Login' : 'Signup'} Successful`);
         setRole(result.user.role);
-
-        // Store user details in localStorage
         localStorage.setItem('user', JSON.stringify(result.user));
-
         navigate('/Home');
       } else {
         alert(result.message || `${isLogin ? 'Login' : 'Signup'} Failed`);
@@ -147,6 +139,8 @@ const AuthForm = () => {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter Name"
+                    pattern="^[A-Za-z\s]+$"
+                    title="Name must contain only alphabets and spaces."
                     required
                   />
                   <label>Name</label>
@@ -158,6 +152,8 @@ const AuthForm = () => {
                     value={formData.contact}
                     onChange={handleChange}
                     placeholder="Enter Contact Number"
+                    pattern="^\d{10}$"
+                    title="Contact number must be exactly 10 digits."
                     required
                   />
                   <label>Contact Number</label>
@@ -172,6 +168,8 @@ const AuthForm = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter Email"
+                pattern="^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com)$"
+                title="Enter a valid email (gmail.com or yahoo.com only)."
                 required
               />
               <label>Email</label>

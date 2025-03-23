@@ -94,32 +94,42 @@ export default function Inventory() {
             alert("Expiry date must be at least 1 year from today.");
             return;
         }
-    }
+    }  
 
-    // Validate name, supplier, and category
-    if (["name", "supplier", "category"].includes(name)) {
-        if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
-            alert(`${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and not be all numbers.`);
+    // Validate supplier (only alphabets and spaces)
+    if (name === "supplier") {
+        if (!onlyLettersRegex.test(value)) {
+            alert("Supplier name should contain only alphabets and spaces.");
             return;
         }
     }
 
-    // Validate category separately (only letters allowed)
-    if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
-        alert("Category must contain only letters.");
-        return;
+    // Validate category (only alphabets and spaces)
+    if (name === "category") {
+        if (!onlyLettersRegex.test(value)) {
+            alert("Category must contain only alphabets and spaces.");
+            return;
+        }
     }
 
-    // Validate threshold (should be a positive number)
+    // Validate name (at least one letter, not all numbers)
+    if (name === "name") {
+        if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
+            alert("Name should contain letters and not be all numbers.");
+            return;
+        }
+    }
+
+    // Validate threshold (positive number)
     if (name === "threshold") {
         const thresholdValue = parseInt(value, 10);
         if (isNaN(thresholdValue) || thresholdValue < 0) {
-            alert("Threshold must be a above 0.");
+            alert("Threshold must be above 0.");
             return;
         }
     }
 
-    // ✅ Validate quantity (must be a positive number above 0)
+    // Validate quantity (positive number > 0)
     if (name === "quantity") {
         const quantityValue = parseInt(value, 10);
         if (isNaN(quantityValue) || quantityValue <= 0) {
@@ -128,9 +138,10 @@ export default function Inventory() {
         }
     }
 
-    // If all validations pass, update state
+    // Update state
     setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
 };
+
 
 
 const handleInputBlur = (e) => {

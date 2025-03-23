@@ -597,7 +597,7 @@ const notifications = []; // Temporary storage
 app.post("/api/update-inventory", (req, res) => {
   const { name, quantity } = req.body;
 
-  con.query(
+  medstockDB.query(
     "SELECT quantity, threshold FROM inventory WHERE name = ?",
     [name],
     (err, results) => {
@@ -615,7 +615,7 @@ app.post("/api/update-inventory", (req, res) => {
       }
 
       // Update inventory quantity
-      con.query(
+      medstockDB.query(
         "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
         [quantity, name],
         (updateErr) => {
@@ -634,7 +634,7 @@ app.post("/api/update-inventory", (req, res) => {
 app.get("/api/notifications", (req, res) => {
   const query = `SELECT name, category, quantity, expiryDate, supplier, threshold FROM inventory`;
 
-  con.query(query, (err, results) => {
+  medstockDB.query(query, (err, results) => {
     if (err) {
       console.error("❌ Database query failed:", err.sqlMessage || err);
       return res.status(500).json({ message: "Database error.", error: err });
@@ -690,54 +690,46 @@ app.get("/api/notifications", (req, res) => {
 
 
 // for user page data
-// Fetch all users
+// ✅ GET all users
 app.get("/users", (req, res) => {
-  con.query("SELECT * FROM user_data", (err, result) => {
-    if (err) return res.status(500).json({ message: "Database error" });
-    res.json(result);
+  medstockDB.query("SELECT * FROM user_data ORDER BY id DESC", (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
   });
 });
 
-// Add a new user
+// ✅ ADD new user
 app.post("/users", (req, res) => {
   const { name, role, email, phone } = req.body;
-  if (!name || !role || !email || !phone) {
-    return res.status(400).json({ message: "All fields are required!" });
-  }
-  const query = "INSERT INTO user_data (name, role, email, phone) VALUES (?, ?, ?, ?)";
-  con.query(query, [name, role, email, phone], (err, result) => {
-    if (err) {
-      console.error("Error adding user:", err);
-      return res.status(500).json({ message: "Database error" });
+  medstockDB.query(
+    "INSERT INTO user_data (name, role, email, phone) VALUES (?, ?, ?, ?)",
+    [name, role, email, phone],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.status(201).json({ message: "User added successfully" });
     }
-    res.status(201).json({ id: result.insertId, name, role, email, phone });
-  });
+  );
 });
 
-// Update a user
+// ✅ UPDATE user
 app.put("/users/:id", (req, res) => {
   const { name, role, email, phone } = req.body;
   const { id } = req.params;
-
-  const query = "UPDATE user_data SET name=?, role=?, email=?, phone=? WHERE id=?";
-  con.query(query, [name, role, email, phone, id], (err, result) => {
-    if (err) {
-      console.error("Error updating user:", err);
-      return res.status(500).json({ message: "Database error" });
+  medstockDB.query(
+    "UPDATE user_data SET name = ?, role = ?, email = ?, phone = ? WHERE id = ?",
+    [name, role, email, phone, id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: "User updated successfully" });
     }
-    res.json({ message: "User updated successfully" });
-  });
+  );
 });
 
-// Delete a user
+// ✅ DELETE user
 app.delete("/users/:id", (req, res) => {
   const { id } = req.params;
-  con.query("DELETE FROM user_data WHERE id=?", [id], (err, result) => {
-    if (err) {
-      console.error("Error deleting user:", err);
-      return res.status(500).json({ message: "Database error" });
-    }
+  medstockDB.query("DELETE FROM user_data WHERE id = ?", [id], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
     res.json({ message: "User deleted successfully" });
   });
 });
-
