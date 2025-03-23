@@ -37,8 +37,8 @@ const Supplier = () => {
     const phoneRegex = /^[0-9]{10}$/;
     const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com)$/;
 
-    if (!formValues.SupplierID || isNaN(formValues.SupplierID)) {
-      newErrors.SupplierID = "Supplier ID is required and must be a number.";
+    if (!formValues.SupplierID || isNaN(formValues.SupplierID) || Number(formValues.SupplierID) < 1) {
+      newErrors.SupplierID = "Supplier ID is required and must be a number above 0.";
     }
     if (!formValues.SupplierName.trim() || !nameRegex.test(formValues.SupplierName)) {
       newErrors.SupplierName = "Supplier name should contain only alphabets.";
@@ -68,8 +68,8 @@ const Supplier = () => {
 
     let fieldError = "";
 
-    if (name === "SupplierID" && (isNaN(value) || value.trim() === "")) {
-      fieldError = "Supplier ID must be a number.";
+    if (name === "SupplierID" && (isNaN(value) || value.trim() === "" || Number(value) < 1)) {
+      fieldError = "Supplier ID must be a number above 0.";
     }
     if (name === "SupplierName" && (!value.trim() || !nameRegex.test(value))) {
       fieldError = "Supplier name should contain only alphabets.";
@@ -210,6 +210,7 @@ const Supplier = () => {
                 <input
                   type="number"
                   name="SupplierID"
+                  min="1"
                   value={formValues.SupplierID}
                   onChange={handleInputChange}
                 />
