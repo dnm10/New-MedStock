@@ -402,7 +402,20 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
               <label htmlFor="name">Item Name:</label>
               <input type="text" name="name" value={newItem.name} onChange={handleInputChange} required />
               <label htmlFor="category">Category:</label>
-              <input type="text" name="category" value={newItem.category} onChange={handleInputChange} required />
+            <select name="category" value={newItem.category} onChange={handleInputChange} required>
+              <option value="">Select Category</option>
+              <option value="tablet">Tablet</option>
+              <option value="syrup">Syrup</option>
+              <option value="lotion">Lotion</option>
+              <option value="oil">Oil</option>
+              <option value="spray">Spray</option>
+              <option value="injection">Injection</option>
+          <option value="ointment">Ointment</option>
+          <option value="cream">Cream/gel</option>
+          <option value="drops">Drops</option>
+          <option value="other">Other</option>
+</select>
+
               <label htmlFor="quantity">Quantity:</label>
               <input type="number" name="quantity" value={newItem.quantity} onChange={handleInputChange} required />
               <label htmlFor="expiryDate">Expiry Date:</label>
@@ -446,7 +459,20 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
         <label htmlFor="name">Item Name:</label>
         <input type="text" name="name" value={newItem.name} onChange={handleInputChange} required />
         <label htmlFor="category">Category:</label>
-        <input type="text" name="category" value={newItem.category} onChange={handleInputChange} required />
+        <select name="category" value={newItem.category} onChange={handleInputChange} required>
+          <option value="">Select Category</option>
+          <option value="tablet">Tablet</option>
+          <option value="syrup">Syrup</option>
+          <option value="lotion">Lotion</option>
+          <option value="oil">Oil</option>
+          <option value="spray">Spray</option>
+          <option value="injection">Injection</option>
+          <option value="ointment">Ointment</option>
+          <option value="cream">Cream/gel</option>
+          <option value="drops">Drops</option>
+          <option value="other">Other</option>
+        </select>
+
         <label htmlFor="quantity">Quantity:</label>
         <input type="number" name="quantity" value={newItem.quantity} onChange={handleInputChange} required />
         <label htmlFor="expiryDate">Expiry Date:</label>

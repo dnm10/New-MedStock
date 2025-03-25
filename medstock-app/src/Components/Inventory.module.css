@@ -464,4 +464,41 @@ button {
     border-radius: 4px;
   }
   
+  .inventoryModalContent select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .inventoryModalContent select:focus {
+    border-color: #007bff;
+    outline: none;
+    background-color: #fff;
+  }
+  
+  .inventoryModalContent label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  .inventoryModalContent button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .inventoryModalContent button:hover {
+    background-color: #0056b3;
+  }
   
