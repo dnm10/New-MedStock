@@ -24,10 +24,29 @@ const Orders = () => {
       console.error("Error fetching orders:", error);
     }
   };
+  const fetchUpcomingOrders = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/orders/upcoming');
+      if (response.data.length > 0) {
+        response.data.forEach(order => {
+          const dateOnly = order.DeliveryDate.split('T')[0];  // this will remove the time part
+          alert(`📢 Upcoming Order Alert:\nOrder #${order.OrderID} from Supplier ${order.SupplierID} will arrive on ${dateOnly}`);
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching upcoming orders:', error);
+    }
+  };
+  
+  
   
   // Fetch orders when the component mounts
   useEffect(() => {
     fetchOrders();
+    fetchUpcomingOrders(); 
+    const interval = setInterval(fetchUpcomingOrders, 30000); // every 30 seconds
+    return () => clearInterval(interval);
+
   }, []);  
 
   // Handle input change for order details

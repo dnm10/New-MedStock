@@ -788,3 +788,21 @@ app.put('/api/orders/:orderId', async (req, res) => {
     res.status(500).json({ error: "Failed to update order status", details: error.message });
   }
 });
+
+// ✅ API to fetch upcoming orders
+app.get('/api/orders/upcoming', async (req, res) => {
+  try {
+    const [rows] = await medstockDB.promise().query(`
+      SELECT OrderID, SupplierID, DeliveryDate, Delivery_Status 
+      FROM Orders 
+      WHERE Delivery_Status = 0 
+        AND DeliveryDate >= CURDATE() 
+        AND DeliveryDate <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching upcoming orders:', err);
+    res.status(500).json({ error: 'Failed to fetch upcoming orders' });
+  }
+});
