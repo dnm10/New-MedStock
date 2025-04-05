@@ -398,7 +398,7 @@ app.get('/api/reports/low-stock', (req, res) => {
 app.get('/api/reports/expired-items', async (req, res) => {
   try {
     const currentDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-    const [expiredItems] = await db.query(
+    const [expiredItems] = await medstockDB.query(
       'SELECT * FROM Inventory WHERE expiryDate < ?',
       [currentDate]
     );
@@ -470,7 +470,7 @@ app.delete("/api/suppliers/:id", (req, res) => {
 // Get Delivered Orders (Only orders that are delivered but not yet billed)
 app.get("/api/get-delivered-orders", async (req, res) => {
   try {
-    const [deliveredOrders] = await con.promise().query(`
+    const [deliveredOrders] = await medstockDB.promise().query(`
       SELECT OrderID, TotalPrice, DeliveryDate
       FROM Orders
       WHERE Delivery_Status = TRUE
@@ -486,7 +486,7 @@ app.get("/api/get-delivered-orders", async (req, res) => {
 // Get Previous Bills
 app.get("/api/get-bills", async (req, res) => {
   try {
-    const [bills] = await con.promise().query(`
+    const [bills] = await medstockDB.promise().query(`
       SELECT BillID, OrderID, BillingDate, CAST(TotalAmount AS DECIMAL(10,2)) AS TotalAmount
       FROM Bills
       ORDER BY BillingDate DESC;
@@ -505,7 +505,7 @@ app.post("/api/generate-bill", async (req, res) => {
     const { orderID } = req.body;
 
     // Check if order exists and is delivered
-    const [order] = await con.promise().query(
+    const [order] = await medstockDB.promise().query(
       `SELECT TotalPrice FROM Orders WHERE OrderID = ? AND Delivery_Status = TRUE`,
       [orderID]
     );
@@ -515,20 +515,20 @@ app.post("/api/generate-bill", async (req, res) => {
 
     // Generate unique Bill ID
     const billID = `BILL${Date.now()}`;
-    await con.promise().query(
+    await medstockDB.promise().query(
       `INSERT INTO Bills (BillID, OrderID, TotalAmount) VALUES (?, ?, ?)`,
       [billID, orderID, order[0].TotalPrice]
     );
 
     // Fetch order items
-    const [orderItems] = await con.promise().query(
+    const [orderItems] = await medstockDB.promise().query(
       `SELECT MedicineName, Quantity, Price FROM OrderItems WHERE OrderID = ?`,
       [orderID]
     );
 
     // Insert order items into BillItems
     for (const item of orderItems) {
-      await con.promise().query(
+      await medstockDB.promise().query(
         `INSERT INTO BillItems (BillID, MedicineName, Quantity, Price) VALUES (?, ?, ?, ?)`,
         [billID, item.MedicineName, item.Quantity, item.Price]
       );
@@ -691,31 +691,44 @@ app.delete("/users/:id", (req, res) => {
 // GET /api/orders
 app.get("/api/orders", async (req, res) => {
   try {
-    const [orders] = await db.query("SELECT * FROM Orders");
+    const [orders] = await medstockDB.promise().query("SELECT * FROM Orders");
 
-    const fullOrders = await Promise.all(
-      orders.map(async (order) => {
-        const [items] = await db.query(
-          `SELECT oi.InventoryID, i.name AS MedicineName, oi.Quantity, oi.Price
-           FROM OrderItems oi
-           JOIN inventory i ON oi.InventoryID = i.id
-           WHERE oi.OrderID = ?`,
-          [order.OrderID]
-        );
+    // Fetch all order items and join with inventory
+    const [items] = await medstockDB.promise().query(`
+      SELECT 
+        oi.OrderID,
+        i.name AS MedicineName,
+        oi.Quantity,
+        oi.Price
+      FROM OrderItems oi
+      JOIN inventory i ON oi.InventoryID = i.id
+    `);
 
-        return {
-          ...order,
-          Medicines: items,
-        };
-      })
-    );
+    // Group items by OrderID
+    const orderMap = {};
+    for (const order of orders) {
+      order.Medicines = [];
+      orderMap[order.OrderID] = order;
+    }
 
-    res.json(fullOrders);
-  } catch (error) {
-    console.error("Error fetching orders with medicines:", error);
-    res.status(500).json({ message: "Server error fetching orders" });
+    for (const item of items) {
+      if (orderMap[item.OrderID]) {
+        orderMap[item.OrderID].Medicines.push({
+          name: item.MedicineName,
+          quantity: item.Quantity,
+          price: item.Price,
+        });
+      }
+    }
+
+    res.json(Object.values(orderMap));
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
+
+
 
 
 // ✅ POST a new order
