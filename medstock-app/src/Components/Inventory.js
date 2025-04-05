@@ -4,11 +4,8 @@ import styles from './Inventory.module.css';
 import '../App.css';
 import { AiOutlineDatabase, AiOutlineAppstore, AiOutlineExclamationCircle } from "react-icons/ai";
 
-
-
 export default function Inventory() {
   const [inventory, setInventory] = useState([]);
-  
   const [filteredInventory, setFilteredInventory] = useState(inventory);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -18,223 +15,174 @@ export default function Inventory() {
     name: '',
     category: '',
     quantity: '',
+    price: '',
     expiryDate: '',
     supplier: '',
-    threshold: '', // New field for threshold
+    threshold: '',
   });
 
   useEffect(() => {
-    // Fetch the inventory data on page load (or after the page refreshes)
     axios.get('http://localhost:5000/api/Inventory')
       .then(response => {
-        setInventory(response.data); // Set inventory data from the backend
-        setFilteredInventory(response.data); // Update filtered inventory if needed
+        setInventory(response.data);
+        setFilteredInventory(response.data);
       })
       .catch(error => {
         console.error('Error fetching inventory:', error);
       });
   }, []);
 
-  //const [selectedItem, setSelectedItem] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
 
-
-  // Calculating stock data for cards
   const totalStock = inventory.reduce((sum, item) => sum + item.quantity, 0);
-  const lowStockItems = inventory.filter(item => item.quantity < item.threshold).length; // Updated for threshold
+  const lowStockItems = inventory.filter(item => item.quantity < item.threshold).length;
   const categories = [...new Set(inventory.map(item => item.category))].length;
 
   const handleAddItem = () => setShowAddModal(true);
   const closeAddModal = () => {
     setShowAddModal(false);
-    setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '', threshold: '' });
+    setNewItem({ name: '', category: '', quantity: '', price: '', expiryDate: '', supplier: '', threshold: '' });
   };
 
   const handleRemoveItem = () => setShowRemoveModal(true);
   const closeRemoveModal = () => setShowRemoveModal(false);
-
 
   const handleUpdateItem = () => {
     if (!selectedItem) {
       alert("Please select an item to update!");
       return;
     }
-  
     const itemToUpdate = inventory.find(item => item.id === selectedItem);
     if (!itemToUpdate) {
       alert("Selected item not found!");
       return;
     }
-  
-    setNewItem({ ...itemToUpdate });  
-    setShowUpdateModal(true);  // ✅ Now, the modal will open
+    setNewItem({ ...itemToUpdate });
+    setShowUpdateModal(true);
   };
-  
-  
 
   const closeUpdateModal = () => {
     setShowUpdateModal(false);
-    setNewItem({ name: '', category: '', quantity: '', expiryDate: '', supplier: '', threshold: '' });
+    setNewItem({ name: '', category: '', quantity: '', price: '', expiryDate: '', supplier: '', threshold: '' });
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
     const alphaNumericRegex = /^[A-Za-z0-9- ]+$/;
     const onlyLettersRegex = /^[A-Za-z ]+$/;
     const allNumbersRegex = /^\d+$/;
 
     if (name === "expiryDate") {
-        const selectedDate = new Date(value);
-        const minExpiryDate = new Date();
-        minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
-
-        if (selectedDate < minExpiryDate) {
-            alert("Expiry date must be at least 1 year from today.");
-            return;
-        }
+      const selectedDate = new Date(value);
+      const minExpiryDate = new Date();
+      minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
+      if (selectedDate < minExpiryDate) {
+        alert("Expiry date must be at least 1 year from today.");
+        return;
+      }
     }
 
     if (name === "supplier" && !onlyLettersRegex.test(value)) {
-        alert("Supplier name should contain only alphabets and spaces.");
-        return;
+      alert("Supplier name should contain only alphabets and spaces.");
+      return;
     }
 
     if (name === "category" && !onlyLettersRegex.test(value)) {
-        alert("Category must contain only alphabets and spaces.");
-        return;
+      alert("Category must contain only alphabets and spaces.");
+      return;
     }
 
     if (name === "name" && (!alphaNumericRegex.test(value) || allNumbersRegex.test(value))) {
-        alert("Name should contain letters and not be all numbers.");
-        return;
+      alert("Name should contain letters and not be all numbers.");
+      return;
     }
 
     if (name === "threshold") {
-        const thresholdValue = parseInt(value, 10);
-        if (isNaN(thresholdValue) || thresholdValue < 0) {
-            alert("Threshold must be above 0.");
-            return;
-        }
+      const thresholdValue = parseInt(value, 10);
+      if (isNaN(thresholdValue) || thresholdValue < 0) {
+        alert("Threshold must be above 0.");
+        return;
+      }
     }
 
-    // Quantity input filtering (optional)
-    if (name === "quantity") {
-        // Allow only digits or empty string (so they can delete)
-        if (value !== "" && !/^\d*$/.test(value)) {
-            return;
-        }
+    if (name === "quantity" || name === "price") {
+      if (value !== "" && !/^\d*\.?\d*$/.test(value)) {
+        return;
+      }
     }
 
     setNewItem((prevItem) => ({ ...prevItem, [name]: value }));
-};
+  };
 
-
-
-const handleInputBlur = (e) => {
+  const handleInputBlur = (e) => {
     const { name, value } = e.target;
+    const alphaNumericRegex = /^[A-Za-z0-9- ]+$/;
+    const onlyLettersRegex = /^[A-Za-z ]+$/;
+    const allNumbersRegex = /^\d+$/;
 
-    // Regex patterns
-    const alphaNumericRegex = /^[A-Za-z0-9- ]+$/; // Alphabets, numbers, hyphens, spaces
-    const onlyLettersRegex = /^[A-Za-z ]+$/; // Only alphabets and spaces
-    const allNumbersRegex = /^\d+$/; // Only numbers
-
-    // Validate expiry date
     if (name === "expiryDate") {
-        const selectedDate = new Date(value);
-        const minExpiryDate = new Date();
-        minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
-
-        if (selectedDate < minExpiryDate) {
-            alert("Expiry date must be at least 1 year from today.");
-            setNewItem((prevItem) => ({ ...prevItem, [name]: "" })); // Reset invalid value
-            return;
-        }
-    }
-
-    // Validate name, supplier, and category
-    if (["name", "supplier", "category"].includes(name)) {
-        if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
-            alert(
-                `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and not be all numbers.`
-            );
-            setNewItem((prevItem) => ({ ...prevItem, [name]: "" }));
-            return;
-        }
-    }
-
-    // Validate category separately for only letters
-    if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
-        alert("Category Invalid.");
+      const selectedDate = new Date(value);
+      const minExpiryDate = new Date();
+      minExpiryDate.setFullYear(minExpiryDate.getFullYear() + 1);
+      if (selectedDate < minExpiryDate) {
+        alert("Expiry date must be at least 1 year from today.");
         setNewItem((prevItem) => ({ ...prevItem, [name]: "" }));
         return;
+      }
     }
 
-    // Validate quantity (should be 20 or more)
+    if (["name", "supplier", "category"].includes(name)) {
+      if (!alphaNumericRegex.test(value) || allNumbersRegex.test(value)) {
+        alert(
+          `${name.charAt(0).toUpperCase() + name.slice(1)} should contain at least one letter and not be all numbers.`
+        );
+        setNewItem((prevItem) => ({ ...prevItem, [name]: "" }));
+        return;
+      }
+    }
+
+    if (name === "category" && (!onlyLettersRegex.test(value) || allNumbersRegex.test(value))) {
+      alert("Category Invalid.");
+      setNewItem((prevItem) => ({ ...prevItem, [name]: "" }));
+      return;
+    }
+
     if (name === "quantity") {
-        const quantityValue = parseInt(value, 10);
-
-        if (isNaN(quantityValue) || quantityValue < 20) {
-            alert("Quantity must be 20 or more.");
-            setNewItem((prevItem) => ({ ...prevItem, [name]: "20" })); // Reset to 20 if invalid
-            return;
-        }
+      const quantityValue = parseInt(value, 10);
+      if (isNaN(quantityValue) || quantityValue < 20) {
+        alert("Quantity must be 20 or more.");
+        setNewItem((prevItem) => ({ ...prevItem, [name]: "20" }));
+        return;
+      }
     }
-};
-
+  };
 
   const handleSaveItem = (e) => {
     e.preventDefault();
-    console.log("Sve button clicked!");
     const newItemWithId = {
       name: newItem.name,
       category: newItem.category,
       quantity: parseInt(newItem.quantity, 10),
+      price: parseFloat(newItem.price),
       expiryDate: newItem.expiryDate,
       supplier: newItem.supplier,
-      threshold: parseInt(newItem.threshold, 10), // Save threshold as a number
+      threshold: parseInt(newItem.threshold, 10),
     };
-  
 
-    const handleUpdateItemDetails = (e) => {
-      e.preventDefault();
-    
-      if (!selectedItem) {
-        alert("No item selected for update!");
-        return;
-      }
-    
-      axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, newItem)
-        .then(() => {
-          return axios.get('http://localhost:5000/api/inventory');
-        })
-        .then(response => {
-          setInventory(response.data);
-          setFilteredInventory(response.data);
-          closeUpdateModal();
-        })
-        .catch(error => console.error('Error updating item:', error));
-    };
-    
-    
-    // Send a POST request to your backend API to save the new item to the database
     axios.post('http://localhost:5000/api/inventory', newItemWithId)
       .then(response => {
-        // After the item is saved, fetch the updated inventory
         axios.get('http://localhost:5000/api/inventory')
           .then(response => {
-            setInventory(response.data); // Update the inventory state with the latest data
-            setFilteredInventory(response.data); // Update filtered inventory as well
+            setInventory(response.data);
+            setFilteredInventory(response.data);
           })
           .catch(error => console.error('Error fetching updated inventory:', error));
-  
-        // Close the modal and reset the form
         closeAddModal();
       })
       .catch(error => {
         console.error('Error adding item:', error);
       });
   };
-  
 
   const handleSearch = () => {
     const query = document.getElementById('searchBox').value.toLowerCase();
@@ -246,183 +194,137 @@ const handleInputBlur = (e) => {
     );
     setFilteredInventory(filteredItems);
   };
-/*
-  const handleSort = () => {
-    const sortBy = document.getElementById('sortOptions').value;
-    const sortedInventory = [...filteredInventory].sort((a, b) => {
-      if (sortBy === 'quantity') return a[sortBy] - b[sortBy];
-      if (sortBy === 'expiryDate') return new Date(a[sortBy]) - new Date(b[sortBy]);
-      return String(a[sortBy]).localeCompare(String(b[sortBy]));
-    });
-    setFilteredInventory(sortedInventory);
-  };
-*/
+
   const handleRemoveSelectedItem = () => {
     axios.delete(`http://localhost:5000/api/inventory/${selectedItem}`)
-      .then(response => {
-        // After the item is removed, fetch the updated inventory
+      .then(() => {
         axios.get('http://localhost:5000/api/inventory')
           .then(response => {
             setInventory(response.data);
             setFilteredInventory(response.data);
           })
           .catch(error => console.error('Error fetching inventory:', error));
-  
         closeRemoveModal();
       })
       .catch(error => console.error('Error removing item:', error));
   };
-  
-const handleUpdateItemDetails = (e) => {
-  e.preventDefault();
-  
-  axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, newItem)
-    .then(() => {
-      axios.get('http://localhost:5000/api/inventory')
-        .then(response => {
-          setInventory(response.data);
-          setFilteredInventory(response.data);
-        })
-        .catch(error => console.error('Error fetching inventory:', error));
-      closeUpdateModal();
-    })
-    .catch(error => console.error('Error updating item:', error));
-};
 
+  const handleUpdateItemDetails = (e) => {
+    e.preventDefault();
+    axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, newItem)
+      .then(() => {
+        axios.get('http://localhost:5000/api/inventory')
+          .then(response => {
+            setInventory(response.data);
+            setFilteredInventory(response.data);
+          })
+          .catch(error => console.error('Error fetching inventory:', error));
+        closeUpdateModal();
+      })
+      .catch(error => console.error('Error updating item:', error));
+  };
 
-const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Date());
+  const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Date());
 
   return (
     <>
       <div className={styles.inventory}>
         <h1>Inventory Overview</h1>
-
-        {/* Stock Overview Cards */}
         <div className={styles.cards}>
-  <div className={styles.card}>
-    <AiOutlineDatabase size={30} />
-    <h3>Total Stock</h3>
-    <p>{totalStock}</p>
-  </div>
-  <div className={styles.card}>
-    <AiOutlineAppstore size={30} />
-    <h3>Categories</h3>
-    <p>{categories}</p>
-  </div>
-  <div className={styles.card}>
-    <AiOutlineExclamationCircle size={30} color="red" />
-    <h3>Low Stock Items</h3>
-    <p>{lowStockItems}</p>
-  </div>
-</div>
+          <div className={styles.card}><AiOutlineDatabase size={30} /><h3>Total Stock</h3><p>{totalStock}</p></div>
+          <div className={styles.card}><AiOutlineAppstore size={30} /><h3>Categories</h3><p>{categories}</p></div>
+          <div className={styles.card}><AiOutlineExclamationCircle size={30} color="red" /><h3>Low Stock Items</h3><p>{lowStockItems}</p></div>
+        </div>
 
-        {/* Controls */}
         <div className={styles.controls}>
           <button id="addItemBtn" onClick={handleAddItem}>Add New Item</button>
           <button id="updateItemBtn" onClick={handleUpdateItem}>Update Item</button>
           <button id="removeItemBtn" onClick={handleRemoveItem}>Remove Item</button>
         </div>
 
-        {/* Search and Sort */}
         <div className={styles.topRow}>
           <div className={styles.searchSort}>
-            <input
-              type="text"
-              id="searchBox"
-              placeholder="Search..."
-              onChange={handleSearch}
-            />
-          </div>
-          <div className={styles.sortOptions}>
-           { /*<label>Sort By: </label> }
-            <select id="sortOptions">
-              <option value="name">Name</option>
-              <option value="category">Category</option>
-              <option value="quantity">Quantity</option>
-              <option value="expiryDate">Expiry Date</option>
-              <option value="supplier">Supplier</option>
-            </select>
-           { /*<button id="sortBtn" onClick={handleSort}>Sort</button> */}
+            <input type="text" id="searchBox" placeholder="Search..." onChange={handleSearch} />
           </div>
         </div>
+
         <div className={styles.colorLegend}>
-  <p><span className={styles.expiredLegend}></span> Expired Items</p>
-  <p><span className={styles.lowStockLegend}></span> Low Stock Items</p>
-</div>
+          <p><span className={styles.expiredLegend}></span> Expired Items</p>
+          <p><span className={styles.lowStockLegend}></span> Low Stock Items</p>
+        </div>
 
-        {/* Inventory Table */}
         <table className={styles.inventoryTable}>
-  <thead>
-    <tr className="invent-header-row">
-      <th>No.</th>
-      <th>Item Name</th>
-      <th>Category</th>
-      <th>Quantity</th>
-      <th>Expiry Date</th>
-      <th>Supplier</th>
-      <th>Threshold</th>
-    </tr>
-  </thead>
-  <tbody>
-  {filteredInventory.map((item, index) => (
-<tr
-  key={item.id}
-  onClick={() => setSelectedItem(item.id)}
-  style={{
-    backgroundColor:
-      item.id === selectedItem ? "#cce5ff" :
-      new Date(item.expiryDate) < new Date() ? "#ffcccc" : // Reddish for expired
-      item.quantity < item.threshold ? "#cce5ff" : "transparent", // Light blue for low stock
-    cursor: "pointer",
-  }}
->
-
-      <td>{index + 1}</td>
-      <td>{item.name}</td>
-      <td>{item.category}</td>
-      <td>{item.quantity}</td>
-      <td>{new Date(item.expiryDate).toISOString().split('T')[0]}</td> {/* YYYY-MM-DD Format */}
-      <td>{item.supplier}</td>
-      <td>{item.threshold}</td>
-    </tr>
-  ))}
-</tbody>
-
-</table>
-
+          <thead>
+            <tr className="invent-header-row">
+              <th>No.</th>
+              <th>Item Name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Total Price</th>
+              <th>Expiry Date</th>
+              <th>Supplier</th>
+              <th>Threshold</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredInventory.map((item, index) => (
+              <tr
+                key={item.id}
+                onClick={() => setSelectedItem(item.id)}
+                style={{
+                  backgroundColor:
+                    item.id === selectedItem ? "#cce5ff" :
+                      new Date(item.expiryDate) < new Date() ? "#ffcccc" :
+                        item.quantity < item.threshold ? "#cce5ff" : "transparent",
+                  cursor: "pointer",
+                }}
+              >
+                <td>{index + 1}</td>
+                <td>{item.name}</td>
+                <td>{item.category}</td>
+                <td>{item.quantity}</td>
+                <td>Rs.{(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}</td>
+                <td>{new Date(item.expiryDate).toISOString().split('T')[0]}</td>
+                <td>{item.supplier}</td>
+                <td>{item.threshold}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Add Item Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className={styles.inventoryModal}>
           <div className={styles.inventoryModalContent}>
             <span className={styles.inventoryCloseBtn} onClick={closeAddModal}>&times;</span>
             <h3>Add Item</h3>
-            <form id="addItemForm" onSubmit={handleSaveItem}>
-              <label htmlFor="name">Item Name:</label>
+            <form onSubmit={handleSaveItem}>
+              <label>Item Name:</label>
               <input type="text" name="name" value={newItem.name} onChange={handleInputChange} required />
-              <label htmlFor="category">Category:</label>
-            <select name="category" value={newItem.category} onChange={handleInputChange} required>
-              <option value="">Select Category</option>
-              <option value="tablet">Tablet</option>
-              <option value="syrup">Syrup</option>
-              <option value="lotion">Lotion</option>
-              <option value="oil">Oil</option>
-              <option value="spray">Spray</option>
-              <option value="injection">Injection</option>
-          <option value="ointment">Ointment</option>
-          <option value="cream">Cream/gel</option>
-          <option value="drops">Drops</option>
-          <option value="other">Other</option>
-</select>
-
-              <label htmlFor="quantity">Quantity:</label>
+              <label>Category:</label>
+              <select name="category" value={newItem.category} onChange={handleInputChange} required>
+                <option value="">Select Category</option>
+                <option value="tablet">Tablet</option>
+                <option value="syrup">Syrup</option>
+                <option value="lotion">Lotion</option>
+                <option value="oil">Oil</option>
+                <option value="spray">Spray</option>
+                <option value="injection">Injection</option>
+                <option value="ointment">Ointment</option>
+                <option value="cream">Cream/gel</option>
+                <option value="drops">Drops</option>
+                <option value="other">Other</option>
+              </select>
+              <label>Quantity:</label>
               <input type="number" name="quantity" value={newItem.quantity} onChange={handleInputChange} required />
-              <label htmlFor="expiryDate">Expiry Date:</label>
+              <label>Price (per unit):</label>
+              <input type="number" name="price" value={newItem.price} onChange={handleInputChange} required />
+              <label>Expiry Date:</label>
               <input type="date" name="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
-              <label htmlFor="supplier">Supplier:</label>
+              <label>Supplier:</label>
               <input type="text" name="supplier" value={newItem.supplier} onChange={handleInputChange} required />
-              <label htmlFor="threshold">Threshold:</label>
+              <label>Threshold:</label>
               <input type="number" name="threshold" value={newItem.threshold} onChange={handleInputChange} required />
               <button type="submit">Save Item</button>
             </form>
@@ -475,6 +377,8 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
 
         <label htmlFor="quantity">Quantity:</label>
         <input type="number" name="quantity" value={newItem.quantity} onChange={handleInputChange} required />
+        <label htmlFor="price">Price (per unit): </label>
+        <input type="number" name="price" value={newItem.price} onChange={handleInputChange} required />
         <label htmlFor="expiryDate">Expiry Date:</label>
         <input type="date" name="expiryDate" value={newItem.expiryDate} onChange={handleInputChange} required />
         <label htmlFor="supplier">Supplier:</label>
@@ -486,7 +390,6 @@ const expiredItems = inventory.filter(item => new Date(item.expiryDate) < new Da
     </div>
   </div>
 )}
-
     </>
   );
 }

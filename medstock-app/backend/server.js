@@ -171,12 +171,32 @@ app.get('/api/inventory', (req, res) => {
   });
 });
 
+// Get low stock or expired medicines
+app.get('/api/inventory/low-or-expired', (req, res) => {
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+  const query = `
+    SELECT * FROM inventory 
+    WHERE quantity < threshold OR expiryDate < ?
+  `;
+
+  medstockDB.query(query, [today], (err, results) => {
+    if (err) {
+      console.error("Error fetching low or expired medicines:", err);
+      return res.status(500).json({ message: "Error fetching low or expired medicines" });
+    }
+
+    res.json(results);
+  });
+});
+
+
 // Add new inventory item
 app.post('/api/inventory', (req, res) => {  
-  const { name, category, quantity, expiryDate, supplier, threshold } = req.body;
-  const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold) VALUES (?, ?, ?, ?, ?, ?)';
+  const { name, category, quantity, expiryDate, supplier, threshold, price } = req.body;
+  const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold, price) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
-  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold], (err, result) => {    if (err) {
+  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold, price], (err, result) => {    if (err) {
       return res.status(500).send('Error adding new item');
     }
     res.status(201).json({
@@ -186,24 +206,25 @@ app.post('/api/inventory', (req, res) => {
       quantity: quantity,
       expiryDate: expiryDate,
       supplier: supplier,
-      threshold: threshold
+      threshold: threshold,
+      price: price
     });
   });
 });
 
 // Update inventory item
 app.put('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventory'
-  const { name, category, quantity, expiryDate, supplier, threshold } = req.body;
+  const { name, category, quantity, expiryDate, supplier, threshold, price} = req.body;
 
-  const query = 'UPDATE inventory SET name = ?, category = ?, quantity = ?, expiryDate = ?, supplier = ?, threshold = ? WHERE id = ?';
+  const query = 'UPDATE inventory SET name = ?, category = ?, quantity = ?, expiryDate = ?, supplier = ?, threshold = ?, price=? WHERE id = ?';
 
-  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold, req.params.id], (err, result) => {
+  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold, price, req.params.id], (err, result) => {
     if (err) {
       return res.status(500).send('Error updating item');
     }
     res.json({
       id: req.params.id,
-      name, category, quantity, expiryDate, supplier, threshold
+      name, category, quantity, expiryDate, supplier, threshold, price
     });
   });
 });
@@ -666,99 +687,73 @@ app.delete("/users/:id", (req, res) => {
 
 
 // ORDERS//////////////////////
-// ✅ Fetch all orders with proper JOIN to inventory
-app.get('/api/orders', async (req, res) => {
+// ✅ GET all orders with grouped medicines
+// GET /api/orders
+app.get("/api/orders", async (req, res) => {
   try {
-    const query = `
-      SELECT o.OrderID, o.SupplierID, o.TotalPrice, o.DeliveryDate, o.Delivery_Status, 
-             i.name AS MedicineName, oi.Quantity, oi.Price 
-      FROM Orders o 
-      LEFT JOIN OrderItems oi ON o.OrderID = oi.OrderID
-      LEFT JOIN inventory i ON oi.InventoryID = i.id
-    `;
+    const [orders] = await db.query("SELECT * FROM Orders");
 
-    const [rows] = await medstockDB.promise().query(query);
+    const fullOrders = await Promise.all(
+      orders.map(async (order) => {
+        const [items] = await db.query(
+          `SELECT oi.InventoryID, i.name AS MedicineName, oi.Quantity, oi.Price
+           FROM OrderItems oi
+           JOIN inventory i ON oi.InventoryID = i.id
+           WHERE oi.OrderID = ?`,
+          [order.OrderID]
+        );
 
-    // Group orders by OrderID
-    const orders = rows.reduce((acc, row) => {
-      let order = acc.find(o => o.OrderID === row.OrderID);
-      if (!order) {
-        order = {
-          OrderID: row.OrderID,
-          SupplierID: row.SupplierID,
-          TotalPrice: row.TotalPrice,
-          DeliveryDate: row.DeliveryDate,
-          Delivery_Status: row.Delivery_Status,
-          Medicines: []
+        return {
+          ...order,
+          Medicines: items,
         };
-        acc.push(order);
-      }
-      if (row.MedicineName) {
-        order.Medicines.push({
-          MedicineName: row.MedicineName,
-          Quantity: row.Quantity,
-          Price: row.Price
-        });
-      }
-      return acc;
-    }, []);
-
-    res.json(orders);
-  } catch (err) {
-    console.error('Error fetching orders:', err);
-    res.status(500).json({ error: "Failed to fetch orders", details: err.message });
-  }
-});
-
-// ✅ Add a new order (using InventoryID)
-app.post('/api/orders', async (req, res) => {
-  //const connection = await medstockDB.getConnection(); // use medstockDB
-  const connection = await medstockDB.promise().getConnection();
-
-  const { OrderID, SupplierID, DeliveryDate, TotalPrice, medicines } = req.body;
-
-  if (!OrderID || !SupplierID || !DeliveryDate || !TotalPrice || !medicines || medicines.length === 0) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  try {
-    await connection.beginTransaction();
-
-    // Insert into Orders table
-    await connection.execute(
-      `INSERT INTO Orders (OrderID, SupplierID, TotalPrice, DeliveryDate, Delivery_Status) VALUES (?, ?, ?, ?, ?)`,
-      [OrderID, SupplierID, TotalPrice, DeliveryDate, false]
+      })
     );
 
-    const orderItemsQuery = `INSERT INTO OrderItems (OrderID, InventoryID, Quantity, Price) VALUES (?, ?, ?, ?)`;
-
-    for (const medicine of medicines) {
-      console.log("👉 Inserting medicine:", medicine.name);
-      // Fetch InventoryID from inventory using medicine.name
-      const [inventoryRows] = await connection.execute(
-        `SELECT id FROM inventory WHERE name = ? LIMIT 1`,
-        [medicine.name]
-      );
-
-      if (inventoryRows.length === 0) throw new Error(`Medicine not found in inventory: ${medicine.name}`);
-
-      const inventoryId = inventoryRows[0].id;
-
-      await connection.execute(orderItemsQuery, [OrderID, inventoryId, medicine.quantity, medicine.price]);
-    }
-
-    await connection.commit();
-    res.status(201).json({ message: "Order added successfully" });
+    res.json(fullOrders);
   } catch (error) {
-    await connection.rollback();
-    console.error('❌ Error adding order:', error);
-    res.status(500).json({ error: "Failed to add order", details: error.message });
-  } finally {
-    connection.release();
+    console.error("Error fetching orders with medicines:", error);
+    res.status(500).json({ message: "Server error fetching orders" });
   }
 });
 
-// ✅ Delete an order
+
+// ✅ POST a new order
+app.post('/api/orders', (req, res) => {
+  const { OrderID, SupplierID, DeliveryDate, TotalPrice, medicines } = req.body;
+
+  // Step 1: Insert into Orders table
+  const orderQuery = `
+    INSERT INTO Orders (OrderID, SupplierID, DeliveryDate, TotalPrice)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  medstockDB.query(orderQuery, [OrderID, SupplierID, DeliveryDate, TotalPrice], (err, result) => {
+    if (err) {
+      console.error("❌ Error inserting into Orders:", err);
+      return res.status(500).json({ message: "Error adding order" });
+    }
+
+    // Step 2: Prepare OrderItems insert
+    const itemsQuery = `
+      INSERT INTO OrderItems (OrderID, InventoryID, Quantity, Price)
+      VALUES ?
+    `;
+
+    const itemValues = medicines.map(med => [OrderID, med.id, med.quantity, med.price]);
+
+    medstockDB.query(itemsQuery, [itemValues], (itemErr) => {
+      if (itemErr) {
+        console.error("❌ Error inserting into OrderItems:", itemErr);
+        return res.status(500).json({ message: "Error adding order items" });
+      }
+
+      res.status(201).json({ message: "✅ Order added successfully!" });
+    });
+  });
+});
+
+// ✅ DELETE an order
 app.delete('/api/orders/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -770,16 +765,16 @@ app.delete('/api/orders/:orderId', async (req, res) => {
   }
 });
 
-// ✅ Update delivery status
+// ✅ UPDATE delivery status
 app.put('/api/orders/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { Delivery_Status } = req.body;
+    const { Delivery_Status, DeliveryDate } = req.body;
     const statusValue = Delivery_Status ? 1 : 0;
 
     await medstockDB.promise().execute(
-      'UPDATE Orders SET Delivery_Status = ? WHERE OrderID = ?',
-      [statusValue, orderId]
+      'UPDATE Orders SET Delivery_Status = ?, DeliveryDate = ? WHERE OrderID = ?',
+      [statusValue, DeliveryDate, orderId]
     );
 
     res.json({ success: true, message: "Order status updated successfully" });
@@ -789,7 +784,7 @@ app.put('/api/orders/:orderId', async (req, res) => {
   }
 });
 
-// ✅ API to fetch upcoming orders
+// ✅ GET upcoming orders
 app.get('/api/orders/upcoming', async (req, res) => {
   try {
     const [rows] = await medstockDB.promise().query(`
