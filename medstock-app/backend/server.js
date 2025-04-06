@@ -243,12 +243,11 @@ app.delete('/api/inventory/:id', (req, res) => {
   });
 });
 
-// BILLING PAGE (user role)///////////////////////
-// for billing
+// BILLING PAGE (user role)
+// For billing: update inventory
 app.post("/api/update-inventory", (req, res) => {
   const { name, quantity } = req.body;
 
-  // Check current stock
   medstockDB.query("SELECT quantity FROM inventory WHERE name = ?", [name], (err, results) => {
     if (err) {
       console.error("Database error:", err);
@@ -265,7 +264,6 @@ app.post("/api/update-inventory", (req, res) => {
       return res.status(400).json({ message: "Insufficient stock available." });
     }
 
-    // Update stock
     medstockDB.query(
       "UPDATE inventory SET quantity = quantity - ? WHERE name = ?",
       [quantity, name],
@@ -281,44 +279,70 @@ app.post("/api/update-inventory", (req, res) => {
 });
 
 
-// Add a new bill
-app.post("/api/add-bill", async (req, res) => {
-  const { name, quantity, price } = req.body;
-  
-  if (!name || !quantity || !price) {
-    return res.status(400).json({ message: "All fields are required." });
+// Save a new bill
+app.post("/api/save-bill", (req, res) => {
+  let { billItems, totalAmount, date, username } = req.body;
+
+  if (!billItems || !totalAmount || !date || !username) {
+    return res.status(400).json({ message: "Missing required fields." });
   }
 
-  try {
-    const sql = `INSERT INTO userRole_billingPage (name, quantity, price) VALUES (?, ?, ?)`;
-    const values = [name, quantity, price];
+  // Normalize date to YYYY-MM-DD
+  const normalizedDate = new Date(date).toISOString().split('T')[0];
+  totalAmount = parseFloat(totalAmount);
 
-    medstockDB.query(sql, values, (err, result) => {
-      if (err) {
-        console.error("Database Error:", err);
-        return res.status(500).json({ message: "Database error", error: err });
-      }
-      res.status(201).json({ message: "Bill added successfully", billId: result.insertId });
-    });
-  } catch (error) {
-    console.error("Error adding bill:", error);
-    res.status(500).json({ message: "Server error", error });
-  }
-});
+  const jsonData = JSON.stringify({
+    billItems,
+    totalAmount,
+    date: normalizedDate,
+    username
+  });
 
+  console.log("Saving bill:", jsonData); // debug log
 
-// Get all bills
-app.get("/api/get-bills", (req, res) => {
-  medstockDB.query("SELECT * FROM userRole_billingPage ORDER BY id DESC", (err, results) => {
+  const sql = `
+    INSERT INTO userRole_billingPage (name, quantity, price)
+    VALUES (?, ?, ?)
+  `;
+  const values = ["bill", 1, jsonData];
+
+  medstockDB.query(sql, values, (err, result) => {
     if (err) {
-      console.error("Error fetching bills:", err);
-      return res.status(500).json({ message: "Error fetching bills." });
+      console.error("Database Error:", err);
+      return res.status(500).json({ message: "Database error", error: err });
     }
-    res.json(results);
+    res.status(201).json({ message: "Bill saved successfully", billId: result.insertId });
   });
 });
 
-// Clear all bills after invoice is generated
+
+// Fetch all bills
+app.get("/api/get-bills", (req, res) => {
+  medstockDB.query("SELECT * FROM userRole_billingPage ORDER BY id DESC", (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Error fetching bills." });
+    }
+
+    const bills = results.map((row) => {
+      try {
+        const parsed = JSON.parse(row.price);
+        return {
+          id: row.id,
+          ...parsed
+        };
+      } catch (e) {
+        console.error("Error parsing bill:", row.price);
+        return null;
+      }
+    }).filter(Boolean);
+
+    console.log("Fetched bills:", bills); // debug log
+    res.json(bills);
+  });
+});
+
+
+// Clear all bills
 app.delete("/api/clear-bills", (req, res) => {
   medstockDB.query("DELETE FROM userRole_billingPage", (err) => {
     if (err) {
@@ -468,6 +492,7 @@ app.delete("/api/suppliers/:id", (req, res) => {
 
 // Billing PAGE///////////////////////////////////////////////////////
 // Get Delivered Orders (Only orders that are delivered but not yet billed)
+// ✅ Get delivered orders (not yet billed)
 app.get("/api/get-delivered-orders", async (req, res) => {
   try {
     const [deliveredOrders] = await medstockDB.promise().query(`
@@ -483,7 +508,7 @@ app.get("/api/get-delivered-orders", async (req, res) => {
   }
 });
 
-// Get Previous Bills
+// ✅ Get previous bills
 app.get("/api/get-bills", async (req, res) => {
   try {
     const [bills] = await medstockDB.promise().query(`
@@ -499,7 +524,7 @@ app.get("/api/get-bills", async (req, res) => {
   }
 });
 
-// Generate a Bill for a Delivered Order
+// ✅ Generate bill
 app.post("/api/generate-bill", async (req, res) => {
   try {
     const { orderID } = req.body;
@@ -513,20 +538,20 @@ app.post("/api/generate-bill", async (req, res) => {
       return res.status(404).json({ error: "Order not found or not delivered" });
     }
 
-    // Generate unique Bill ID
+    // Generate Bill ID
     const billID = `BILL${Date.now()}`;
     await medstockDB.promise().query(
       `INSERT INTO Bills (BillID, OrderID, TotalAmount) VALUES (?, ?, ?)`,
       [billID, orderID, order[0].TotalPrice]
     );
 
-    // Fetch order items
+    // Get order items
     const [orderItems] = await medstockDB.promise().query(
       `SELECT MedicineName, Quantity, Price FROM OrderItems WHERE OrderID = ?`,
       [orderID]
     );
 
-    // Insert order items into BillItems
+    // Insert into BillItems
     for (const item of orderItems) {
       await medstockDB.promise().query(
         `INSERT INTO BillItems (BillID, MedicineName, Quantity, Price) VALUES (?, ?, ?, ?)`,
@@ -534,12 +559,49 @@ app.post("/api/generate-bill", async (req, res) => {
       );
     }
 
-    res.json({ message: "Bill generated successfully", billID });
+    // ✅ Just return the BillID now
+    res.json({
+      message: "Bill generated successfully",
+      billID,
+    });
+
   } catch (error) {
     console.error("Error generating bill:", error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// ✅ API for fetching invoice details (used in React popup)
+app.get("/api/invoice/:billID", async (req, res) => {
+  const { billID } = req.params;
+
+  try {
+    // Get bill info
+    const [[bill]] = await medstockDB.promise().query(
+      `SELECT BillID, OrderID, BillingDate, TotalAmount FROM Bills WHERE BillID = ?`,
+      [billID]
+    );
+
+    if (!bill) {
+      return res.status(404).json({ error: "Invoice not found" });
+    }
+
+    // Get bill items
+    const [items] = await medstockDB.promise().query(
+      `SELECT MedicineName, Quantity, Price FROM BillItems WHERE BillID = ?`,
+      [billID]
+    );
+
+    // Send bill and items as JSON
+    res.json({ bill, items });
+  } catch (error) {
+    console.error("Error fetching invoice data:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
 
 
 const notifications = []; // Temporary storage
