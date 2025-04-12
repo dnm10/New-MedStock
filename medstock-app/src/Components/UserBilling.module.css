@@ -238,3 +238,90 @@
   opacity: 0.8;
 }
 
+.upiSection {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+}
+.upiSection input {
+  margin-right: 10px;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.successPopupOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.successPopupCard {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 4px 20px rgba(0, 128, 0, 0.3);
+}
+
+.successIcon {
+  margin-bottom: 15px;
+}
+
+.circle {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: #e0f7ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkmark {
+  font-size: 40px;
+  color: #28a745;
+}
+
+.successPopupCard h3 {
+  margin: 10px 0;
+  color: #333;
+}
+
+.successPopupCard p {
+  margin: 5px 0;
+  font-size: 15px;
+  color: #444;
+}
+
+.successPopupCard hr {
+  margin: 10px 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.amount {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.upi {
+  color: #00aaff;
+  font-weight: bold;
+}
+
+.successPopupCard button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

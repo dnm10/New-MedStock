@@ -15,6 +15,10 @@ const UserBilling = () => {
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
+  const [upiId, setUpiId] = useState('');
+  const [successPopupData, setSuccessPopupData] = useState(null);
+
+
 
 
 
@@ -31,7 +35,7 @@ const UserBilling = () => {
   useEffect(() => {
     fetchBills();
     console.log("Previous Bills Fetched:", previousBills);
-  }, [previousBills]);
+  }, []);
   
 
     const getTodayTotal = () => {
@@ -120,7 +124,12 @@ const UserBilling = () => {
           <p><strong>Bill No:</strong> ${billNumber}</p>
           <p><strong>Date:</strong> ${date.toLocaleDateString()}</p>
           <p><strong>Time:</strong> ${date.toLocaleTimeString()}</p>
-          <p><strong>Payment Mode:</strong> ${paymentType === 'cash' ? 'Offline - Cash' : 'Online - Razorpay'}</p>
+          <p><strong>Payment Mode:</strong> ${
+  paymentType === 'cash' ? 'Offline - Cash' :
+  paymentType === 'online' ? 'Online - Razorpay' :
+  'Online - UPI'
+}</p>
+
         </div>
           <div class="invoice-details">
             <table>
@@ -167,10 +176,11 @@ const UserBilling = () => {
         billItems,
         totalAmount,
         date: new Date().toISOString(),
-        username: localStorage.getItem("username") || "Unknown"
-       
+        username: localStorage.getItem("username") || "Unknown",
+        paymentType // Include this to send payment type to backend
       }),
     })
+    
       .then(response => response.json())
       .then(data => {
         console.log("Bill saved successfully:", data);
@@ -223,6 +233,14 @@ const UserBilling = () => {
       console.error("Mock payment error:", error);
       alert("Failed to process payment.");
     }
+
+    setSuccessPopupData({
+      transactionId: Math.floor(Math.random() * 1000000),
+      upiId: "**** **** **** " + cardNumber.slice(-4),
+      amount: totalAmount
+    });
+    
+    
   };
   
   
@@ -306,7 +324,8 @@ const UserBilling = () => {
     onChange={(e) => setPaymentType(e.target.value)}
   >
     <option value="cash">Offline - Cash</option>
-    <option value="online">Online - Razorpay</option>
+    <option value="online">Online - Via Card</option>
+    <option value="upi">Online - UPI</option>
   </select>
 </div>
 
@@ -373,16 +392,62 @@ const UserBilling = () => {
             <button type="button" onClick={() => setShowPaymentForm(false)}>Cancel</button>
           </form>
         </div>
+        {successPopupData && (
+  <SuccessPopup
+    transactionId={successPopupData.transactionId}
+    upiId={successPopupData.upiId}
+    amount={successPopupData.amount}
+    onClose={() => setSuccessPopupData(null)}
+  />
+)}
+
       </div>
     )}
   </>
 ) : (
   <button onClick={generateInvoice}>Generate Invoice</button>
 )}
+{paymentType === "upi" && (
+  <div className={styles.upiSection}>
+    <h3>Enter UPI ID</h3>
+    <input
+      type="text"
+      value={upiId}
+      onChange={(e) => setUpiId(e.target.value)}
+      placeholder="example@upi"
+      required
+    />
+    <button
+      onClick={() => {
+        if (!upiId || !upiId.includes('@')) {
+          alert("Please enter a valid UPI ID.");
+          return;
+        }
 
+        // Set success popup data after payment validation
+        setSuccessPopupData({
+          transactionId: Math.floor(Math.random() * 1000000),
+          upiId: upiId,
+          amount: totalAmount,
+        });
 
+        // Proceed with generating the invoice
+        generateInvoice();
+      }}
+    >
+      Pay via UPI
+    </button>
+  </div>
+)}
 
-
+{successPopupData && (
+  <SuccessPopup
+    transactionId={successPopupData.transactionId}
+    upiId={successPopupData.upiId}
+    amount={successPopupData.amount}
+    onClose={() => setSuccessPopupData(null)}
+  />
+)}
           
         </section>
       </div>
@@ -394,5 +459,23 @@ const UserBilling = () => {
   );
 };
 
+// Add this at the bottom of your file
+const SuccessPopup = ({ transactionId, upiId, amount, onClose }) => (
+  <div className={styles.successPopupOverlay}>
+    <div className={styles.successPopupCard}>
+      <div className={styles.successIcon}>
+        <div className={styles.circle}>
+          <span className={styles.checkmark}>✔</span>
+        </div>
+      </div>
+      <h3>Ticket Payment Successful</h3>
+      <p>Transaction Number: <strong>{transactionId}</strong></p>
+      <hr />
+      <p>Amount paid <span className={styles.amount}>₹{amount}</span></p>
+      <p>Paid by <span className={styles.upi}>{upiId}</span></p>
+      <button onClick={onClose}>Close</button>
+    </div>
+  </div>
+);
 
 export default UserBilling;
