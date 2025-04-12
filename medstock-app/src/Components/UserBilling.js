@@ -468,7 +468,7 @@ const SuccessPopup = ({ transactionId, upiId, amount, onClose }) => (
           <span className={styles.checkmark}>✔</span>
         </div>
       </div>
-      <h3>Ticket Payment Successful</h3>
+      <h3>Payment Successful</h3>
       <p>Transaction Number: <strong>{transactionId}</strong></p>
       <hr />
       <p>Amount paid <span className={styles.amount}>₹{amount}</span></p>
