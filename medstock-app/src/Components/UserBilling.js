@@ -10,7 +10,12 @@ const UserBilling = () => {
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0); 
   const [previousBills, setPreviousBills] = useState([]);
-  const [paymentType, setPaymentType] = useState("cash"); // ✅ Moved here
+  const [paymentType, setPaymentType] = useState("cash"); 
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvv, setCvv] = useState('');
+
 
 
   const fetchBills = async () => {
@@ -25,13 +30,9 @@ const UserBilling = () => {
 
   useEffect(() => {
     fetchBills();
-  }, []);
-
-  useEffect(() => {
-    if (billItems.length > 0) {
-      document.getElementById("medicine-name").focus();
-    }
-  }, [billItems]);
+    console.log("Previous Bills Fetched:", previousBills);
+  }, [previousBills]);
+  
 
     const getTodayTotal = () => {
       const today = new Date().toISOString().split("T")[0];
@@ -191,7 +192,40 @@ const UserBilling = () => {
     console.log("Previous Bills Fetched:", previousBills);
   }, [previousBills]);
   
-
+  const handleMockOnlinePayment = async () => {
+    // Basic validation for card fields
+    if (!cardNumber || !expiry || !cvv) {
+      alert("Please fill in all the card details.");
+      return;
+    }
+  
+    if (cardNumber.length !== 16) {
+      alert("Please enter a valid 16-digit card number.");
+      return;
+    }
+  
+    try {
+      const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: localStorage.getItem("username") || "Unknown",
+          amount: totalAmount,
+        }),
+      });
+  
+      if (response.ok) {
+        alert("Mock Online Payment Successful!");
+        setShowPaymentForm(false); // Hide the payment form
+        generateInvoice(); // Generate the invoice
+      }
+    } catch (error) {
+      console.error("Mock payment error:", error);
+      alert("Failed to process payment.");
+    }
+  };
+  
+  
   return (
     <div className={styles.Billinguser}>
       <h1>MedStock Billing System</h1>
@@ -293,8 +327,63 @@ const UserBilling = () => {
               ))}
             </ul>
           )}
+ {paymentType === "online" ? (
+  <>
+    <button onClick={() => setShowPaymentForm(true)}>Pay Online</button>
 
-          <button onClick={generateInvoice}>Generate Invoice</button>
+    {/* Modal for Payment Form */}
+    {showPaymentForm && (
+      <div className={styles.paymentModal}>
+        <div className={styles.modalContent}>
+          <h2>Enter Card Details</h2>
+          <form onSubmit={(e) => { e.preventDefault(); handleMockOnlinePayment(); }}>
+            <div>
+              <label>Card Number:</label>
+              <input 
+                type="text" 
+                value={cardNumber} 
+                onChange={(e) => setCardNumber(e.target.value)} 
+                maxLength="16" 
+                placeholder="Enter 16-digit card number" 
+                required 
+              />
+            </div>
+            <div>
+              <label>Expiry Date:</label>
+              <input 
+                type="text" 
+                value={expiry} 
+                onChange={(e) => setExpiry(e.target.value)} 
+                placeholder="MM/YY" 
+                required 
+              />
+            </div>
+            <div>
+              <label>CVV:</label>
+              <input 
+                type="text" 
+                value={cvv} 
+                onChange={(e) => setCvv(e.target.value)} 
+                maxLength="3" 
+                placeholder="CVV" 
+                required 
+              />
+            </div>
+            <button type="submit">Submit Payment</button>
+            <button type="button" onClick={() => setShowPaymentForm(false)}>Cancel</button>
+          </form>
+        </div>
+      </div>
+    )}
+  </>
+) : (
+  <button onClick={generateInvoice}>Generate Invoice</button>
+)}
+
+
+
+
+          
         </section>
       </div>
 

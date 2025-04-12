@@ -224,7 +224,7 @@ const AuthForm = () => {
               </label>
             </div>
 
-            <div className={styles.forgotPassword}>
+           {/* <div className={styles.forgotPassword}>
               <button
                 type="button"
                 className={styles.forgotPasswordBtn}
@@ -232,7 +232,7 @@ const AuthForm = () => {
               >
                 Forgot Password?
               </button>
-            </div>
+            </div>*/}
 
             <button className={styles.lsbtn} type="submit">
               {isLogin ? 'Log In' : 'Sign Up'}
