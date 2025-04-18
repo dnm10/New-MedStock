@@ -8,12 +8,12 @@ const Orders = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [suggestedMedicines, setSuggestedMedicines] = useState([]);
-
+  const [inventoryMedicines, setInventoryMedicines] = useState([]);
   const [newOrder, setNewOrder] = useState({
     OrderID: "",
     SupplierID: "",
     DeliveryDate: "",
-    medicines: [{ id: 1, name: "", quantity: 1, price: 0 }],
+    medicines: [{ id: 1, name: "", category: "", quantity: 1, price: 0 }],
   });
 
   const fetchOrders = async () => {
@@ -25,40 +25,38 @@ const Orders = () => {
     }
   };
 
-  const fetchUpcomingOrders = async () => {
+  const fetchInventoryMedicines = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/orders/upcoming');
-      if (response.data.length > 0) {
-        response.data.forEach(order => {
-          const dateOnly = order.DeliveryDate.split('T')[0];
-          alert(`📢 Upcoming Order Alert:\nOrder #${order.OrderID} from Supplier ${order.SupplierID} will arrive on ${dateOnly}`);
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching upcoming orders:', error);
+      const response = await axios.get("http://localhost:5000/api/inventory/names");
+      setInventoryMedicines(response.data);
+    } catch (err) {
+      console.error("Error fetching inventory medicine names", err);
     }
   };
 
   const fetchLowOrExpiredMedicines = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/inventory/low-or-expired");
-      
-      const defaultMeds = response.data.map((item) => ({
-        id: item.id, // ✅ Use actual inventory ID
+      const [lowResponse, inventoryResponse] = await Promise.all([
+        axios.get("http://localhost:5000/api/inventory/low-or-expired"),
+        axios.get("http://localhost:5000/api/inventory/names"),
+      ]);
+
+      const defaultMeds = lowResponse.data.map((item) => ({
+        id: item.id,
         name: item.name,
+        category: item.category,
         quantity: item.quantity < 10 ? 10 - item.quantity : 1,
         price: item.price,
         supplier_id: item.supplier_id,
       }));
-  
+
       const mergedMedicines = [
         ...defaultMeds,
-        ...newOrder.medicines.filter(
-          (m) => !defaultMeds.some((s) => s.name === m.name)
-        ),
+        ...newOrder.medicines.filter((m) => !defaultMeds.some((s) => s.name === m.name)),
       ];
-  
+
       setSuggestedMedicines(defaultMeds);
+      setInventoryMedicines(inventoryResponse.data);
       setNewOrder((prev) => ({
         ...prev,
         medicines: mergedMedicines,
@@ -69,12 +67,12 @@ const Orders = () => {
       console.error("Error fetching suggested medicines:", error);
     }
   };
-  
 
   useEffect(() => {
     fetchOrders();
-    fetchUpcomingOrders();
-    const interval = setInterval(fetchUpcomingOrders, 30000);
+    fetchInventoryMedicines();
+    fetchLowOrExpiredMedicines();
+    const interval = setInterval(fetchLowOrExpiredMedicines, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -103,7 +101,7 @@ const Orders = () => {
       ...prevOrder,
       medicines: [
         ...prevOrder.medicines,
-        { id: null, name: "", quantity: 1, price: 0},
+        { id: null, name: "", category: "", quantity: 1, price: 0 },
       ],
     }));
   };
@@ -116,29 +114,44 @@ const Orders = () => {
   };
 
   const addOrder = async () => {
+    console.log(newOrder); // Log the current state of newOrder to debug
+    
     const { OrderID, SupplierID, DeliveryDate, medicines } = newOrder;
-
+    
     if (!OrderID || !SupplierID || !DeliveryDate || medicines.length === 0) {
       alert("Please fill out all fields.");
       return;
     }
 
+    // Validate each medicine
+    for (const med of medicines) {
+      if (!med.name || med.quantity <= 0 || med.price <= 0) {
+        alert("Please provide valid medicine details.");
+        return;
+      }
+    }
+
     try {
       await axios.post("http://localhost:5000/api/orders", {
-        OrderID,
+        OrderID: OrderID.trim(),
         SupplierID: parseInt(SupplierID, 10),
         DeliveryDate,
         TotalPrice: calculateTotal(),
-        medicines,
+        medicines: medicines.map(({ name, category, quantity, price }) => ({
+          name: name.trim(),
+          category: category.trim(),
+          quantity,
+          price
+        }))
       });
 
       fetchOrders();
       setIsAddModalOpen(false);
-      setNewOrder({ OrderID: "", SupplierID: "", DeliveryDate: "", medicines: [{ id: 1, name: "", quantity: 1, price: 0 }] });
-      alert("Order added successfully!");
+      setNewOrder({ OrderID: "", SupplierID: "", DeliveryDate: "", medicines: [{ id: 1, name: "", category: "", quantity: 1, price: 0 }] });
+      alert("✅ Order added successfully!");
     } catch (error) {
       console.error("Error adding order:", error);
-      alert("Failed to add order.");
+      alert("❌ Failed to add order: " + (error.response?.data?.details || error.message));
     }
   };
 
@@ -215,7 +228,18 @@ const Orders = () => {
             <h3>Medicines</h3>
             {newOrder.medicines.map((medicine) => (
               <div key={medicine.id} className={styles.ordersmedicineCard}>
-                <input type="text" placeholder="Medicine Name" value={medicine.name} onChange={(e) => updateMedicine(medicine.id, "name", e.target.value)} required />
+                <input type="text" list="medicineOptions" placeholder="Medicine Name" value={medicine.name} onChange={(e) => updateMedicine(medicine.id, "name", e.target.value)} required />
+                <datalist id="medicineOptions">
+                  {inventoryMedicines.map((med) => (
+                    <option key={med.id} value={med.name} />
+                  ))}
+                </datalist>
+                <input type="text" list="categoryOptions" placeholder="Category" value={medicine.category} onChange={(e) => updateMedicine(medicine.id, "category", e.target.value)} required />
+                <datalist id="categoryOptions">
+                  {inventoryMedicines.map((med) => (
+                    <option key={med.id} value={med.category} />
+                  ))}
+                </datalist>
                 <input type="number" placeholder="Quantity" value={medicine.quantity} onChange={(e) => updateMedicine(medicine.id, "quantity", Number(e.target.value))} required />
                 <input type="number" placeholder="Price" value={medicine.price} onChange={(e) => updateMedicine(medicine.id, "price", Number(e.target.value))} required />
                 <button onClick={() => removeMedicine(medicine.id)}>❌</button>
@@ -251,7 +275,9 @@ const Orders = () => {
                       <td>
                         {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
                           order.Medicines.map((med, index) => (
-                            <div key={index}>{(med.MedicineName || med.name)} - {med.Quantity || med.quantity} units - ₹{med.Price || med.price}</div>
+                            <div key={index}>
+                              {med.name} ({med.category}) - {med.quantity} units - ₹{med.price}
+                            </div>
                           ))
                         ) : (
                           <em>No medicines</em>
@@ -291,7 +317,9 @@ const Orders = () => {
                 <td>
                   {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
                     order.Medicines.map((med, index) => (
-                      <div key={index}>{(med.MedicineName || med.name)} - {med.Quantity || med.quantity} units - ₹{med.Price || med.price}</div>
+                      <div key={index}>
+                        {med.name} - {med.quantity} units - ₹{med.price}
+                      </div>
                     ))
                   ) : (
                     <em>No medicines</em>
