@@ -17,9 +17,26 @@ const UserBilling = () => {
   const [cvv, setCvv] = useState('');
   const [upiId, setUpiId] = useState('');
   const [successPopupData, setSuccessPopupData] = useState(null);
+  const [todayTotal, setTodayTotal] = useState("0.00");
 
 
-
+  const updateTodayTotal = (bills) => {
+    const today = new Date().toISOString().split("T")[0];
+    const currentUser = localStorage.getItem("username");
+  
+    const todayBills = bills.filter((bill) => {
+      const billDate = bill.date?.split("T")[0];
+      return billDate === today && bill.username === currentUser;
+    });
+  
+    const total = todayBills.reduce((sum, bill) => {
+      const amount = parseFloat(bill.totalAmount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+  
+    setTodayTotal(total.toFixed(2));
+  };
+  
 
 
   const fetchBills = async () => {
@@ -27,6 +44,7 @@ const UserBilling = () => {
       const response = await fetch("http://localhost:5000/api/get-bills");
       const data = await response.json();
       setPreviousBills(data);
+      updateTodayTotal(data); 
     } catch (error) {
       console.error("Error fetching previous bills:", error);
     }
@@ -38,22 +56,23 @@ const UserBilling = () => {
   }, []);
   
 
-    const getTodayTotal = () => {
-      const today = new Date().toISOString().split("T")[0];
-    
-      const todayBills = previousBills.filter((bill) => {
-        const billDate = bill.date?.split("T")[0]; // In case timestamp is included
-        return billDate === today;
-      });
-    
-      const total = todayBills.reduce((sum, bill) => {
-        const amount = parseFloat(bill.totalAmount);
-        return sum + (isNaN(amount) ? 0 : amount);
-      }, 0);
-    
-      return total.toFixed(2);
-    };
-    
+  const getTodayTotal = () => {
+    const today = new Date().toISOString().split("T")[0]; // e.g. "2025-04-18"
+    const currentUser = localStorage.getItem("username");
+  
+    const todayBills = previousBills.filter((bill) => {
+      const billDate = bill.date?.split("T")[0]; // Assumes bill.date is ISO format
+      return billDate === today && bill.username === currentUser;
+    });
+  
+    const total = todayBills.reduce((sum, bill) => {
+      const amount = parseFloat(bill.totalAmount);
+      return sum + (isNaN(amount) ? 0 : amount); // Failsafe for invalid amounts
+    }, 0);
+  
+    return total.toFixed(2); // Returns string like "120.50"
+  };
+  
   
   
 
@@ -330,8 +349,7 @@ const UserBilling = () => {
 </div>
 
 
-          <h3>Today's Payout: ₹{getTodayTotal()}</h3>
-
+<h3>Today's Payout: ₹{todayTotal}</h3>
 
           {previousBills.length === 0 ? (
             <p>No previous bills yet.</p>

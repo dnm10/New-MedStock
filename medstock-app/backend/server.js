@@ -407,6 +407,54 @@ app.get('/api/reports/sales', (req, res) => {
   });
 });
 
+// 🔥 Today's Total Payout (calculate and save)
+app.get('/api/reports/todays-payout', (req, res) => {
+  const payoutQuery = `
+    SELECT SUM(quantity * price) AS total_payout
+    FROM sales
+    WHERE DATE(sale_date) = CURDATE()
+  `;
+
+  medstockDB.query(payoutQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching today\'s payout:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    const totalPayout = results[0].total_payout || 0;
+
+    // Insert into payouts table
+    const insertQuery = `
+      INSERT INTO payouts (payout_amount, payout_date, created_by)
+      VALUES (?, CURDATE(), ?)
+    `;
+    const createdBy = 'system'; // You can change or pass from frontend
+
+    medstockDB.query(insertQuery, [totalPayout, createdBy], (insertErr) => {
+      if (insertErr) {
+        console.error('Error inserting payout:', insertErr);
+        return res.status(500).json({ error: 'Insert error' });
+      }
+
+      res.json({ total_payout: totalPayout, saved: true });
+    });
+  });
+});
+
+// 📜 Fetch payout history
+app.get('/api/reports/payout-history', (req, res) => {
+  const fetchQuery = `SELECT * FROM payouts ORDER BY payout_date DESC`;
+
+  medstockDB.query(fetchQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching payout history:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.json({ payouts: results });
+  });
+});
+
 // Fetch low stock items
 app.get('/api/reports/low-stock', (req, res) => {
   medstockDB.query('SELECT name, quantity, threshold FROM inventory WHERE quantity < threshold', (err, results) => {

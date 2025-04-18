@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaEnvelope, FaUser, FaUserShield } from "react-icons/fa";
 import "./Profile.css";
+import adminimg from '../Assets/adminimg.png';
+
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -8,7 +10,8 @@ const Profile = () => {
     name: "",
     email: "",
     role: "",
-    image: "https://via.placeholder.com/200",
+    image: adminimg,
+
   });
 
   useEffect(() => {
@@ -30,7 +33,8 @@ const Profile = () => {
     <div className="profile-container">
       <div className="profile-card">
         <div className="profile-header"></div>
-        <img src={user.image} alt="Profile" className="profile-image" />
+        <img src={user.image || adminimg} alt="Profile" className="profile-image" />
+
         <h2 className="profile-name">{user.name || "Profile"}</h2>
         <div className="profile-info">
           <p><FaUser className="profile-icon" /> <strong>Name:</strong> {user.name || "N/A"}</p>
