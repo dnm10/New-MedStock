@@ -4,7 +4,7 @@ import styles from "./AdminBilling.module.css";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
 
-const Billing = () => {
+const AdminBilling = () => {
   const [pendingOrders, setPendingOrders] = useState([]);
   const [previousBills, setPreviousBills] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,18 +51,23 @@ const Billing = () => {
       const response = await axios.post("http://localhost:5000/api/generate-bill", {
         orderID: order.OrderID,
       });
-
+  
       if (response.status === 200) {
         alert("Bill generated successfully!");
         fetchDeliveredOrders(); // Refresh pending orders
         fetchPreviousBills();   // Refresh billing history
-        navigate(`/invoice/${response.data.billID}`);
+        viewInvoice(response.data.billID); // Show the invoice in modal
       }
     } catch (error) {
-      console.error("Error generating bill:", error);
-      alert("Error generating bill. Please try again.");
+      console.error("Error generating bill:", error); // Log the entire error
+      if (error.response && error.response.data) {
+        alert(`Error: ${error.response.data.error}`);
+      } else {
+        alert("Error generating bill. Please try again.");
+      }
     }
   };
+  
 
   // ✅ Fetch and view invoice
   const viewInvoice = async (billID) => {
@@ -191,4 +196,4 @@ const Billing = () => {
   );
 };
 
-export default Billing;
+export default AdminBilling;
