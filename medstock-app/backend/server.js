@@ -796,49 +796,51 @@ app.delete("/users/:id", (req, res) => {
 });
 
 
-// ORDERS //////////////////////
+///////////////////////////////////////////////////ORDERS //////////////////////
 // ✅ GET all orders with grouped medicines
-// GET /api/orders
 app.get("/api/orders", async (req, res) => {
   try {
+    // Fetch all orders
     const [orders] = await medstockDB.promise().query("SELECT * FROM Orders");
 
-    // Fetch all order items and join with inventory to include category
+    // Fetch order items directly with name and category from OrderItems
     const [items] = await medstockDB.promise().query(`
       SELECT 
         oi.OrderID,
-        i.name AS MedicineName,
-        i.category AS MedicineCategory,
+        oi.Name AS MedicineName,
+        oi.Category AS MedicineCategory,
         oi.Quantity,
-        oi.Price
+        oi.Price,
+        oi.InventoryID
       FROM OrderItems oi
-      JOIN inventory i ON oi.InventoryID = i.id
     `);
 
-    // Group items by OrderID
+    // Group order items by OrderID
     const orderMap = {};
-    for (const order of orders) {
+    orders.forEach(order => {
       order.Medicines = [];
       orderMap[order.OrderID] = order;
-    }
+    });
 
-    for (const item of items) {
+    items.forEach(item => {
       if (orderMap[item.OrderID]) {
         orderMap[item.OrderID].Medicines.push({
-          name: item.MedicineName,
-          category: item.MedicineCategory, // Now includes category
+          name: item.MedicineName || 'Name Missing',
+          category: item.MedicineCategory || 'Category Missing',
           quantity: item.Quantity,
           price: item.Price,
         });
       }
-    }
+    });
 
-    res.json(Object.values(orderMap));
+    const result = Object.values(orderMap);
+    res.json(result);
   } catch (err) {
     console.error("Error fetching orders:", err);
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
+
 
 // New Route to get all inventory medicine names and categories
 app.get('/api/inventory/names', async (req, res) => {
@@ -851,11 +853,25 @@ app.get('/api/inventory/names', async (req, res) => {
   }
 });
 
+
+const formatDate = (date) => {
+  if (!date || date === '0000-00-00') {
+    return null; // Use NULL for invalid or missing dates
+  }
+  const d = new Date(date);
+  if (isNaN(d)) {
+    return null; // In case the provided date is invalid
+  }
+  return d.toISOString().split('T')[0]; // Returns the date part 'YYYY-MM-DD'
+};
+
+
+
 // ✅ POST a new order
+// ORDER CREATION ROUTE 
 app.post('/api/orders', async (req, res) => {
   const { OrderID, SupplierID, DeliveryDate, TotalPrice, medicines } = req.body;
 
-  // Log the incoming request data for debugging
   console.log('Received order data:', req.body);
 
   if (!OrderID || !SupplierID || !DeliveryDate || !medicines || medicines.length === 0) {
@@ -866,15 +882,14 @@ app.post('/api/orders', async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    // Check if OrderID already exists
     const [existing] = await conn.query(`SELECT OrderID FROM Orders WHERE OrderID = ?`, [OrderID]);
     if (existing.length > 0) {
       throw new Error(`OrderID "${OrderID}" already exists.`);
     }
 
     await conn.query(
-      `INSERT INTO Orders (OrderID, SupplierID, DeliveryDate, TotalPrice) VALUES (?, ?, ?, ?)`,
-      [OrderID, SupplierID, DeliveryDate, TotalPrice]
+      `INSERT INTO Orders (OrderID, SupplierID, DeliveryDate, TotalPrice, Delivery_Status) VALUES (?, ?, ?, ?, ?)`,
+      [OrderID, SupplierID, DeliveryDate, TotalPrice, false]
     );
 
     const itemValues = [];
@@ -884,27 +899,28 @@ app.post('/api/orders', async (req, res) => {
         throw new Error(`Invalid medicine entry: ${JSON.stringify(med)}`);
       }
 
-      const [rows] = await conn.query(`SELECT id FROM inventory WHERE name = ?`, [med.name]);
+      const formattedExpiryDate = formatDate(med.expiryDate || '0000-00-00');
+      const category = med.category || 'Default Category';
+      const supplierID = med.supplier_id || SupplierID;
 
-      let inventoryID;
-      if (rows.length > 0) {
-        // Medicine exists in inventory, use the existing inventory ID
-        inventoryID = rows[0].id;
-      } else {
-        // Medicine doesn't exist, create a new inventory item without expiryDate
-        const [insertResult] = await conn.query(`
-          INSERT INTO inventory (name, quantity, price, category, expiryDate)
-          VALUES (?, 0, ?, ?, ?)
-        `, [med.name, med.price, med.category || 'Default Category', null]); // Use null for expiryDate
+      // We don't assign InventoryID yet; it'll be updated on delivery
+      const inventoryID = null;
 
-        inventoryID = insertResult.insertId;
-      }
-
-      itemValues.push([OrderID, inventoryID, med.quantity, med.price]);
+      itemValues.push([
+        OrderID,
+        inventoryID,
+        med.quantity,
+        med.price,
+        med.name,
+        category,
+        formattedExpiryDate,
+        supplierID
+      ]);
     }
 
     await conn.query(
-      `INSERT INTO OrderItems (OrderID, InventoryID, Quantity, Price) VALUES ?`,
+      `INSERT INTO OrderItems (OrderID, InventoryID, Quantity, Price, Name, Category, ExpiryDate, SupplierID)
+       VALUES ?`,
       [itemValues]
     );
 
@@ -921,44 +937,211 @@ app.post('/api/orders', async (req, res) => {
 });
 
 
+// DELIVERY ROUTE (UPDATES INVENTORY & MARKS ORDER DELIVERED)
+app.post('/api/orders/deliver/:orderID', async (req, res) => {
+  const { orderID } = req.params;
+  const conn = await medstockDB.promise().getConnection();
 
-// ✅ DELETE an order
-app.delete('/api/orders/:orderId', async (req, res) => {
   try {
-    const { orderId } = req.params;
-    await medstockDB.promise().execute('DELETE FROM Orders WHERE OrderID = ?', [orderId]);
-    res.json({ success: true, message: "Order deleted successfully" });
-  } catch (error) {
-    console.error('Error deleting order:', error);
-    res.status(500).json({ error: "Failed to delete order", details: error.message });
-  }
-});
+    await conn.beginTransaction();
+    console.log(`Delivering Order: ${orderID}`);
 
+    // Check if the order exists and is not already delivered
+    const [orderRows] = await conn.query(
+      'SELECT * FROM Orders WHERE OrderID = ? AND Delivery_Status = ?',
+      [orderID, false]  // Only deliver if not already delivered
+    );
+    if (orderRows.length === 0) {
+      return res.status(400).json({ message: "Order not found or already delivered" });
+    }
 
-// ✅ UPDATE delivery status
-app.put('/api/orders/:orderId', async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { Delivery_Status, DeliveryDate } = req.body;
-
-    const statusValue = Delivery_Status ? 1 : 0;
-
-    // First, update the order's delivery status
-    await medstockDB.promise().execute(
-      'UPDATE Orders SET Delivery_Status = ?, DeliveryDate = ? WHERE OrderID = ?',
-      [statusValue, DeliveryDate, orderId]
+    // Fetch the order items
+    const [medicines] = await conn.query(
+      'SELECT * FROM OrderItems WHERE OrderID = ?',
+      [orderID]
     );
 
-    // No need to update the expiry date anymore
+    // For each item in the order, update the inventory
+    for (const med of medicines) {
+      console.log(`Medicine Name: ${med.Name}, Medicine ID: ${med.InventoryID}`);
+      
+      if (!med.InventoryID) {
+        console.log("❌ InventoryID not found for this medicine, skipping update.");
+        continue; // Skip if InventoryID is not found
+      }
 
-    res.json({ success: true, message: "Order status updated successfully" });
-  } catch (error) {
-    console.error('Error updating delivery status:', error);
-    res.status(500).json({ error: "Failed to update order status", details: error.message });
+      // Call the new route to update the inventory after delivery
+      try {
+        const response = await axios.put(`http://localhost:5000/api/inventory/update/${med.InventoryID}`, {
+          quantity: med.Quantity,
+        });
+        console.log(`✅ Successfully updated inventory for Medicine ID: ${med.InventoryID}`);
+      } catch (err) {
+        console.error("❌ Failed to update inventory for Medicine ID:", med.InventoryID, err.response.data);
+      }
+    }
+
+    // Mark the order as delivered and set the Delivery Date
+    await conn.query(
+      `UPDATE Orders SET Delivery_Status = true, Delivery_Date = CURDATE() WHERE OrderID = ?`,
+      [orderID]
+    );
+
+    await conn.commit();
+    res.status(200).json({ message: "✅ Order delivered successfully and inventory updated!" });
+  } catch (err) {
+    await conn.rollback();
+    console.error("❌ Delivery failed:", err);
+    res.status(500).json({ message: "Error during delivery", error: err.message });
+  } finally {
+    conn.release();
   }
 });
 
 
+
+// PUT - Mark order as delivered and update inventory
+// Consolidated Delivery Endpoint
+// PUT - Mark order as delivered and update inventory
+app.put("/api/orders/:orderId/deliver", async (req, res) => {
+  const { orderId } = req.params;
+  const { delivered } = req.body;
+  const conn = await medstockDB.promise().getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    // 1. Update order delivery status
+    const [updateResult] = await conn.query(
+      `UPDATE Orders 
+       SET Delivery_Status = ?, 
+           DeliveryDate = IF(?, NOW(), NULL)
+       WHERE OrderID = ?`,
+      [delivered, delivered, orderId]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      await conn.rollback();
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // 2. Only update inventory if we're marking as delivered (not when unchecking)
+    if (delivered) {
+      // Get all items in this order
+      const [items] = await conn.query(
+        `SELECT oi.*, i.id AS inventory_id 
+         FROM OrderItems oi
+         LEFT JOIN inventory i ON i.name = oi.Name
+         WHERE oi.OrderID = ?`,
+        [orderId]
+      );
+
+      // Update each item in inventory
+      for (const item of items) {
+        if (!item.inventory_id) {
+          console.warn(`No inventory match for ${item.Name} - skipping`);
+          continue;
+        }
+
+        await conn.query(
+          `UPDATE inventory 
+           SET quantity = quantity + ? 
+           WHERE id = ?`,
+          [item.Quantity, item.inventory_id]
+        );
+
+        // Update the OrderItems with the inventory ID if not set
+        if (!item.InventoryID) {
+          await conn.query(
+            `UPDATE OrderItems 
+             SET InventoryID = ? 
+             WHERE OrderID = ? AND Name = ?`,
+            [item.inventory_id, orderId, item.Name]
+          );
+        }
+      }
+    }
+
+    await conn.commit();
+    res.json({ success: true, message: "Order status updated" });
+  } catch (error) {
+    await conn.rollback();
+    console.error("Delivery error:", error);
+    res.status(500).json({ error: "Failed to update order status" });
+  } finally {
+    conn.release();
+  }
+});
+
+
+// PUT - Update inventory quantity
+app.put('/api/inventory/update/:medicineId', async (req, res) => {
+  const { medicineId } = req.params;
+  const { quantity } = req.body;
+
+  if (!quantity || isNaN(quantity)) {
+    return res.status(400).json({ error: "Invalid quantity" });
+  }
+
+  const conn = await medstockDB.promise().getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // Verify medicine exists
+    const [rows] = await conn.query(
+      'SELECT * FROM inventory WHERE id = ?',
+      [medicineId]
+    );
+
+    if (rows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ error: "Medicine not found" });
+    }
+
+    // Update quantity (adding the delivered quantity)
+    await conn.query(
+      'UPDATE inventory SET quantity = quantity + ? WHERE id = ?',
+      [quantity, medicineId]
+    );
+
+    await conn.commit();
+    res.json({ success: true });
+  } catch (error) {
+    await conn.rollback();
+    console.error("Inventory update error:", error);
+    res.status(500).json({ error: "Failed to update inventory" });
+  } finally {
+    conn.release();
+  }
+});
+
+
+
+
+// DELETE an order
+app.delete('/api/orders/:orderID', async (req, res) => {
+  const { orderID } = req.params;
+  const conn = await medstockDB.promise().getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    // First, delete the order items
+    await conn.query('DELETE FROM OrderItems WHERE OrderID = ?', [orderID]);
+
+    // Then, delete the order itself
+    await conn.query('DELETE FROM Orders WHERE OrderID = ?', [orderID]);
+
+    await conn.commit();
+    res.status(200).json({ message: `Order ${orderID} deleted successfully!` });
+  } catch (err) {
+    await conn.rollback();
+    console.error('Error deleting order:', err);
+    res.status(500).json({ message: 'Error deleting order', details: err.message });
+  } finally {
+    conn.release();
+  }
+});
 
 
 // ✅ GET upcoming orders
@@ -978,4 +1161,3 @@ app.get('/api/orders/upcoming', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch upcoming orders' });
   }
 });
-

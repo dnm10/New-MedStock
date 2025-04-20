@@ -7,13 +7,13 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [suggestedMedicines, setSuggestedMedicines] = useState([]);
+  const [, setSuggestedMedicines] = useState([]);
   const [inventoryMedicines, setInventoryMedicines] = useState([]);
   const [newOrder, setNewOrder] = useState({
-    OrderID: "",
-    SupplierID: "",
-    DeliveryDate: "",
-    medicines: [{ id: 1, name: "", category: "", quantity: 1, price: 0 }],
+    OrderID: " ",
+    SupplierID: " ",
+    DeliveryDate: " ",
+    medicines: [{ id: 1, name: " ", category: " ", quantity: 1, price: 0 }],
   });
 
   const fetchOrders = async () => {
@@ -34,13 +34,13 @@ const Orders = () => {
     }
   };
 
-  const fetchLowOrExpiredMedicines = async () => {
+  const getSuggestedMedicines = async (openModal = false) => {
     try {
       const [lowResponse, inventoryResponse] = await Promise.all([
         axios.get("http://localhost:5000/api/inventory/low-or-expired"),
         axios.get("http://localhost:5000/api/inventory/names"),
       ]);
-
+  
       const defaultMeds = lowResponse.data.map((item) => ({
         id: item.id,
         name: item.name,
@@ -48,13 +48,14 @@ const Orders = () => {
         quantity: item.quantity < 10 ? 10 - item.quantity : 1,
         price: item.price,
         supplier_id: item.supplier_id,
+        expiryDate: item.expiryDate || "0000-00-00",
       }));
-
+  
       const mergedMedicines = [
         ...defaultMeds,
         ...newOrder.medicines.filter((m) => !defaultMeds.some((s) => s.name === m.name)),
       ];
-
+  
       setSuggestedMedicines(defaultMeds);
       setInventoryMedicines(inventoryResponse.data);
       setNewOrder((prev) => ({
@@ -62,17 +63,19 @@ const Orders = () => {
         medicines: mergedMedicines,
         SupplierID: defaultMeds.length > 0 ? defaultMeds[0].supplier_id : prev.SupplierID,
       }));
-      setIsAddModalOpen(true);
+  
+      if (openModal) setIsAddModalOpen(true);
     } catch (error) {
       console.error("Error fetching suggested medicines:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchOrders();
     fetchInventoryMedicines();
-    fetchLowOrExpiredMedicines();
-    const interval = setInterval(fetchLowOrExpiredMedicines, 30000);
+    getSuggestedMedicines(false); // Don't open the modal here
+    const interval = setInterval(getSuggestedMedicines, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -97,11 +100,12 @@ const Orders = () => {
   };
 
   const addMedicine = () => {
+    const uniqueId = Date.now();
     setNewOrder((prevOrder) => ({
       ...prevOrder,
       medicines: [
         ...prevOrder.medicines,
-        { id: null, name: "", category: "", quantity: 1, price: 0 },
+        { id: uniqueId, name: "", category: "", quantity: 1, price: 0, expiryDate: "0000-00-00", supplier_id: prevOrder.SupplierID },
       ],
     }));
   };
@@ -115,45 +119,58 @@ const Orders = () => {
 
   const addOrder = async () => {
     console.log(newOrder); // Log the current state of newOrder to debug
-    
+  
     const { OrderID, SupplierID, DeliveryDate, medicines } = newOrder;
-    
+  
+    // Check if all required fields are filled
     if (!OrderID || !SupplierID || !DeliveryDate || medicines.length === 0) {
       alert("Please fill out all fields.");
       return;
     }
-
-    // Validate each medicine
+  
+    // Validate each medicine entry
     for (const med of medicines) {
       if (!med.name || med.quantity <= 0 || med.price <= 0) {
         alert("Please provide valid medicine details.");
         return;
       }
     }
-
+  
+    // Send the order data to the backend API
     try {
-      await axios.post("http://localhost:5000/api/orders", {
+      // Prepare the order data to be sent
+      const response = await axios.post("http://localhost:5000/api/orders", {
         OrderID: OrderID.trim(),
-        SupplierID: parseInt(SupplierID, 10),
+        SupplierID: parseInt(SupplierID, 10), // Ensure SupplierID is a number
         DeliveryDate,
         TotalPrice: calculateTotal(),
-        medicines: medicines.map(({ name, category, quantity, price }) => ({
+        medicines: medicines.map(({ name, category, quantity, price, expiryDate, supplier_id }) => ({
           name: name.trim(),
           category: category.trim(),
           quantity,
-          price
-        }))
+          price,
+          expiryDate,
+          supplier_id: supplier_id || SupplierID, // Ensure supplier_id is included, use SupplierID if not provided
+        })),
       });
-
+  
+      // Refresh orders and close the modal on success
       fetchOrders();
       setIsAddModalOpen(false);
-      setNewOrder({ OrderID: "", SupplierID: "", DeliveryDate: "", medicines: [{ id: 1, name: "", category: "", quantity: 1, price: 0 }] });
+      setNewOrder({
+        OrderID: "",
+        SupplierID: "",
+        DeliveryDate: "",
+        medicines: [{ id: 1, name: "", category: "", quantity: 1, price: 0 }],
+      });
       alert("✅ Order added successfully!");
     } catch (error) {
+      // Handle errors
       console.error("Error adding order:", error);
       alert("❌ Failed to add order: " + (error.response?.data?.details || error.message));
     }
   };
+    
 
   const deleteOrder = async (orderId) => {
     if (!window.confirm("Are you sure you want to delete this order?")) return;
@@ -168,27 +185,76 @@ const Orders = () => {
     }
   };
 
-  const handleCheckboxChange = async (orderId, delivered) => {
-    try {
-      const deliveryDate = delivered ? new Date().toISOString().split('T')[0] : null;
+const handleCheckboxChange = async (orderId, delivered) => {
+  try {
+    // Find the order being updated
+    const orderToUpdate = orders.find(order => order.OrderID === orderId);
+    
+    if (!orderToUpdate) {
+      throw new Error("Order not found");
+    }
 
-      await axios.put(`http://localhost:5000/api/orders/${orderId}`, {
-        Delivery_Status: delivered ? 1 : 0,
-        DeliveryDate: deliveryDate
-      });
+    // Update the order status first
+    const response = await axios.put(
+      `http://localhost:5000/api/orders/${orderId}/deliver`, 
+      { delivered }
+    );
 
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
+    if (response.status === 200) {
+      // Update local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
           order.OrderID === orderId
-            ? { ...order, Delivery_Status: delivered, DeliveryDate: deliveryDate }
+            ? { ...order, Delivery_Status: delivered }
             : order
         )
       );
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      alert("Failed to update order status.");
+
+      // Only update inventory if marking as delivered (not when unchecking)
+      if (delivered) {
+        await updateInventoryAfterDelivery(orderId, orderToUpdate.Medicines);
+        alert("Order marked as delivered and inventory updated!");
+      } else {
+        alert("Order status updated to pending");
+      }
     }
-  };
+  } catch (error) {
+    console.error("Delivery error:", error.response?.data || error.message);
+    }
+};
+
+const updateInventoryAfterDelivery = async (orderId, medicines) => {
+  try {
+    // First verify we have medicines to update
+    if (!medicines || medicines.length === 0) {
+      console.warn("No medicines in this order to update");
+      return;
+    }
+
+    // Prepare the update requests
+    const updatePromises = medicines.map(medicine => {
+      if (!medicine.id && !medicine.InventoryID) {
+        console.warn(`Skipping medicine ${medicine.name} - no ID found`);
+        return Promise.resolve();
+      }
+
+      const medId = medicine.id || medicine.InventoryID;
+      return axios.put(
+        `http://localhost:5000/api/inventory/update/${medId}`,
+        { quantity: medicine.quantity }
+      );
+    });
+
+    // Execute all updates
+    await Promise.all(updatePromises);
+    fetchInventoryMedicines(); // Refresh inventory data
+  } catch (error) {
+    console.error("Inventory update error:", error);
+    throw error; // Re-throw to be caught by the calling function
+  }
+};
+  
+  
 
   const formatDate = (dateString) => dateString ? dateString.split("T")[0] : "";
 
@@ -207,7 +273,7 @@ const Orders = () => {
       </div>
 
       <div className={styles.buttons}>
-        <button className={styles.addOrderButton} onClick={fetchLowOrExpiredMedicines}>Add Order</button>
+        <button className={styles.addOrderButton} onClick={() => getSuggestedMedicines(true)}>Add Order</button>
         <button className={styles.orderHistoryButton} onClick={() => setIsHistoryModalOpen(true)}>Order History</button>
       </div>
 
@@ -220,10 +286,10 @@ const Orders = () => {
               <input type="text" name="OrderID" value={newOrder.OrderID} onChange={handleNewOrderChange} required />
             </label>
             <label>Supplier ID:
-              <input type="text" name="SupplierID" value={newOrder.SupplierID} onChange={handleNewOrderChange} required />
+              <input type="text" name="SupplierID" value={newOrder.SupplierID || ''} onChange={handleNewOrderChange} required />
             </label>
             <label>Delivery Date:
-              <input type="date" name="DeliveryDate" value={newOrder.DeliveryDate} onChange={handleNewOrderChange} required />
+              <input type="date" name="DeliveryDate" value={newOrder.DeliveryDate || ''} onChange={handleNewOrderChange} required />
             </label>
             <h3>Medicines</h3>
             {newOrder.medicines.map((medicine) => (
@@ -315,10 +381,14 @@ const Orders = () => {
               <tr key={order.OrderID}>
                 <td>{order.OrderID}</td>
                 <td>
-                  {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
+                {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
                     order.Medicines.map((med, index) => (
                       <div key={index}>
-                        {med.name} - {med.quantity} units - ₹{med.price}
+                        {med.name === 'Medicine Not Found' ? (
+                          <span style={{ color: 'red' }}>Medicine details not found</span>
+                        ) : (
+                          `${med.name} (${med.category}) - ${med.quantity} units - ₹${med.price}`
+                        )}
                       </div>
                     ))
                   ) : (
