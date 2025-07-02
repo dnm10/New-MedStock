@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './Components/Header';
 import Notifications from './Components/Notifications';
 import FormPopup from './Components/FormPopup';
 import Sidebar from './Components/Sidebar';
-import Home from './Components/Home/Home';
+import Home from './Components/Home';
 import Inventory from './Components/Inventory';
 import AdminBilling from './Components/AdminBilling';
 import UserBilling from './Components/UserBilling';
@@ -20,16 +20,28 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { RoleProvider, useRole } from './Components/RoleContext';
 import ForgotResetPassword from "./Components/ForgotResetPassword";
 
+
 const Layout = ({ children }) => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const isAuthPage = location.pathname === '/' || location.pathname === '/Signup';
 
+  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
     <>
-      {!isAuthPage && <Header />}
+      {!isAuthPage && <Header toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />}
       <div className="AppContainer">
-        {!isAuthPage && <Sidebar />}
-        <main>{children}</main>
+        {!isAuthPage && (
+          <Sidebar
+            isSidebarOpen={isSidebarOpen}
+            closeSidebar={closeSidebar}
+          />
+        )}
+        <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-64' : ''}`}>
+          <main>{children}</main>
+        </div>
       </div>
       {!isAuthPage && <FormPopup />}
     </>

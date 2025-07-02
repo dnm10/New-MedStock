@@ -1,119 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import '../App.css';
-import './Sidebar.css';
+import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { FaTimes } from 'react-icons/fa';
 import mslogo from '../Assets/mslogo.png';
-import { Link } from 'react-router-dom';
-import { useRole } from './RoleContext';
+import { FaBox, FaTruck, FaHome, FaChartBar, FaMoneyBill, FaBell, FaUser, FaCog } from 'react-icons/fa';
 
-function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const { role } = useRole();
-  const [userRole, setUserRole] = useState(role);
+const Sidebar = ({ isSidebarOpen, closeSidebar }) => {
+  const location = useLocation();
 
-  useEffect(() => {
-    const storedRole = localStorage.getItem('role');
-    if (storedRole) {
-      setUserRole(storedRole);
-    }
-  }, []);
-
-  const handleMouseEnter = () => {
-    setIsExpanded(true);
-    document.body.classList.add('sidebar-expanded');
-  };
-
-  const handleMouseLeave = () => {
-    setIsExpanded(false);
-    document.body.classList.remove('sidebar-expanded');
-  };
+  const sidebarItems = [
+    { id: 'inventory', label: 'Inventory', icon: <FaBox />, path: '/Inventory' },
+    { id: 'orders', label: 'Orders', icon: <FaTruck />, path: '/Orders' },
+    { id: 'suppliers', label: 'Suppliers', icon: <FaHome />, path: '/Supplier' },
+    { id: 'reports', label: 'Reports', icon: <FaChartBar />, path: '/Reports' },
+    { id: 'billing', label: 'Billing', icon: <FaMoneyBill />, path: '/Billing/User' },
+    { id: 'notifications', label: 'Notifications', icon: <FaBell />, path: '/Notifications' },
+    { id: 'users', label: 'Users', icon: <FaUser />, path: '/Users' },
+    { id: 'profile', label: 'Profile', icon: <FaUser />, path: '/Profile' },
+    { id: 'settings', label: 'Settings', icon: <FaCog />, path: '/Settings' },
+  ];
 
   return (
-    <aside
-      className={`sidebar ${isExpanded ? 'expanded' : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="sidebar-header">
-        <img src={mslogo} alt="MedStock Logo" />
-        <h2>
-          <b>MedStock</b>
-        </h2>
+    <aside className={`fixed top-0 left-0 h-full w-64 bg-white shadow transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 z-50`}>
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center space-x-2">
+          <img src={mslogo} alt="Logo" className="w-10 h-10" />
+          <span className="font-bold text-xl text-gray-800">MedStock</span>
+        </div>
+        <button onClick={closeSidebar} className="text-xl text-gray-600">
+          <FaTimes />
+        </button>
       </div>
-      <ul className="sidebar-links">
-        <li>
-          <Link to="/Home">
-            <span className="material-symbols-outlined">home</span>Home
-          </Link>
-        </li>
-
-        {/* Admin-Only Links */}
-        {userRole === 'Admin' && (
-          <>
-            <li>
-              <Link to="/Inventory">
-                <span className="material-symbols-outlined">inventory_2</span>Inventory
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/Orders">
-                <span className="material-symbols-outlined">list_alt</span>Orders
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/Supplier">
-                <span className="material-symbols-outlined">local_shipping</span>Suppliers
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/Reports">
-                <span className="material-symbols-outlined">bar_chart</span>Reports
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/Notifications">
-                <span className="material-symbols-outlined">notifications</span>Notifications
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/Users">
-                <span className="material-symbols-outlined">group</span>Users
-              </Link>
-            </li>
-          </>
-        )}
-
-        {/* Billing Link with Role-Based Routing */}
-        <li>
-          <Link to={userRole === 'Admin' ? "/Billing/Admin" : "/Billing/User"}>
-            <span className="material-symbols-outlined">receipt_long</span>Billing
-          </Link>
-        </li>
-
-        <li>
-          <Link to="/Profile">
-            <span className="material-symbols-outlined">account_circle</span>Profile
-          </Link>
-        </li>
-
-        <li>
-          <Link to="/Settings">
-            <span className="material-symbols-outlined">settings</span>Settings
-          </Link>
-        </li>
-
-        <li>
-          <Link to="/">
-            <span className="material-symbols-outlined">logout</span>Logout
-          </Link>
-        </li>
+      <ul className="p-4 space-y-2">
+        {sidebarItems.map((item) => (
+          <li key={item.id}>
+            <NavLink
+              to={item.path}
+              onClick={closeSidebar}
+              className={`flex items-center space-x-3 px-4 py-2 rounded hover:bg-blue-100 ${location.pathname === item.path ? 'bg-blue-100 font-semibold' : ''}`}
+            >
+              <span className="text-lg">{item.icon}</span>
+              <span>{item.label}</span>
+            </NavLink>
+          </li>
+        ))}
       </ul>
     </aside>
   );
-}
+};
 
 export default Sidebar;
