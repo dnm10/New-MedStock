@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import styles from "./Supplier.module.css";
+import api from "../api/axiosConfig";
+import toast from 'react-hot-toast';
 
 const Supplier = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -22,11 +24,11 @@ const Supplier = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/suppliers");
-      const data = await response.json();
-      setSuppliers(data);
+      const response = await api.get("/suppliers");
+      setSuppliers(response.data);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
+      toast.error("Failed to fetch suppliers");
     }
   };
 
@@ -124,20 +126,20 @@ const Supplier = () => {
 
     try {
       const method = editSupplier ? "PUT" : "POST";
-      const url = editSupplier
-        ? `http://localhost:5000/api/suppliers/${editSupplier}`
-        : "http://localhost:5000/api/suppliers";
+      const url = editSupplier ? `/suppliers/${editSupplier}` : "/suppliers";
 
-      await fetch(url, {
+      await api({
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formValues),
+        url,
+        data: formValues,
       });
 
+      toast.success(editSupplier ? "Supplier updated successfully" : "Supplier added successfully");
       fetchSuppliers();
       setModalOpen(false);
     } catch (error) {
       console.error("Error saving supplier:", error);
+      toast.error("Failed to save supplier");
     }
   };
 
@@ -145,12 +147,12 @@ const Supplier = () => {
     if (!window.confirm("Are you sure you want to delete this supplier?")) return;
 
     try {
-      await fetch(`http://localhost:5000/api/suppliers/${id}`, {
-        method: "DELETE",
-      });
+      await api.delete(`/suppliers/${id}`);
+      toast.success("Supplier deleted successfully");
       fetchSuppliers();
     } catch (error) {
       console.error("Error deleting supplier:", error);
+      toast.error("Failed to delete supplier");
     }
   };
 

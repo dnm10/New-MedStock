@@ -4,221 +4,212 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #e3ecff, #c1d3ff);
+  background: #f0f4f8; /* Soft minimalist background */
   padding: 20px;
-  animation: fadeIn 0.6s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  box-sizing: border-box;
 }
 
 .formBox {
   display: flex;
   flex-direction: row;
-  max-width: 900px;
+  max-width: 960px;
   width: 100%;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
+  min-height: 460px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.3s ease-in-out;
 }
 
-.formBox:hover {
-  transform: scale(1.03);
-}
-
-/* Left Side */
+/* Left Side - Brand/Logo */
 .formDetails {
-  background: linear-gradient(135deg, #5c77f0, #3056ff);
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); /* Professional Blue gradient */
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 30px;
   flex: 1;
-  
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+.formDetails::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: slowPulse 8s infinite alternate;
+}
+
+@keyframes slowPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.1); opacity: 1; }
 }
 
 .logoImage {
-  max-width: 100%;
+  max-width: 70%;
   height: auto;
-  border-radius: 10px;
-  transition: transform 0.3s;
+  border-radius: 12px;
+  z-index: 1;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
-
-/* Right Side */
+/* Right Side - Form */
 .formContent {
-  padding: 40px;
-  flex: 2;
+  padding: 30px 40px;
+  flex: 1.2;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: #ffffff;
 }
 
 .formContent h2 {
-  color: #3056ff;
-  font-size: 30px;
-  text-align: center;
+  color: #1d4ed8;
+  font-size: 24px;
+  font-weight: 700;
   margin-bottom: 20px;
-  transition: color 0.3s ease;
-}
-
-.formContent h2:hover {
-  color: #1e40af;
+  text-align: left;
+  letter-spacing: -0.5px;
 }
 
 /* Input Fields */
+.inputGroup {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
 .inputField {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   position: relative;
+  flex: 1;
+}
+
+.inputGroup .inputField {
+  margin-bottom: 0;
 }
 
 .inputField input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 14px;
-  transition: all 0.3s ease;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.inputField input::placeholder {
+  color: #94a3b8;
 }
 
 .inputField input:focus {
-  border-color: #3056ff;
-  box-shadow: 0 0 12px rgba(48, 86, 255, 0.5);
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   outline: none;
 }
 
-.inputField label {
-  display: block;
-  margin-top: 5px;
-  margin-left: 4px;
-  font-size: 14px;
-  color: #555;
-}
-
-/* Login Type */
+/* Login Type Radio Buttons */
 .loginType {
   display: flex;
-  gap: 120px;
-  margin: 15px 0;
-  margin-left: 25px;
+  gap: 20px;
+  margin: 8px 0 16px 0;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .loginType label {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
 }
 
-/* Buttons */
-.lsbtn button {
+.loginType input[type="radio"] {
+  accent-color: #2563eb;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Submit Button */
+.lsbtn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #3056ff, #1e40af);
+  background: #2563eb;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease-in-out;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  margin-top: 10px;
 }
 
-.lsbtn button:hover {
-  background: linear-gradient(135deg, #1e40af, #0f2c80);
-  transform: translateY(-2px);
+.lsbtn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
 }
 
-.lsbtn button:active {
-  transform: scale(0.95);
+.lsbtn:active {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
-.lsbtn button::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 300%;
-  height: 300%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: width 0.5s ease, height 0.5s ease, top 0.5s ease, left 0.5s ease;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-}
-
-.lsbtn button:active::after {
-  width: 0;
-  height: 0;
-  opacity: 1;
+/* Bottom Links */
+.bottomLink {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
 }
 
 .registerButton {
   background: none;
   border: none;
-  color: #ffffff;
+  color: #2563eb;
   cursor: pointer;
-  font-weight: bold;
-  margin-top: 12px;
-  transition: color 0.3s ease, transform 0.2s;
-  background-color: #3056ff;
-  border-radius: 10px;
-  padding: 10px 20px;
-  position: relative;
-  overflow: hidden;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0;
+  margin-left: 4px;
+  transition: color 0.2s ease;
 }
 
 .registerButton:hover {
-  background-color: #1e40af;
-  color: #ffffff;
-  transform: scale(1.05);
-}
-
-.registerButton:active {
-  transform: scale(0.95);
-}
-
-.registerButton::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.4s ease, height 0.4s ease;
-}
-
-.registerButton:active::before {
-  width: 200%;
-  height: 200%;
-}
-
-/* Bottom Link */
-.bottomLink {
-  margin-top: 5px;
-  text-align: center;
-  font-size: 14px;
-}
-
-.bottomLink a {
-  color: #3056ff;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.bottomLink a:hover {
+  color: #1d4ed8;
   text-decoration: underline;
-  color: #1e40af;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .formBox {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .formDetails {
+    padding: 30px;
+  }
+  .formContent {
+    padding: 30px 20px;
+  }
+  .inputGroup {
+    flex-direction: column;
+    gap: 16px;
+  }
 }

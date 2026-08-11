@@ -1,322 +1,236 @@
 import React, { useState, useEffect } from "react";
-
 import styles from './UserBilling.module.css';
 import '../App.css';
+import toast from 'react-hot-toast';
+import api from '../api/axiosConfig';
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 const UserBilling = () => {
+  const [inventory, setInventory] = useState([]);
+  const [selectedMedicine, setSelectedMedicine] = useState("");
   const [billItems, setBillItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0); 
   const [previousBills, setPreviousBills] = useState([]);
   const [paymentType, setPaymentType] = useState("cash"); 
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [upiId, setUpiId] = useState('');
-  const [successPopupData, setSuccessPopupData] = useState(null);
   const [todayTotal, setTodayTotal] = useState("0.00");
 
+  useEffect(() => {
+    fetchInventory();
+    fetchBills();
+  }, []);
 
-  const updateTodayTotal = (bills) => {
-    const today = new Date().toISOString().split("T")[0];
-    const currentUser = localStorage.getItem("username");
-  
-    const todayBills = bills.filter((bill) => {
-      const billDate = bill.date?.split("T")[0];
-      return billDate === today && bill.username === currentUser;
-    });
-  
-    const total = todayBills.reduce((sum, bill) => {
-      const amount = parseFloat(bill.totalAmount);
-      return sum + (isNaN(amount) ? 0 : amount);
-    }, 0);
-  
-    setTodayTotal(total.toFixed(2));
+  const fetchInventory = async () => {
+    try {
+      const response = await api.get('/inventory');
+      setInventory(response.data);
+    } catch (error) {
+      toast.error("Failed to load inventory");
+    }
   };
-  
-
 
   const fetchBills = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/get-bills");
-      const data = await response.json();
-      setPreviousBills(data);
-      updateTodayTotal(data); 
+      const response = await api.get("/get-bills");
+      setPreviousBills(response.data);
+      updateTodayTotal(response.data); 
     } catch (error) {
       console.error("Error fetching previous bills:", error);
     }
   };
 
-  useEffect(() => {
-    fetchBills();
-    console.log("Previous Bills Fetched:", previousBills);
-  }, []);
-  
-
-  const getTodayTotal = () => {
-    const today = new Date().toISOString().split("T")[0]; // e.g. "2025-04-18"
+  const updateTodayTotal = (bills) => {
+    const today = new Date().toISOString().split("T")[0];
     const currentUser = localStorage.getItem("username");
-  
-    const todayBills = previousBills.filter((bill) => {
-      const billDate = bill.date?.split("T")[0]; // Assumes bill.date is ISO format
+    const todayBills = bills.filter((bill) => {
+      const billDate = bill.date?.split("T")[0];
       return billDate === today && bill.username === currentUser;
     });
-  
     const total = todayBills.reduce((sum, bill) => {
       const amount = parseFloat(bill.totalAmount);
-      return sum + (isNaN(amount) ? 0 : amount); // Failsafe for invalid amounts
+      return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-  
-    return total.toFixed(2); // Returns string like "120.50"
+    setTodayTotal(total.toFixed(2));
   };
-  
-  
-  
 
-  const addToBill = async () => {
-    if (name.trim() && quantity > 0 && price > 0) {
-      const newItem = { name, quantity, price };
+  const handleMedicineSelect = (e) => {
+    const medName = e.target.value;
+    setSelectedMedicine(medName);
+    const med = inventory.find(i => i.name === medName);
+    if (med) setPrice(med.price || 0);
+  };
 
+  const addToBill = () => {
+    if (!selectedMedicine || quantity <= 0 || price <= 0) {
+      toast.error("Please enter valid values for all fields.");
+      return;
+    }
+    const med = inventory.find(i => i.name === selectedMedicine);
+    if (!med) {
+      toast.error("Medicine not found in inventory.");
+      return;
+    }
+    if (quantity > med.quantity) {
+      toast.error(`Only ${med.quantity} units available in stock.`);
+      return;
+    }
+
+    const newItem = { name: selectedMedicine, quantity, price };
+    const updatedItems = [...billItems, newItem];
+    const updatedTotal = updatedItems.reduce((sum, curr) => sum + curr.quantity * curr.price, 0);
+
+    setBillItems(updatedItems);
+    setTotalAmount(updatedTotal);
+    setSelectedMedicine("");
+    setQuantity(1);
+    setPrice(0);
+  };
+
+  const handlePayment = async () => {
+    if (billItems.length === 0) {
+      toast.error("Cart is empty.");
+      return;
+    }
+
+    if (paymentType === 'cash' || paymentType === 'upi') {
+      await finalizeBill(paymentType === 'upi' ? 'Online - UPI' : 'Offline - Cash');
+    } else if (paymentType === 'online') {
       try {
-        const response = await fetch("http://localhost:5000/api/update-inventory", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, quantity }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          const updatedItems = [...billItems, newItem];
-          const updatedTotal = updatedItems.reduce((sum, curr) => sum + curr.quantity * curr.price, 0);
-
-          setBillItems(updatedItems);
-          setTotalAmount(updatedTotal);
-          setName('');
-          setQuantity(1);
-          setPrice(0);
-        } else {
-          alert(result.message || "Failed to update inventory.");
-        }
+        const orderRes = await api.post('/create-order', { amount: totalAmount });
+        const options = {
+          key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'dummy_key',
+          amount: orderRes.data.amount,
+          currency: "INR",
+          name: "MedStock",
+          description: "Pharmacy Bill Payment",
+          order_id: orderRes.data.id,
+          handler: async function (response) {
+            try {
+              await api.post('/verify-payment', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+              toast.success("Payment successful!");
+              await finalizeBill('Online - Razorpay');
+            } catch (err) {
+              toast.error("Payment verification failed.");
+            }
+          },
+          prefill: {
+            name: "Customer",
+            email: "customer@example.com",
+            contact: "9999999999"
+          },
+          theme: { color: "#0ea5e9" }
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.open();
       } catch (error) {
-        console.error("Error updating inventory:", error);
-        alert("Error connecting to server.");
+        toast.error("Failed to initialize payment");
       }
-    } else {
-      alert("Please enter valid values for all fields.");
     }
   };
 
-  const generateInvoice = () => {
-    const billNumber = Math.floor(Math.random() * 1000);
-    const date = new Date();
+  const finalizeBill = async (paymentModeStr) => {
+    try {
 
-    const invoiceWindow = window.open('', '_blank', 'width=800,height=600');
-    invoiceWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; color: #333; }
-          .invoice-container { max-width: 700px; margin: 20px auto; padding: 20px; background: #fff; border: 3px solid #007BFF; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-          .invoice-header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid #007BFF; }
-          .invoice-header h1 { color: #007BFF; font-size: 24px; }
-          .invoice-details { margin-top: 20px; font-size: 14px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { padding: 12px; border: 1px solid #ccc; text-align: center; }
-          th { background-color: #007BFF; color: white; }
-          tfoot td { font-weight: bold; }
-          .invoice-footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-          .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; color: rgba(0, 123, 255, 0.1); white-space: nowrap; z-index: -1; }
-        </style>
-      </head>
-      <body>
-        <div class="invoice-container">
-          <div class="watermark">MedStock</div>
-          <div class="invoice-header">
-          <h1>MedStock Invoice</h1>
-          <p><strong>Bill No:</strong> ${billNumber}</p>
-          <p><strong>Date:</strong> ${date.toLocaleDateString()}</p>
-          <p><strong>Time:</strong> ${date.toLocaleTimeString()}</p>
-          <p><strong>Payment Mode:</strong> ${
-  paymentType === 'cash' ? 'Offline - Cash' :
-  paymentType === 'online' ? 'Online - Razorpay' :
-  'Online - UPI'
-}</p>
 
-        </div>
-          <div class="invoice-details">
-            <table>
-              <thead>
-                <tr>
-                  <th>Medicine</th>
-                  <th>Quantity</th>
-                  <th>Price per Unit (₹)</th>
-                  <th>Total (₹)</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${billItems.map(item => `
-                  <tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>₹${item.price.toFixed(2)}</td>
-                    <td>₹${(item.quantity * item.price).toFixed(2)}</td>
-                  </tr>`).join('')}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3">Total Amount</td>
-                  <td>₹${totalAmount.toFixed(2)}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div class="invoice-footer">
-            <p>&copy; 2025 MedStock. All Rights Reserved.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `);
-    invoiceWindow.document.close();
-    invoiceWindow.print();
-
-    // Save to backend
-    fetch("http://localhost:5000/api/save-bill", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      const billRes = await api.post("/save-bill", {
         billItems,
         totalAmount,
         date: new Date().toISOString(),
         username: localStorage.getItem("username") || "Unknown",
-        paymentType // Include this to send payment type to backend
-      }),
-    })
-    
-      .then(response => response.json())
-      .then(data => {
-        console.log("Bill saved successfully:", data);
-        fetchBills();
-        setBillItems([]);
-        setTotalAmount(0);
-      })
-      .catch(error => {
-        console.error("Error saving bill:", error);
-        alert("Error saving bill.");
+        paymentType: paymentModeStr
       });
-  };
 
-  useEffect(() => {
-    fetchBills();
-  }, []);
-  
-  useEffect(() => {
-    console.log("Previous Bills Fetched:", previousBills);
-  }, [previousBills]);
-  
-  const handleMockOnlinePayment = async () => {
-    // Basic validation for card fields
-    if (!cardNumber || !expiry || !cvv) {
-      alert("Please fill in all the card details.");
-      return;
-    }
-  
-    if (cardNumber.length !== 16) {
-      alert("Please enter a valid 16-digit card number.");
-      return;
-    }
-  
-    try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: localStorage.getItem("username") || "Unknown",
-          amount: totalAmount,
-        }),
-      });
-  
-      if (response.ok) {
-        alert("Mock Online Payment Successful!");
-        setShowPaymentForm(false); // Hide the payment form
-        generateInvoice(); // Generate the invoice
-      }
+      toast.success("Bill finalized and saved!");
+      generatePDFInvoice(billRes.data.billId || Math.floor(Math.random() * 1000), paymentModeStr);
+      
+      setBillItems([]);
+      setTotalAmount(0);
+      fetchBills();
+      fetchInventory();
     } catch (error) {
-      console.error("Mock payment error:", error);
-      alert("Failed to process payment.");
+      toast.error("Error finalizing bill.");
     }
-
-    setSuccessPopupData({
-      transactionId: Math.floor(Math.random() * 1000000),
-      upiId: "**** **** **** " + cardNumber.slice(-4),
-      amount: totalAmount
-    });
-    
-    
   };
-  
-  
+
+  const generatePDFInvoice = (billId, paymentModeStr) => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("MedStock Invoice", 105, 20, null, null, "center");
+    
+    doc.setFontSize(12);
+    doc.text(`Bill No: ${billId}`, 15, 40);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 15, 50);
+    doc.text(`Payment Mode: ${paymentModeStr}`, 15, 60);
+
+    const tableColumn = ["Medicine", "Quantity", "Price (Rs)", "Total (Rs)"];
+    const tableRows = [];
+
+    billItems.forEach(item => {
+      const rowData = [
+        item.name,
+        item.quantity,
+        Number(item.price).toFixed(2),
+        (item.quantity * item.price).toFixed(2)
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 70,
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 70;
+    doc.setFontSize(14);
+    doc.text(`Total Amount: Rs ${totalAmount.toFixed(2)}`, 15, finalY + 15);
+
+    doc.save(`invoice_${billId}.pdf`);
+  };
+
   return (
     <div className={styles.Billinguser}>
-      <h1>MedStock Billing System</h1>
+      <h1 className="text-3xl font-bold mb-6 text-primary-600">MedStock Walk-in Billing</h1>
 
       <div className={styles.billingMainuser}>
         <section className={styles.Billingformuser}>
-          <h2>Add Medicine</h2>
+          <h2 className="text-xl font-semibold mb-4">Add Medicine</h2>
           <form>
             <div className={styles.Billingforminputuser}>
-              <label htmlFor="medicine-name">Medicine Name:</label>
-              <input
-                type="text"
-                id="medicine-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter medicine name"
-                required
-              />
+              <label>Medicine Name:</label>
+              <select value={selectedMedicine} onChange={handleMedicineSelect} required className="w-full p-2 border rounded">
+                <option value="">-- Select Medicine --</option>
+                {inventory.map(med => (
+                  <option key={med.id} value={med.name}>{med.name} (Stock: {med.quantity})</option>
+                ))}
+              </select>
             </div>
             <div className={styles.Billingforminputuser}>
-              <label htmlFor="quantity">Quantity:</label>
-              <input
-                type="number"
-                id="quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value))}
-                min="1"
-                required
-              />
+              <label>Quantity:</label>
+              <input type="number" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value))} min="1" required className="w-full p-2 border rounded" />
             </div>
             <div className={styles.Billingforminputuser}>
-              <label htmlFor="price">Price per Unit (₹):</label>
-              <input
-                type="number"
-                id="price"
-                value={price}
-                onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.01"
-                required
-              />
+              <label>Price per Unit (₹):</label>
+              <input type="number" value={price} disabled className="w-full p-2 border rounded bg-gray-100" />
             </div>
-            <button type="button" onClick={addToBill}>Add to Bill</button>
+            <button type="button" onClick={addToBill} className="w-full bg-primary-600 text-white p-2 rounded hover:bg-primary-700 transition">Add to Bill</button>
           </form>
         </section>
 
         <section className={styles.billingSummaryuser}>
-          <h2>Bill Summary</h2>
+          <h2 className="text-xl font-semibold mb-4">Bill Summary</h2>
           <table className={styles.billingTableuser}>
             <thead>
-              <tr>
+              <tr className="bg-primary-100">
                 <th>Medicine</th>
-                <th>Quantity</th>
-                <th>Price per Unit (₹)</th>
+                <th>Qty</th>
+                <th>Price (₹)</th>
                 <th>Total (₹)</th>
               </tr>
             </thead>
@@ -332,168 +246,28 @@ const UserBilling = () => {
             </tbody>
           </table>
 
-        {/*<h3>Billing History</h3>*/}
+          <div className={styles.paymentTypeContainer}>
+            <label className="font-semibold">Payment Type: </label>
+            <select className={styles.paymentTypeSelect + " border p-2 rounded ml-2"} value={paymentType} onChange={(e) => setPaymentType(e.target.value)}>
+              <option value="cash">Offline - Cash</option>
+              <option value="online">Online - Razorpay</option>
+              <option value="upi">Online - UPI</option>
+            </select>
+          </div>
 
-             {/* Payment Type Dropdown */}
-             <div className={styles.paymentTypeContainer}>
-  <label>Select Payment Type: </label>
-  <select
-    className={styles.paymentTypeSelect}
-    value={paymentType}
-    onChange={(e) => setPaymentType(e.target.value)}
-  >
-    <option value="cash">Offline - Cash</option>
-    <option value="online">Online - Via Card</option>
-    <option value="upi">Online - UPI</option>
-  </select>
-</div>
-
-
-<h3>Today's Payout: ₹{todayTotal}</h3>
-
-          {previousBills.length === 0 ? (
-            <p>No previous bills yet.</p>
-          ) : (
-            <ul>
-              {previousBills.map((bill) => (
-                <li key={bill.id}>
-                  <strong>Date:</strong> {new Date(bill.date).toLocaleString()} <br />
-                  <strong>Amount:</strong> ₹{bill.totalAmount.toFixed(2)} <br />
-                  <strong>Items:</strong> {bill.billItems.length} items
-                </li>
-              ))}
-            </ul>
-          )}
- {paymentType === "online" ? (
-  <>
-    <button onClick={() => setShowPaymentForm(true)}>Pay Online</button>
-
-    {/* Modal for Payment Form */}
-    {showPaymentForm && (
-      <div className={styles.paymentModal}>
-        <div className={styles.modalContent}>
-          <h2>Enter Card Details</h2>
-          <form onSubmit={(e) => { e.preventDefault(); handleMockOnlinePayment(); }}>
-            <div>
-              <label>Card Number:</label>
-              <input 
-                type="text" 
-                value={cardNumber} 
-                onChange={(e) => setCardNumber(e.target.value)} 
-                maxLength="16" 
-                placeholder="Enter 16-digit card number" 
-                required 
-              />
-            </div>
-            <div>
-              <label>Expiry Date:</label>
-              <input 
-                type="text" 
-                value={expiry} 
-                onChange={(e) => setExpiry(e.target.value)} 
-                placeholder="MM/YY" 
-                required 
-              />
-            </div>
-            <div>
-              <label>CVV:</label>
-              <input 
-                type="text" 
-                value={cvv} 
-                onChange={(e) => setCvv(e.target.value)} 
-                maxLength="3" 
-                placeholder="CVV" 
-                required 
-              />
-            </div>
-            <button type="submit">Submit Payment</button>
-            <button type="button" onClick={() => setShowPaymentForm(false)}>Cancel</button>
-          </form>
-        </div>
-        {successPopupData && (
-  <SuccessPopup
-    transactionId={successPopupData.transactionId}
-    upiId={successPopupData.upiId}
-    amount={successPopupData.amount}
-    onClose={() => setSuccessPopupData(null)}
-  />
-)}
-
-      </div>
-    )}
-  </>
-) : (
-  <button onClick={generateInvoice}>Generate Invoice</button>
-)}
-{paymentType === "upi" && (
-  <div className={styles.upiSection}>
-    <h3>Enter UPI ID</h3>
-    <input
-      type="text"
-      value={upiId}
-      onChange={(e) => setUpiId(e.target.value)}
-      placeholder="example@upi"
-      required
-    />
-    <button
-      onClick={() => {
-        if (!upiId || !upiId.includes('@')) {
-          alert("Please enter a valid UPI ID.");
-          return;
-        }
-
-        // Set success popup data after payment validation
-        setSuccessPopupData({
-          transactionId: Math.floor(Math.random() * 1000000),
-          upiId: upiId,
-          amount: totalAmount,
-        });
-
-        // Proceed with generating the invoice
-        generateInvoice();
-      }}
-    >
-      Pay via UPI
-    </button>
-  </div>
-)}
-
-{successPopupData && (
-  <SuccessPopup
-    transactionId={successPopupData.transactionId}
-    upiId={successPopupData.upiId}
-    amount={successPopupData.amount}
-    onClose={() => setSuccessPopupData(null)}
-  />
-)}
+          <h3 className="text-lg font-bold text-gray-700 mb-4 mt-4">Cart Total: ₹{totalAmount.toFixed(2)}</h3>
           
+          <button onClick={handlePayment} className="w-full bg-secondary-500 text-white p-3 rounded font-bold hover:bg-secondary-600 transition">
+            Finalize & Pay
+          </button>
+          
+          <div className="mt-8">
+            <h3 className="font-semibold text-gray-600">Today's Payout: ₹{todayTotal}</h3>
+          </div>
         </section>
       </div>
-
-      <footer className={styles.billingFooteruser}>
-        <p>&copy; 2025 MedStock. All Rights Reserved.</p>
-      </footer>
     </div>
   );
 };
-
-// Add this at the bottom of your file
-const SuccessPopup = ({ transactionId, upiId, amount, onClose }) => (
-  <div className={styles.successPopupOverlay}>
-    <div className={styles.successPopupCard}>
-      <div className={styles.successIcon}>
-        <div className={styles.circle}>
-          <span className={styles.checkmark}>✔</span>
-        </div>
-      </div>
-      <h3>Payment Successful</h3>
-      <p>Transaction Number: <strong>{transactionId}</strong></p>
-      <hr />
-      <p>Amount paid <span className={styles.amount}>₹{amount}</span></p>
-      <p>Paid by <span className={styles.upi}>{upiId}</span></p>
-      <button onClick={onClose}>Close</button>
-    </div>
-  </div>
-);
 
 export default UserBilling;

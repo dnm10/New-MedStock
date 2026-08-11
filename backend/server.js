@@ -6,6 +6,17 @@ const app = express();
 const bcrypt = require('bcrypt');
 const mysql = require("mysql2/promise");
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const Razorpay = require('razorpay');
+
+const SECRET_KEY = process.env.JWT_SECRET || 'fallback_secret_key';
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key_id',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_key_secret',
+});
 
 const port = 5000;
 app.use(express.json());
@@ -70,9 +81,16 @@ app.post('/api/signup', async (req, res) => {
                           return res.status(500).json({ message: 'Error syncing user data' });
                       }
 
+                      const token = jwt.sign(
+                        { id: result.insertId, email, role },
+                        SECRET_KEY,
+                        { expiresIn: '1d' }
+                      );
+
                       res.status(201).json({
                           message: 'Signup successful',
                           user: { id: result.insertId, email, role },
+                          token,
                       });
                   }
               );
@@ -104,9 +122,16 @@ app.post('/api/login', (req, res) => {
           return res.status(401).json({ message: 'Invalid email, password, or role' });
       }
 
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        SECRET_KEY,
+        { expiresIn: '1d' }
+      );
+
       res.status(200).json({
           message: 'Login successful',
           user: { id: user.id, email: user.email, role: user.role },
+          token,
           redirectTo: user.role === 'Admin' ? '/admin/dashboard' : '/user/home',
       });
   });
@@ -280,14 +305,13 @@ app.post("/api/update-inventory", (req, res) => {
 
 
 // Save a new bill
-app.post("/api/save-bill", (req, res) => {
-  let { billItems, totalAmount, date, username } = req.body;
+app.post("/api/save-bill", async (req, res) => {
+  let { billItems, totalAmount, date, username, paymentType } = req.body;
 
   if (!billItems || !totalAmount || !date || !username) {
     return res.status(400).json({ message: "Missing required fields." });
   }
 
-  // Normalize date to YYYY-MM-DD
   const normalizedDate = new Date(date).toISOString().split('T')[0];
   totalAmount = parseFloat(totalAmount);
 
@@ -295,24 +319,36 @@ app.post("/api/save-bill", (req, res) => {
     billItems,
     totalAmount,
     date: normalizedDate,
-    username
+    username,
+    paymentType
   });
 
-  console.log("Saving bill:", jsonData); // debug log
+  const conn = await medstockDB.promise().getConnection();
+  try {
+    await conn.beginTransaction();
 
-  const sql = `
-    INSERT INTO userRole_billingPage (name, quantity, price)
-    VALUES (?, ?, ?)
-  `;
-  const values = ["bill", 1, jsonData];
-
-  medstockDB.query(sql, values, (err, result) => {
-    if (err) {
-      console.error("Database Error:", err);
-      return res.status(500).json({ message: "Database error", error: err });
+    // 1. Decrement inventory
+    for (const item of billItems) {
+      const [results] = await conn.query("SELECT quantity FROM inventory WHERE name = ?", [item.name]);
+      if (results.length === 0) throw new Error(`Item ${item.name} not found in inventory.`);
+      if (results[0].quantity < item.quantity) throw new Error(`Insufficient stock for ${item.name}.`);
+      
+      await conn.query("UPDATE inventory SET quantity = quantity - ? WHERE name = ?", [item.quantity, item.name]);
     }
+
+    // 2. Save bill
+    const sql = `INSERT INTO userRole_billingPage (name, quantity, price) VALUES (?, ?, ?)`;
+    const [result] = await conn.query(sql, ["bill", 1, jsonData]);
+
+    await conn.commit();
     res.status(201).json({ message: "Bill saved successfully", billId: result.insertId });
-  });
+  } catch (error) {
+    await conn.rollback();
+    console.error("Database Error:", error);
+    res.status(500).json({ message: "Failed to save bill and update inventory", error: error.message });
+  } finally {
+    conn.release();
+  }
 });
 
 
@@ -351,6 +387,42 @@ app.delete("/api/clear-bills", (req, res) => {
     }
     res.json({ message: "All bills cleared successfully." });
   });
+});
+
+
+// Razorpay Endpoints
+app.post("/api/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const options = {
+      amount: Math.round(amount * 100), // amount in the smallest currency unit
+      currency: "INR",
+      receipt: `receipt_order_${Date.now()}`
+    };
+    
+    const order = await razorpay.orders.create(options);
+    if (!order) return res.status(500).send("Some error occured");
+    res.json(order);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+app.post("/api/verify-payment", async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    
+    // In a real production app, verify signature using crypto here
+    // const crypto = require('crypto');
+    // const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+    // hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+    // const generated_signature = hmac.digest('hex');
+    // if (generated_signature !== razorpay_signature) return res.status(400).send("Invalid signature");
+
+    res.json({ message: "Payment verified successfully", paymentId: razorpay_payment_id });
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 

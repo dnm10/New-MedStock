@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import styles from './Users.module.css';
+import toast from 'react-hot-toast';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -15,7 +16,7 @@ const Users = () => {
   // Fetch Users from Backend
   const fetchUsers = async () => {
     try {
-        const response = await axios.get("http://localhost:5000/users");
+        const response = await api.get("/users");
         if (response.status === 200) {
             setUsers(response.data);
         } else {
@@ -43,27 +44,24 @@ const Users = () => {
   // Save User (Add/Edit)
   const saveUser = async () => {
     try {
-        console.log("Form values before sending:", formValues); // Debugging line
-
         let response;
         if (currentUser) {
-            response = await axios.put(`http://localhost:5000/users/${currentUser.id}`, formValues);
+            response = await api.put(`/users/${currentUser.id}`, formValues);
         } else {
-            response = await axios.post("http://localhost:5000/users", formValues);
+            response = await api.post("/users", formValues);
         }
-
-        console.log("Response:", response);
 
         if (response.status === 201 || response.status === 200) {
             fetchUsers(); // Refresh user list after save
             setIsModalOpen(false);
+            toast.success("User saved successfully");
         } else {
             console.error("Error response:", response.data);
-            alert("Failed to save user.");
+            toast.error("Failed to save user.");
         }
     } catch (error) {
         console.error("Error saving user:", error.response ? error.response.data : error);
-        alert("Something went wrong while saving the user!");
+        toast.error("Something went wrong while saving the user!");
     }
 };
 
@@ -72,10 +70,12 @@ const Users = () => {
   // Delete User
   const deleteUser = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/users/${id}`);
+      await api.delete(`/users/${id}`);
       fetchUsers();
+      toast.success("User deleted successfully");
     } catch (error) {
       console.error("Error deleting user:", error);
+      toast.error("Error deleting user");
     }
   };
   

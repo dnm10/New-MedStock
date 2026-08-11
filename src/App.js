@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import Header from './Components/Header';
 import Notifications from './Components/Notifications';
 import FormPopup from './Components/FormPopup';
@@ -44,6 +45,7 @@ const Layout = ({ children }) => {
         </div>
       </div>
       {!isAuthPage && <FormPopup />}
+      <Toaster position="top-right" reverseOrder={false} />
     </>
   );
 };

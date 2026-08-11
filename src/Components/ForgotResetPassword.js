@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import api from "../api/axiosConfig";
+import toast from 'react-hot-toast';
 
 const ResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -6,29 +8,20 @@ const ResetPassword = () => {
 
   const handleResetPassword = async () => {
     if (!email || !newPassword) {
-      alert("⚠ Please enter both email and new password");
+      toast.error("Please enter both email and new password");
       return;
     }
   
     try {
-      const response = await fetch("http://localhost:5000/api/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword }), // ✅ Ensure correct JSON format
-      });
-  
-      const data = await response.json();
+      const response = await api.post("/reset-password", { email, newPassword });
       
-      if (response.ok) {
-        alert("✅ Password reset successful!");
-        setEmail("");
-        setNewPassword("");
-      } else {
-        alert(`❌ ${data.message}`);
-      }
+      toast.success("Password reset successful!");
+      setEmail("");
+      setNewPassword("");
     } catch (error) {
-      console.error("❌ Fetch Error:", error);
-      alert("Something went wrong!");
+      console.error("Fetch Error:", error);
+      const msg = error.response?.data?.message || "Something went wrong!";
+      toast.error(msg);
     }
   };
   

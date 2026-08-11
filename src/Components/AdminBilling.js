@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import styles from "./AdminBilling.module.css";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 const AdminBilling = () => {
   const [pendingOrders, setPendingOrders] = useState([]);
@@ -19,7 +22,7 @@ const AdminBilling = () => {
   // ✅ Fetch only delivered orders for billing
   const fetchDeliveredOrders = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/get-delivered-orders");
+      const response = await api.get("/get-delivered-orders");
       setPendingOrders(response.data);
     } catch (error) {
       console.error("Error fetching delivered orders:", error);
@@ -30,7 +33,7 @@ const AdminBilling = () => {
   // ✅ Fetch previous billing history
   const fetchPreviousBills = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/get-bills");
+      const response = await api.get("/get-bills");
       setPreviousBills(response.data);
     } catch (error) {
       console.error("Error fetching previous bills:", error);
@@ -48,12 +51,12 @@ const AdminBilling = () => {
   // ✅ Generate a bill for an order
   const generateBill = async (order) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/generate-bill", {
+      const response = await api.post("/generate-bill", {
         orderID: order.OrderID,
       });
   
       if (response.status === 200) {
-        alert("Bill generated successfully!");
+        toast.success("Bill generated successfully!");
         fetchDeliveredOrders(); // Refresh pending orders
         fetchPreviousBills();   // Refresh billing history
         viewInvoice(response.data.billID); // Show the invoice in modal
@@ -61,9 +64,9 @@ const AdminBilling = () => {
     } catch (error) {
       console.error("Error generating bill:", error); // Log the entire error
       if (error.response && error.response.data) {
-        alert(`Error: ${error.response.data.error}`);
+        toast.error(`Error: ${error.response.data.error}`);
       } else {
-        alert("Error generating bill. Please try again.");
+        toast.error("Error generating bill. Please try again.");
       }
     }
   };
@@ -72,12 +75,12 @@ const AdminBilling = () => {
   // ✅ Fetch and view invoice
   const viewInvoice = async (billID) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/invoice/${billID}`);
+      const response = await api.get(`/invoice/${billID}`);
       setSelectedBill(response.data.bill);
       setInvoiceItems(response.data.items);
       setShowInvoice(true);
     } catch (err) {
-      alert("Unable to fetch invoice.");
+      toast.error("Unable to fetch invoice.");
     }
   };
 
@@ -85,6 +88,44 @@ const AdminBilling = () => {
   const formatPrice = (price) => {
     const numPrice = Number(price);
     return isNaN(numPrice) ? "0.00" : numPrice.toFixed(2);
+  };
+
+  const generatePDFInvoice = () => {
+    if (!selectedBill) return;
+    
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("MedStock Admin Invoice", 105, 20, null, null, "center");
+    
+    doc.setFontSize(12);
+    doc.text(`Bill ID: ${selectedBill.BillID}`, 15, 40);
+    doc.text(`Order ID: ${selectedBill.OrderID}`, 15, 50);
+    doc.text(`Date: ${new Date(selectedBill.BillingDate).toLocaleDateString()}`, 15, 60);
+
+    const tableColumn = ["#", "Medicine", "Quantity", "Price (Rs)"];
+    const tableRows = [];
+
+    invoiceItems.forEach((item, idx) => {
+      const rowData = [
+        idx + 1,
+        item.MedicineName,
+        item.Quantity,
+        Number(item.Price).toFixed(2)
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 70,
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 70;
+    doc.setFontSize(14);
+    doc.text(`Total Amount: Rs ${Number(selectedBill.TotalAmount).toFixed(2)}`, 15, finalY + 15);
+
+    doc.save(`invoice_${selectedBill.BillID}.pdf`);
   };
 
   return (
@@ -182,8 +223,9 @@ const AdminBilling = () => {
             </table>
 
             <h3 style={{ marginTop: "1rem" }}>Total: ₹{Number(selectedBill.TotalAmount).toFixed(2)}</h3>
-            <div style={{ textAlign: "center", marginTop: "1rem" }}>
-              <button onClick={() => setShowInvoice(false)}>Close</button>
+            <div style={{ textAlign: "center", marginTop: "1rem", display: "flex", justifyContent: "center", gap: "1rem" }}>
+              <button onClick={generatePDFInvoice} style={{ backgroundColor: "#4CAF50", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer" }}>Download PDF</button>
+              <button onClick={() => setShowInvoice(false)} style={{ padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer" }}>Close</button>
             </div>
           </div>
         </div>

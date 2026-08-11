@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import "./Notifications.css";
 
 const Notifications = () => {
@@ -12,7 +12,7 @@ const Notifications = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/notifications");
+        const response = await api.get("/notifications");
         console.log("Received Notifications Data:", response.data);
         setNotifications(response.data);
       } catch (error) {

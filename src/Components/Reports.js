@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FaBox, FaChartLine, FaExclamationTriangle, FaTrashAlt, FaPrint } from "react-icons/fa";
 import styles from "./Reports.module.css";
+import api from "../api/axiosConfig";
+import toast from 'react-hot-toast';
 
 const Reports = () => {
   const [lowStockItems, setLowStockItems] = useState([]); // Stores low stock items
@@ -15,8 +17,8 @@ const Reports = () => {
   useEffect(() => {
     const fetchStockCounts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/reports/stock");
-        const data = await response.json();
+        const response = await api.get("/reports/stock");
+        const data = response.data;
 
         setStockCounts({
           totalItems: data.totalItems,
@@ -26,6 +28,7 @@ const Reports = () => {
         });
       } catch (error) {
         console.error("Error fetching stock counts:", error);
+        toast.error("Error fetching stock counts");
       }
     };
 
@@ -35,8 +38,8 @@ const Reports = () => {
   // ✅ Corrected: Now handleLowStockClick is placed properly inside the component
   const handleLowStockClick = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/reports/low-stock-items");
-      const data = await response.json();
+      const response = await api.get("/reports/low-stock-items");
+      const data = response.data;
 
       console.log("Low Stock Data:", data); // Debugging log
 
@@ -49,6 +52,7 @@ const Reports = () => {
       setShowLowStock(true); // Show modal
     } catch (error) {
       console.error("Error fetching low stock items:", error);
+      toast.error("Error fetching low stock items");
     }
   };
 
