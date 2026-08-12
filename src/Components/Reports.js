@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaBox, FaChartLine, FaExclamationTriangle, FaTrashAlt, FaPrint } from "react-icons/fa";
-import styles from "./Reports.module.css";
+import { AiOutlineClose } from "react-icons/ai";
 import api from "../api/axiosConfig";
 import toast from 'react-hot-toast';
 
@@ -168,85 +168,112 @@ const Reports = () => {
     `);
     printWindow.document.close();
   };
-  
 
   return (
-    <div className={styles.reports}>
-      <h1>📊 MedStock Reports Overview</h1>
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen pb-10 px-5 md:px-8 mx-auto w-full">
+      {/* Page Header */}
+      <div className="mb-8 mt-6 py-6 bg-gradient-to-r from-primary-800 to-primary-600 text-white rounded-2xl shadow-md text-center">
+        <h1 className="text-3xl font-bold tracking-wide drop-shadow-sm">Reports Overview</h1>
+      </div>
 
-      {/* Overview Cards */}
-      <div className={styles.reportsoverview}>
-        <div className={styles.reportscard}>
-          <FaBox className={styles.reportsicon} />
-          <h3>Total Items</h3>
-          <p>{stockCounts.totalItems}</p>
+      {/* Stats Cards */}
+      <div className="flex flex-col md:flex-row gap-6 mb-8 max-w-7xl mx-auto">
+        <div className="flex-1 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl p-6 shadow-card text-white relative overflow-hidden flex flex-col justify-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
+          <FaBox className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 text-[60px]" />
+          <h3 className="text-base font-semibold opacity-90 mb-2 z-10">Total Items</h3>
+          <p className="text-3xl font-bold z-10">{stockCounts.totalItems}</p>
         </div>
-        <div className={styles.reportscard}>
-          <FaChartLine className={styles.reportsicon} />
-          <h3>Current Stock</h3>
-          <p>{stockCounts.totalStock}</p>
+        <div className="flex-1 bg-gradient-to-br from-success to-success-hover rounded-xl p-6 shadow-card text-white relative overflow-hidden flex flex-col justify-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
+          <FaChartLine className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 text-[60px]" />
+          <h3 className="text-base font-semibold opacity-90 mb-2 z-10">Current Stock</h3>
+          <p className="text-3xl font-bold z-10">{stockCounts.totalStock}</p>
         </div>
-        <div className={styles.reportscard} onClick={handleLowStockClick}> {/* ✅ Clickable card */}
-          <FaExclamationTriangle className={styles.reportsicon} />
-          <h3>Low Stock</h3>
-          <p>{stockCounts.lowStock}</p>
+        <div 
+          className="flex-1 bg-gradient-to-br from-warning to-warning-hover rounded-xl p-6 shadow-card text-white relative overflow-hidden flex flex-col justify-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover cursor-pointer border border-transparent hover:border-white/50"
+          onClick={handleLowStockClick}
+        > 
+          <FaExclamationTriangle className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 text-[60px]" />
+          <h3 className="text-base font-semibold opacity-90 mb-2 z-10">Low Stock (Click to View)</h3>
+          <p className="text-3xl font-bold z-10">{stockCounts.lowStock}</p>
         </div>
-        <div className={styles.reportscard}>
-          <FaTrashAlt className={styles.reportsicon} />
-          <h3>Expired Items</h3>
-          <p>{stockCounts.expiredItems}</p>
+        <div className="flex-1 bg-gradient-to-br from-danger to-danger-hover rounded-xl p-6 shadow-card text-white relative overflow-hidden flex flex-col justify-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
+          <FaTrashAlt className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 text-[60px]" />
+          <h3 className="text-base font-semibold opacity-90 mb-2 z-10">Expired Items</h3>
+          <p className="text-3xl font-bold z-10">{stockCounts.expiredItems}</p>
         </div>
       </div>
 
       {/* Print Button */}
-      <div className={styles.reportsbuttonContainer}>
-        <button className={styles.reportsprintButton} onClick={handlePrint}>
-          <FaPrint className={styles.reportsprintIcon} /> PRINT REPORT
+      <div className="flex justify-center mb-12 max-w-7xl mx-auto">
+        <button 
+          className="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transform transition-all hover:-translate-y-0.5 flex items-center gap-2" 
+          onClick={handlePrint}
+        >
+          <FaPrint className="w-5 h-5" /> PRINT REPORT
         </button>
       </div>
-            {/* Benefits of Smart Inventory Reports */}
-            <h2 className={styles.reportssubtitle}>🚀 Why Use Smart Inventory Reports?</h2>
-      <div className={styles.reportsbenefitsContainer}>
-        <div className={styles.reportscard}>
-          <h3>📦 Accurate Tracking</h3>
-          <p>Monitor stock levels with precision, reducing waste and shortages.</p>
-        </div>
-        <div className={styles.reportscard}>
-          <h3>📡 Real-Time Updates</h3>
-          <p>Get instant alerts on low stock, ensuring timely restocking.</p>
-        </div>
-        <div className={styles.reportscard}>
-          <h3>📊 Data-Driven Decisions</h3>
-          <p>Analyze trends and optimize inventory management for better efficiency.</p>
+      
+      {/* Benefits of Smart Inventory Reports */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 text-center mb-8">🚀 Why Use Smart Inventory Reports?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 flex flex-col items-center text-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">📦 Accurate Tracking</h3>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">Monitor stock levels with precision, reducing waste and shortages.</p>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 flex flex-col items-center text-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">📡 Real-Time Updates</h3>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">Get instant alerts on low stock, ensuring timely restocking.</p>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 flex flex-col items-center text-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">📊 Data-Driven Decisions</h3>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">Analyze trends and optimize inventory management for better efficiency.</p>
+          </div>
         </div>
       </div>
-
 
       {/* Low Stock Items Modal */}
       {showLowStock && (
-        <div className={styles.reportsmodalOverlay}>
-          <div className={styles.reportsmodalContent}>
-            <h3>Low Stock Items</h3>
-            <ul>
-              {lowStockItems.length > 0 ? (
-                lowStockItems.map((item, index) => (
-                  <li key={index}>
-                    {item.name} - <strong>{item.stock} left</strong>
-                  </li>
-                ))
-              ) : (
-                <p>No low stock items.</p>
-              )}
-            </ul>
-            <button className={styles.reportscloseButton} onClick={() => setShowLowStock(false)}>Close</button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-modal max-w-xl w-full max-h-[85vh] overflow-y-auto p-8 relative">
+            <button 
+              className="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center hover:bg-danger-bg hover:text-danger hover:rotate-90 transition-all" 
+              onClick={() => setShowLowStock(false)}
+            >
+              <AiOutlineClose size={20} />
+            </button>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Low Stock Items</h3>
+            
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <ul className="divide-y divide-slate-200">
+                {lowStockItems.length > 0 ? (
+                  lowStockItems.map((item, index) => (
+                    <li key={index} className="px-6 py-4 flex justify-between items-center hover:bg-slate-100 transition-colors">
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">{item.name}</span>
+                      <span className="bg-warning-bg text-warning px-3 py-1 rounded-full text-sm font-bold border border-warning/20">
+                        {item.stock} left
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-6 py-8 text-center text-slate-500 dark:text-slate-400 font-medium">No low stock items.</li>
+                )}
+              </ul>
+            </div>
+            
+            <div className="mt-8 flex justify-end">
+              <button 
+                className="bg-slate-200 text-slate-700 dark:text-slate-200 hover:bg-slate-300 px-6 py-2.5 rounded-xl font-bold transition-colors" 
+                onClick={() => setShowLowStock(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
-
-    
   );
-  
 };
 
 export default Reports;

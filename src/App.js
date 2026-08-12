@@ -13,14 +13,55 @@ import Supplier from './Components/Supplier';
 import Reports from './Components/Reports';
 import Users from './Components/Users';
 import AuthForm from './Components/AuthForm';
-import ContactUs from './Components/Home/ContactUs';
 import Profile from './Components/Profile';
-import Settings from './Components/Settings';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { RoleProvider, useRole } from './Components/RoleContext';
 import ForgotResetPassword from "./Components/ForgotResetPassword";
+import toast from 'react-hot-toast';
 
+const SessionManager = () => {
+  const navigate = useNavigate();
+  const { setRole } = useRole();
+
+  React.useEffect(() => {
+    let timeoutId;
+    const checkTimeout = () => {
+      const savedSettings = JSON.parse(localStorage.getItem("userSettings"));
+      if (!savedSettings || !savedSettings.autoLogout || savedSettings.autoLogout === "0") {
+        return;
+      }
+      
+      const timeoutMs = parseInt(savedSettings.autoLogout, 10) * 60 * 1000;
+      
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        // Auto-logout triggered
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        if (setRole) setRole('');
+        navigate('/');
+        toast.error('Logged out due to inactivity.');
+      }, timeoutMs);
+    };
+
+    // Events to reset timeout
+    const events = ['load', 'mousemove', 'mousedown', 'click', 'scroll', 'keypress'];
+    const resetTimer = () => checkTimeout();
+
+    events.forEach(e => window.addEventListener(e, resetTimer));
+    checkTimeout(); // Init
+
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+      clearTimeout(timeoutId);
+    };
+  }, [navigate, setRole]);
+
+  return null;
+};
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -41,7 +82,7 @@ const Layout = ({ children }) => {
           />
         )}
         <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-64' : ''}`}>
-          <main>{children}</main>
+          <main className={!isAuthPage ? "pt-[73px]" : ""}>{children}</main>
         </div>
       </div>
       {!isAuthPage && <FormPopup />}
@@ -50,16 +91,28 @@ const Layout = ({ children }) => {
   );
 };
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles }) => {
   const { role } = useRole();
-  return role ? children : <Navigate to="/" />;
+  if (!role) return <Navigate to="/" />;
+  if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/Home" />;
+  return children;
 };
 
 function App() {
+  React.useEffect(() => {
+    const savedSettings = JSON.parse(localStorage.getItem("userSettings"));
+    if (savedSettings && savedSettings.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   return (
-    <div className="App">
+    <div className="App dark:bg-slate-900 dark:text-slate-100 min-h-screen">
       <RoleProvider>
         <Router>
+          <SessionManager />
           <Layout>
             <Routes>
               <Route path="/" element={<AuthForm />} />
@@ -74,14 +127,6 @@ function App() {
                 }
               />
               <Route
-                path="/Home/ContactUs"
-                element={
-                  <ProtectedRoute>
-                    <ContactUs />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/Notifications"
                 element={
                   <ProtectedRoute>
@@ -92,7 +137,7 @@ function App() {
               <Route
                 path="/Inventory"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <Inventory />
                   </ProtectedRoute>
                 }
@@ -102,7 +147,7 @@ function App() {
               <Route
                 path="/Billing/Admin"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <AdminBilling />
                   </ProtectedRoute>
                 }
@@ -119,7 +164,7 @@ function App() {
               <Route
                 path="/Orders"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <Orders />
                   </ProtectedRoute>
                 }
@@ -127,7 +172,7 @@ function App() {
               <Route
                 path="/Supplier"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <Supplier />
                   </ProtectedRoute>
                 }
@@ -135,7 +180,7 @@ function App() {
               <Route
                 path="/Users"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <Users />
                   </ProtectedRoute>
                 }
@@ -143,20 +188,12 @@ function App() {
               <Route
                 path="/Reports"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['Admin']}>
                     <Reports />
                   </ProtectedRoute>
                 }
               />
 
-              <Route
-                path="/Settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
 
               <Route
                 path="/Profile"

@@ -29,6 +29,19 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
+// Auth Middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1] || req.headers.authorization;
+  if (!token) return res.status(401).json({ message: 'Access Denied: No token provided' });
+  try {
+    const verified = jwt.verify(token, SECRET_KEY);
+    req.user = verified;
+    next();
+  } catch (err) {
+    res.status(403).json({ message: 'Invalid token' });
+  }
+};
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
@@ -36,66 +49,66 @@ app.listen(port, () => {
 
 // User Signup
 app.post('/api/signup', async (req, res) => {
-  const { email, password, role } = req.body;
+  const { name, email, password, role } = req.body;
 
   if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: 'Invalid email format' });
+    return res.status(400).json({ message: 'Invalid email format' });
   }
 
   // Check if email already exists with a different role
-  authDB.query('SELECT role FROM users WHERE email = ?', [email], async (err, results) => {
-      if (err) {
-          console.error('Database error:', err);
-          return res.status(500).json({ message: 'Database error', error: err });
+  authDB.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Database error', error: err });
+    }
+
+    if (results.length > 0) {
+      if (results[0].role !== role) {
+        return res.status(400).json({ message: `This email is already registered as ${results[0].role}. Please use a different email.` });
+      } else {
+        return res.status(400).json({ message: 'Email already exists' });
       }
+    }
 
-      if (results.length > 0) {
-          if (results[0].role !== role) {
-              return res.status(400).json({ message: `This email is already registered as ${results[0].role}. Please use a different email.` });
-          } else {
-              return res.status(400).json({ message: 'Email already exists' });
+    // Hash password before storing
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert user into auth_db
+    authDB.query(
+      'INSERT INTO users (email, name, password, role) VALUES (?, ?, ?, ?)',
+      [email, name, hashedPassword, role],
+      (err, result) => {
+        if (err) {
+          console.error('Signup error:', err);
+          return res.status(500).json({ message: 'Error signing up' });
+        }
+
+        // Insert into role-specific database
+        const targetDB = role === 'Admin' ? adminDB : userDB;
+        targetDB.query(
+          'INSERT INTO users (id, email, password, created_at) VALUES (?, ?, ?, NOW())',
+          [result.insertId, email, hashedPassword],
+          (err) => {
+            if (err) {
+              console.error('Error syncing user data:', err);
+              return res.status(500).json({ message: 'Error syncing user data' });
+            }
+
+            const token = jwt.sign(
+              { id: result.insertId, email, role },
+              SECRET_KEY,
+              { expiresIn: '1d' }
+            );
+
+            res.status(201).json({
+              message: 'Signup successful',
+              user: { id: result.insertId, name, email, role },
+              token,
+            });
           }
+        );
       }
-
-      // Hash password before storing
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Insert user into auth_db
-      authDB.query(
-          'INSERT INTO users (email, password, role) VALUES (?, ?, ?)',
-          [email, hashedPassword, role],
-          (err, result) => {
-              if (err) {
-                  console.error('Signup error:', err);
-                  return res.status(500).json({ message: 'Error signing up' });
-              }
-
-              // Insert into role-specific database
-              const targetDB = role === 'Admin' ? adminDB : userDB;
-              targetDB.query(
-                  'INSERT INTO users (id, email, password, created_at) VALUES (?, ?, ?, NOW())',
-                  [result.insertId, email, hashedPassword],
-                  (err) => {
-                      if (err) {
-                          console.error('Error syncing user data:', err);
-                          return res.status(500).json({ message: 'Error syncing user data' });
-                      }
-
-                      const token = jwt.sign(
-                        { id: result.insertId, email, role },
-                        SECRET_KEY,
-                        { expiresIn: '1d' }
-                      );
-
-                      res.status(201).json({
-                          message: 'Signup successful',
-                          user: { id: result.insertId, email, role },
-                          token,
-                      });
-                  }
-              );
-          }
-      );
+    );
   });
 });
 
@@ -105,35 +118,35 @@ app.post('/api/login', (req, res) => {
   const { email, password, role } = req.body; // Now role is required during login
 
   authDB.query('SELECT * FROM users WHERE email = ? AND role = ?', [email, role], async (err, results) => {
-      if (err) {
-          console.error('Database error:', err);
-          return res.status(500).json({ message: 'Database error', error: err });
-      }
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Database error', error: err });
+    }
 
-      if (results.length === 0) {
-          return res.status(401).json({ message: 'Invalid email, password, or role' });
-      }
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Invalid email, password, or role' });
+    }
 
-      const user = results[0];
+    const user = results[0];
 
-      // Compare hashed password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-          return res.status(401).json({ message: 'Invalid email, password, or role' });
-      }
+    // Compare hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email, password, or role' });
+    }
 
-      const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        SECRET_KEY,
-        { expiresIn: '1d' }
-      );
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      SECRET_KEY,
+      { expiresIn: '1d' }
+    );
 
-      res.status(200).json({
-          message: 'Login successful',
-          user: { id: user.id, email: user.email, role: user.role },
-          token,
-          redirectTo: user.role === 'Admin' ? '/admin/dashboard' : '/user/home',
-      });
+    res.status(200).json({
+      message: 'Login successful',
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      token,
+      redirectTo: user.role === 'Admin' ? '/admin/dashboard' : '/user/home',
+    });
   });
 });
 
@@ -157,17 +170,17 @@ app.get('/api/dashboard', (req, res) => {
 app.post("/api/reset-password", (req, res) => {
   const { email, newPassword } = req.body;
 
-  // ✅ Step 1: Check if email and password are provided
+  //  Step 1: Check if email and password are provided
   if (!email || !newPassword) {
     return res.status(400).json({ message: "Email and new password are required!" });
   }
 
-  // ✅ Step 2: Log incoming request data for debugging
+  //  Step 2: Log incoming request data for debugging
   console.log("Reset Password Request Received:");
   console.log("Email:", email);
   console.log("New Password:", newPassword);
 
-  // ✅ Step 3: Update password in database
+  //  Step 3: Update password in database
   const query = "UPDATE users SET password = ? WHERE email = ?";
   db.query(query, [newPassword, email], (err, result) => {
     if (err) {
@@ -187,7 +200,7 @@ app.post("/api/reset-password", (req, res) => {
 
 //INVENTORY PAGE/////////////////////////////////////
 // GET inventory items
-app.get('/api/inventory', (req, res) => {  
+app.get('/api/inventory', (req, res) => {
   medstockDB.query('SELECT * FROM inventory', (err, results) => {
     if (err) {
       return res.status(500).send('Error fetching inventory');
@@ -217,15 +230,16 @@ app.get('/api/inventory/low-or-expired', (req, res) => {
 
 
 // Add new inventory item
-app.post('/api/inventory', (req, res) => {  
+app.post('/api/inventory', (req, res) => {
   const { name, category, quantity, expiryDate, supplier, threshold, price } = req.body;
   const query = 'INSERT INTO inventory (name, category, quantity, expiryDate, supplier, threshold, price) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
-  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold, price], (err, result) => {    if (err) {
+  medstockDB.query(query, [name, category, quantity, expiryDate, supplier, threshold, price], (err, result) => {
+    if (err) {
       return res.status(500).send('Error adding new item');
     }
     res.status(201).json({
-      id: result.insertId, 
+      id: result.insertId,
       name: name,
       category: category,
       quantity: quantity,
@@ -239,7 +253,7 @@ app.post('/api/inventory', (req, res) => {
 
 // Update inventory item
 app.put('/api/inventory/:id', (req, res) => {  // Changed to lowercase 'inventory'
-  const { name, category, quantity, expiryDate, supplier, threshold, price} = req.body;
+  const { name, category, quantity, expiryDate, supplier, threshold, price } = req.body;
 
   const query = 'UPDATE inventory SET name = ?, category = ?, quantity = ?, expiryDate = ?, supplier = ?, threshold = ?, price=? WHERE id = ?';
 
@@ -332,7 +346,7 @@ app.post("/api/save-bill", async (req, res) => {
       const [results] = await conn.query("SELECT quantity FROM inventory WHERE name = ?", [item.name]);
       if (results.length === 0) throw new Error(`Item ${item.name} not found in inventory.`);
       if (results[0].quantity < item.quantity) throw new Error(`Insufficient stock for ${item.name}.`);
-      
+
       await conn.query("UPDATE inventory SET quantity = quantity - ? WHERE name = ?", [item.quantity, item.name]);
     }
 
@@ -399,7 +413,7 @@ app.post("/api/create-order", async (req, res) => {
       currency: "INR",
       receipt: `receipt_order_${Date.now()}`
     };
-    
+
     const order = await razorpay.orders.create(options);
     if (!order) return res.status(500).send("Some error occured");
     res.json(order);
@@ -411,7 +425,7 @@ app.post("/api/create-order", async (req, res) => {
 app.post("/api/verify-payment", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    
+
     // In a real production app, verify signature using crypto here
     // const crypto = require('crypto');
     // const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
@@ -443,7 +457,7 @@ app.get('/api/reports/stock', (req, res) => {
       console.error('Error fetching stock data:', err);
       return res.status(500).json({ error: 'Database error' });
     }
-    res.json(results[0]); 
+    res.json(results[0]);
   });
 });
 
@@ -479,7 +493,7 @@ app.get('/api/reports/sales', (req, res) => {
   });
 });
 
-// 🔥 Today's Total Payout (calculate and save)
+// Today's Total Payout (calculate and save)
 app.get('/api/reports/todays-payout', (req, res) => {
   const payoutQuery = `
     SELECT SUM(quantity * price) AS total_payout
@@ -513,7 +527,7 @@ app.get('/api/reports/todays-payout', (req, res) => {
   });
 });
 
-// 📜 Fetch payout history
+// Fetch payout history
 app.get('/api/reports/payout-history', (req, res) => {
   const fetchQuery = `SELECT * FROM payouts ORDER BY payout_date DESC`;
 
@@ -611,8 +625,7 @@ app.delete("/api/suppliers/:id", (req, res) => {
 
 
 //////////////////////////////////////////////Billing PAGE///////////////////////////////////////////////////////
-// Get Delivered Orders (Only orders that are delivered but not yet billed)
-// ✅ Get delivered orders (not yet billed)
+// Get delivered orders (not yet billed)
 app.get("/api/get-delivered-orders", async (req, res) => {
   try {
     const [deliveredOrders] = await medstockDB.promise().query(`
@@ -626,10 +639,7 @@ app.get("/api/get-delivered-orders", async (req, res) => {
     console.error("Error fetching delivered orders:", error);
     res.status(500).json({ error: error.message });
   }
-});
-
-
-// ✅ Get previous bills
+});// Get previous bills
 app.post("/api/generate-bill", async (req, res) => {
   try {
     const { orderID } = req.body;
@@ -645,9 +655,17 @@ app.post("/api/generate-bill", async (req, res) => {
 
     const billID = `BILL${Date.now()}`;
 
+    // Fetch tax rate
+    const [settings] = await medstockDB.promise().query(`SELECT tax_rate FROM system_settings WHERE id = 1`);
+    const taxRate = settings.length > 0 ? parseFloat(settings[0].tax_rate) || 0 : 0;
+    
+    const basePrice = parseFloat(order[0].TotalPrice);
+    const taxAmount = basePrice * (taxRate / 100);
+    const totalAmount = basePrice + taxAmount;
+
     await medstockDB.promise().query(
       `INSERT INTO Bills (BillID, OrderID, TotalAmount) VALUES (?, ?, ?)`,
-      [billID, orderID, order[0].TotalPrice]
+      [billID, orderID, totalAmount]
     );
 
     const [orderItems] = await medstockDB.promise().query(
@@ -662,20 +680,20 @@ app.post("/api/generate-bill", async (req, res) => {
       );
     }
 
-    // ✅ Update or insert into inventory
+    // Update or insert into inventory
     for (const item of orderItems) {
-      
-      const category = item.category || 'Uncategorized'; 
-    
-      const supplier = item.supplier || 'Unknown'; 
-      
-      const threshold = item.threshold || 0;  
-    
+
+      const category = item.category || 'Uncategorized';
+
+      const supplier = item.supplier || 'Unknown';
+
+      const threshold = item.threshold || 0;
+
       const [existing] = await medstockDB.promise().query(
         `SELECT * FROM inventory WHERE name = ?`,
         [item.Name]
       );
-    
+
       if (existing.length > 0) {
         await medstockDB.promise().query(
           `UPDATE inventory SET quantity = quantity + ? WHERE name = ?`,
@@ -688,8 +706,8 @@ app.post("/api/generate-bill", async (req, res) => {
         );
       }
     }
-    
-    
+
+
 
     res.json({
       message: "Bill generated and inventory updated successfully",
@@ -706,7 +724,7 @@ app.post("/api/generate-bill", async (req, res) => {
 
 
 
-// ✅ API for fetching invoice details (used in React popup)
+// API for fetching invoice details (used in React popup)
 app.get("/api/invoice/:billID", async (req, res) => {
   const { billID } = req.params;
 
@@ -727,8 +745,12 @@ app.get("/api/invoice/:billID", async (req, res) => {
       [billID]
     );
 
+    // Get Business Details
+    const [settings] = await medstockDB.promise().query(`SELECT * FROM system_settings WHERE id = 1`);
+    const businessDetails = settings[0] || {};
+
     // Send bill and items as JSON
-    res.json({ bill, items });
+    res.json({ bill, items, businessDetails });
   } catch (error) {
     console.error("Error fetching invoice data:", error);
     res.status(500).json({ error: error.message });
@@ -784,11 +806,11 @@ app.get("/api/notifications", (req, res) => {
 
   medstockDB.query(query, (err, results) => {
     if (err) {
-      console.error("❌ Database query failed:", err.sqlMessage || err);
+      console.error("Database query failed:", err.sqlMessage || err);
       return res.status(500).json({ message: "Database error.", error: err });
     }
 
-    console.log("✅ Fetched inventory data:", results);
+    console.log("Fetched inventory data:", results);
 
     let outOfStock = 0;
     let lowStock = 0;
@@ -839,7 +861,7 @@ app.get("/api/notifications", (req, res) => {
 
 //USER PAGE///////////////////////////////////////////////
 // ✅ GET all users
-app.get("/users", (req, res) => {
+app.get("/api/users", (req, res) => {
   medstockDB.query("SELECT * FROM user_data ORDER BY id DESC", (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
@@ -847,7 +869,7 @@ app.get("/users", (req, res) => {
 });
 
 // ✅ ADD new user
-app.post("/users", (req, res) => {
+app.post("/api/users", (req, res) => {
   const { name, role, email, phone } = req.body;
   medstockDB.query(
     "INSERT INTO user_data (name, role, email, phone) VALUES (?, ?, ?, ?)",
@@ -860,7 +882,7 @@ app.post("/users", (req, res) => {
 });
 
 // ✅ UPDATE user
-app.put("/users/:id", (req, res) => {
+app.put("/api/users/:id", (req, res) => {
   const { name, role, email, phone } = req.body;
   const { id } = req.params;
   medstockDB.query(
@@ -874,7 +896,7 @@ app.put("/users/:id", (req, res) => {
 });
 
 // ✅ DELETE user
-app.delete("/users/:id", (req, res) => {
+app.delete("/api/users/:id", (req, res) => {
   const { id } = req.params;
   medstockDB.query("DELETE FROM user_data WHERE id = ?", [id], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -1051,7 +1073,7 @@ app.post('/api/orders/deliver/:orderID', async (req, res) => {
     // For each item in the order, update the inventory
     for (const med of medicines) {
       console.log(`Medicine Name: ${med.Name}, Medicine ID: ${med.InventoryID}`);
-      
+
       if (!med.InventoryID) {
         console.log("❌ InventoryID not found for this medicine, skipping update.");
         continue; // Skip if InventoryID is not found
@@ -1247,4 +1269,64 @@ app.get('/api/orders/upcoming', async (req, res) => {
     console.error('Error fetching upcoming orders:', err);
     res.status(500).json({ error: 'Failed to fetch upcoming orders' });
   }
+});
+// --- SETTINGS ENDPOINTS ---
+app.get('/api/settings', (req, res) => {
+  medstockDB.query('SELECT * FROM system_settings WHERE id = 1', (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error fetching settings' });
+    res.json(results[0] || {});
+  });
+});
+
+app.put('/api/settings', (req, res) => {
+  const { tax_rate, business_name, business_address, business_gstin, business_contact, default_threshold } = req.body;
+  const query = 'UPDATE system_settings SET tax_rate=?, business_name=?, business_address=?, business_gstin=?, business_contact=?, default_threshold=? WHERE id=1';
+  medstockDB.query(query, [tax_rate, business_name, business_address, business_gstin, business_contact, default_threshold], (err) => {
+    if (err) return res.status(500).json({ message: 'Error updating settings' });
+    res.json({ message: 'Settings updated successfully' });
+  });
+});
+
+// --- EXPORT CSV ENDPOINT ---
+app.get('/api/export-inventory', (req, res) => {
+  medstockDB.query('SELECT * FROM inventory', (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error exporting inventory' });
+    if (results.length === 0) return res.status(200).send('No data');
+    
+    const headers = Object.keys(results[0]).join(',') + '\n';
+    const rows = results.map(row => {
+      return Object.values(row).map(val => {
+        if (typeof val === 'string') return '"' + val.replace(/"/g, '""') + '"';
+        return val;
+      }).join(',');
+    }).join('\n');
+    
+    res.header('Content-Type', 'text/csv');
+    res.attachment('inventory.csv');
+    res.send(headers + rows);
+  });
+});
+
+// --- CHANGE PASSWORD ENDPOINT ---
+app.post('/api/change-password', async (req, res) => {
+  const { email, currentPassword, newPassword } = req.body;
+  authDB.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    if (err) return res.status(500).json({ message: 'Database error' });
+    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
+    
+    const user = results[0];
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect current password' });
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    authDB.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email], (err) => {
+      if (err) return res.status(500).json({ message: 'Error updating password' });
+      
+      const targetDB = user.role === 'Admin' ? adminDB : userDB;
+      targetDB.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email], (err) => {
+         if (err) console.error('Error syncing password to role db', err);
+         res.json({ message: 'Password updated successfully' });
+      });
+    });
+  });
 });

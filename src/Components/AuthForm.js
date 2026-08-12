@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import styles from './AuthForm.module.css';
 import mslogo from '../Assets/mslogo.png';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from './RoleContext';
@@ -103,7 +102,7 @@ const AuthForm = () => {
       toast.success(`${isLogin ? 'Login' : 'Signup'} Successful`);
       setRole(response.data.user.role);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      localStorage.setItem('username', response.data.user.email); // Some billing pages use username
+      localStorage.setItem('username', response.data.user.email); 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
       }
@@ -116,149 +115,160 @@ const AuthForm = () => {
   };
 
   return (
-    <div className={styles.Login}>
-      <div className={styles.formBox}>
-        <div className={styles.formDetails}>
-          <img src={mslogo} alt="MedStock Logo" className={styles.logoImage} />
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 bg-[url('https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center relative">
+      <div className="absolute inset-0 bg-slate-900/60 dark:bg-slate-900/80 backdrop-blur-sm z-0"></div>
+      
+      <div className="bg-white dark:bg-slate-800 p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md z-10 border border-slate-200 dark:border-slate-700 mx-4 transition-all duration-300">
+        <div className="flex flex-col items-center mb-8">
+          <div className="bg-white dark:bg-slate-700 p-3 rounded-full mb-4 shadow-sm border border-slate-100 dark:border-slate-600">
+            <img src={mslogo} alt="MedStock Logo" className="w-16 h-16 object-contain" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 text-center">
+            {isLogin ? 'Sign in to access your inventory dashboard' : 'Join MedStock to manage your supplies efficiently'}
+          </p>
         </div>
 
-        <div className={styles.formContent}>
-          <h2>{isLogin ? 'LOGIN' : 'SIGN UP'}</h2>
-          <form onSubmit={handleSubmit}>
-            {!isLogin && (
-              <div className={styles.inputGroup}>
-                <div className={styles.inputField}>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter Name"
-                    pattern="^[A-Za-z\s]+$"
-                    title="Name must contain only alphabets and spaces."
-                    required
-                  />
-                </div>
-                <div className={styles.inputField}>
-                  <input
-                    type="text"
-                    name="contact"
-                    value={formData.contact}
-                    onChange={handleChange}
-                    placeholder="Enter Contact Number"
-                    pattern="^\d{10}$"
-                    title="Contact number must be exactly 10 digits."
-                    required
-                  />
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  pattern="^[A-Za-z\s]+$"
+                  title="Name must contain only alphabets and spaces."
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
+                />
               </div>
-            )}
+              <div>
+                <input
+                  type="text"
+                  name="contact"
+                  value={formData.contact}
+                  onChange={handleChange}
+                  placeholder="Contact"
+                  pattern="^\d{10}$"
+                  title="Contact number must be exactly 10 digits."
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
+                />
+              </div>
+            </div>
+          )}
 
-            <div className={styles.inputField}>
+          <div>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email Address"
+              pattern="^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com)$"
+              title="Enter a valid email (gmail.com or yahoo.com only)."
+              required
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
+            />
+          </div>
+
+          {isLogin ? (
+            <div>
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter Email"
-                pattern="^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com)$"
-                title="Enter a valid email (gmail.com or yahoo.com only)."
+                placeholder="Password"
                 required
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
               />
             </div>
-
-            {isLogin ? (
-              <div className={styles.inputField}>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter Password"
+                  placeholder="Password"
                   required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
                 />
               </div>
-            ) : (
-              <div className={styles.inputGroup}>
-                <div className={styles.inputField}>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter Password"
-                    required
-                  />
-                </div>
-                <div className={styles.inputField}>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Confirm Password"
-                    required
-                  />
-                </div>
+              <div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm"
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
+                />
               </div>
-            )}
-
-            <div className={styles.loginType}>
-              <label>
-                <input
-                  type="radio"
-                  name="role"
-                  value="Admin"
-                  checked={formData.role === 'Admin'}
-                  onChange={handleChange}
-                />{' '}
-                Admin
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="role"
-                  value="User"
-                  checked={formData.role === 'User'}
-                  onChange={handleChange}
-                />{' '}
-                User
-              </label>
             </div>
+          )}
 
-           {/* <div className={styles.forgotPassword}>
-              <button
-                type="button"
-                className={styles.forgotPasswordBtn}
-                onClick={() => navigate('/forgot-password')}
-              >
-                Forgot Password?
-              </button>
-            </div>*/}
-
-            <button className={styles.lsbtn} type="submit">
-              {isLogin ? 'Log In' : 'Sign Up'}
-            </button>
-          </form>
-
-          <div className={styles.bottomLink}>
-            {isLogin ? (
-              <>
-                Don't have an account?{' '}
-                <button
-                  className={styles.registerButton}
-                  onClick={() => setIsLogin(false)}
-                >
-                  Register
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button onClick={() => setIsLogin(true)}>Login</button>
-              </>
-            )}
+          <div className="flex items-center justify-center space-x-6 py-2">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="role"
+                value="Admin"
+                checked={formData.role === 'Admin'}
+                onChange={handleChange}
+                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-slate-300 cursor-pointer"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">Admin</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="role"
+                value="User"
+                checked={formData.role === 'User'}
+                onChange={handleChange}
+                className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-slate-300 cursor-pointer"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">User</span>
+            </label>
           </div>
+
+          <button 
+            type="submit"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 mt-2"
+          >
+            {isLogin ? 'Log In' : 'Sign Up'}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          {isLogin ? (
+            <>
+              Don't have an account?{' '}
+              <button
+                className="text-primary-600 dark:text-primary-400 font-semibold hover:underline focus:outline-none"
+                onClick={() => setIsLogin(false)}
+              >
+                Register here
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <button 
+                className="text-primary-600 dark:text-primary-400 font-semibold hover:underline focus:outline-none"
+                onClick={() => setIsLogin(true)}
+              >
+                Log in here
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

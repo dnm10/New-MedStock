@@ -15,6 +15,8 @@ const Orders = () => {
     DeliveryDate: " ",
     medicines: [{ id: 1, name: " ", category: " ", quantity: 1, price: 0 }],
   });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
 
   const fetchOrders = async () => {
     try {
@@ -76,6 +78,7 @@ const Orders = () => {
     getSuggestedMedicines(false);
     const interval = setInterval(getSuggestedMedicines, 30000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewOrderChange = (e) => {
@@ -132,7 +135,7 @@ const Orders = () => {
     }
   
     try {
-      const response = await api.post("/orders", {
+      await api.post("/orders", {
         OrderID: OrderID.trim(),
         SupplierID: parseInt(SupplierID, 10),
         DeliveryDate,
@@ -227,8 +230,27 @@ const Orders = () => {
   const totalOrders = orders.length;
   const deliveredPercentage = totalOrders === 0 ? 0 : ((deliveredOrders.length / totalOrders) * 100).toFixed(2);
 
+  const filteredOrders = orders.filter((order) => {
+    // Filter by status
+    if (filterStatus === "Delivered" && !order.Delivery_Status) return false;
+    if (filterStatus === "Pending" && order.Delivery_Status) return false;
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const orderIdMatch = String(order.OrderID).toLowerCase().includes(query);
+      const supplierIdMatch = String(order.SupplierID).toLowerCase().includes(query);
+      const medicinesMatch = Array.isArray(order.Medicines) && order.Medicines.some(med => 
+        med.name.toLowerCase().includes(query) || 
+        med.category.toLowerCase().includes(query)
+      );
+      return orderIdMatch || supplierIdMatch || medicinesMatch;
+    }
+    return true;
+  });
+
   return (
-    <div className="bg-slate-50 min-h-screen pb-10 px-5 md:px-8 mx-auto w-full">
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen pb-10 px-5 md:px-8 mx-auto w-full">
       {/* Page Header */}
       <div className="mb-8 mt-6 py-6 bg-gradient-to-r from-primary-800 to-primary-600 text-white rounded-2xl shadow-md text-center">
         <h1 className="text-3xl font-bold tracking-wide drop-shadow-sm">Orders List</h1>
@@ -253,75 +275,98 @@ const Orders = () => {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex justify-end gap-4 mb-6 max-w-7xl mx-auto">
-        <button 
-          className="bg-white border-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 px-8 py-2.5 rounded-xl font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-2" 
-          onClick={() => setIsHistoryModalOpen(true)}
-        >
-          <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          Order History
-        </button>
-        <button 
-          className="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg transform transition-all hover:-translate-y-0.5 flex items-center gap-2" 
-          onClick={() => getSuggestedMedicines(true)}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-          Add Order
-        </button>
+      {/* Actions and Toolbar */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 max-w-7xl mx-auto">
+        <div className="flex flex-wrap gap-4">
+          <button 
+            className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-slate-900 hover:border-slate-300 dark:border-slate-600 px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-2" 
+            onClick={() => setIsHistoryModalOpen(true)}
+          >
+            <svg className="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Order History
+          </button>
+          <button 
+            className="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg transform transition-all hover:-translate-y-0.5 flex items-center gap-2" 
+            onClick={() => getSuggestedMedicines(true)}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+            Add Order
+          </button>
+        </div>
+
+        <div className="w-full md:w-auto flex-1 max-w-xl ml-auto mt-4 md:mt-0 flex gap-4">
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="w-1/3 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-slate-800 dark:text-slate-100 transition-all shadow-sm hover:border-slate-400 cursor-pointer"
+          >
+            <option value="All">All Status</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Pending">Pending</option>
+          </select>
+          <div className="relative w-2/3">
+            <input 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search orders, medicines, suppliers..." 
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-slate-800 dark:text-slate-100 placeholder-slate-500 transition-all shadow-sm hover:border-slate-400" 
+            />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+        </div>
       </div>
 
       {/* Add Order Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-modal max-w-3xl w-full max-h-[85vh] overflow-y-auto p-8 relative">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-modal max-w-3xl w-full max-h-[85vh] overflow-y-auto p-8 relative">
             <button 
-              className="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center hover:bg-danger-bg hover:text-danger hover:rotate-90 transition-all" 
+              className="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center hover:bg-danger-bg hover:text-danger hover:rotate-90 transition-all" 
               onClick={() => setIsAddModalOpen(false)}
             >
               <AiOutlineClose size={24} />
             </button>
-            <h3 className="text-2xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-6">Add New Order</h3>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">Add New Order</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Order ID</label>
-                <input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm text-slate-700 transition-shadow" type="text" name="OrderID" value={newOrder.OrderID} onChange={handleNewOrderChange} required />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Order ID</label>
+                <input className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm text-slate-700 dark:text-slate-200 transition-shadow" type="text" name="OrderID" value={newOrder.OrderID} onChange={handleNewOrderChange} required />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Supplier ID</label>
-                <input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm text-slate-700 transition-shadow" type="text" name="SupplierID" value={newOrder.SupplierID || ''} onChange={handleNewOrderChange} required />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Supplier ID</label>
+                <input className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm text-slate-700 dark:text-slate-200 transition-shadow" type="text" name="SupplierID" value={newOrder.SupplierID || ''} onChange={handleNewOrderChange} required />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Delivery Date</label>
-                <input className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm text-slate-700 transition-shadow" type="date" name="DeliveryDate" value={newOrder.DeliveryDate || ''} onChange={handleNewOrderChange} required />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Delivery Date</label>
+                <input className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm text-slate-700 dark:text-slate-200 transition-shadow" type="date" name="DeliveryDate" value={newOrder.DeliveryDate || ''} onChange={handleNewOrderChange} required />
               </div>
             </div>
 
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Medicines</h3>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Medicines</h3>
             {newOrder.medicines.map((medicine) => (
-              <div key={medicine.id} className="flex flex-wrap gap-4 items-center p-4 border border-slate-200 rounded-xl mb-4 bg-white shadow-sm">
-                <input className="flex-1 min-w-[120px] px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="text" list="medicineOptions" placeholder="Medicine Name" value={medicine.name} onChange={(e) => updateMedicine(medicine.id, "name", e.target.value)} required />
+              <div key={medicine.id} className="flex flex-wrap gap-4 items-center p-4 border border-slate-200 dark:border-slate-700 rounded-xl mb-4 bg-white dark:bg-slate-800 shadow-sm">
+                <input className="flex-1 min-w-[120px] px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="text" list="medicineOptions" placeholder="Medicine Name" value={medicine.name} onChange={(e) => updateMedicine(medicine.id, "name", e.target.value)} required />
                 <datalist id="medicineOptions">
                   {inventoryMedicines.map((med) => (
                     <option key={med.id} value={med.name} />
                   ))}
                 </datalist>
-                <input className="flex-1 min-w-[120px] px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="text" list="categoryOptions" placeholder="Category" value={medicine.category} onChange={(e) => updateMedicine(medicine.id, "category", e.target.value)} required />
+                <input className="flex-1 min-w-[120px] px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="text" list="categoryOptions" placeholder="Category" value={medicine.category} onChange={(e) => updateMedicine(medicine.id, "category", e.target.value)} required />
                 <datalist id="categoryOptions">
                   {inventoryMedicines.map((med) => (
                     <option key={med.id} value={med.category} />
                   ))}
                 </datalist>
-                <input className="w-24 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="number" placeholder="Qty" value={medicine.quantity} onChange={(e) => updateMedicine(medicine.id, "quantity", Number(e.target.value))} required />
-                <input className="w-24 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="number" placeholder="Price" value={medicine.price} onChange={(e) => updateMedicine(medicine.id, "price", Number(e.target.value))} required />
+                <input className="w-24 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="number" placeholder="Qty" value={medicine.quantity} onChange={(e) => updateMedicine(medicine.id, "quantity", Number(e.target.value))} required />
+                <input className="w-24 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm" type="number" placeholder="Price" value={medicine.price} onChange={(e) => updateMedicine(medicine.id, "price", Number(e.target.value))} required />
                 <button className="bg-danger-bg text-danger border border-danger-bg hover:bg-danger hover:text-white px-3 py-2 rounded-lg font-semibold transition-colors" onClick={() => removeMedicine(medicine.id)}>❌</button>
               </div>
             ))}
-            <button className="w-full bg-slate-50 text-primary-600 border-2 border-dashed border-slate-300 hover:border-primary-500 hover:bg-primary-50 py-3 rounded-xl font-semibold transition-colors mb-6" onClick={addMedicine}>
+            <button className="w-full bg-slate-50 dark:bg-slate-900 text-primary-600 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary-500 hover:bg-primary-50 py-3 rounded-xl font-semibold transition-colors mb-6" onClick={addMedicine}>
               + Add Medicine
             </button>
-            <h3 className="text-xl font-bold text-slate-800 text-right mb-6">Total Price: ₹{calculateTotal().toFixed(2)}</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-right mb-6">Total Price: ₹{calculateTotal().toFixed(2)}</h3>
             <button className="w-full bg-success hover:bg-success-hover text-white py-3.5 rounded-xl font-bold text-lg transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5" onClick={addOrder}>
               Save Order
             </button>
@@ -332,31 +377,31 @@ const Orders = () => {
       {/* History Modal */}
       {isHistoryModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-modal max-w-5xl w-full max-h-[85vh] overflow-y-auto p-8 relative">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-modal max-w-5xl w-full max-h-[85vh] overflow-y-auto p-8 relative">
             <button 
-              className="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center hover:bg-danger-bg hover:text-danger hover:rotate-90 transition-all" 
+              className="absolute top-6 right-6 w-10 h-10 bg-slate-100 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center hover:bg-danger-bg hover:text-danger hover:rotate-90 transition-all" 
               onClick={() => setIsHistoryModalOpen(false)}
             >
                <AiOutlineClose size={24} />
             </button>
-            <h1 className="text-2xl font-bold text-slate-800 mb-6 text-center border-b border-slate-200 pb-4">Order History</h1>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center border-b border-slate-200 dark:border-slate-700 pb-4">Order History</h1>
             {deliveredOrders.length > 0 ? (
-              <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                      <th className="px-6 py-4 border-b border-slate-200">Order ID</th>
-                      <th className="px-6 py-4 border-b border-slate-200">Medicines</th>
-                      <th className="px-6 py-4 border-b border-slate-200">Supplier ID</th>
-                      <th className="px-6 py-4 border-b border-slate-200">Total Price</th>
-                      <th className="px-6 py-4 border-b border-slate-200">Delivery Date</th>
+                    <tr className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
+                      <th className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Order ID</th>
+                      <th className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Medicines</th>
+                      <th className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Supplier ID</th>
+                      <th className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Total Price</th>
+                      <th className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Delivery Date</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-slate-100">
+                  <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100">
                     {deliveredOrders.map((order) => (
-                      <tr key={order.OrderID} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm text-slate-700 font-medium">{order.OrderID}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
+                      <tr key={order.OrderID} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-slate-900 transition-colors">
+                        <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200 font-medium">{order.OrderID}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
                           {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
                             <ul className="list-disc pl-4 space-y-1">
                               {order.Medicines.map((med, index) => (
@@ -369,17 +414,17 @@ const Orders = () => {
                             <em className="text-slate-400">No medicines</em>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-700">{order.SupplierID}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-slate-800">₹{order.TotalPrice}</td>
-                        <td className="px-6 py-4 text-sm text-slate-700">{order.DeliveryDate ? formatDate(order.DeliveryDate) : "N/A"}</td>
+                        <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200">{order.SupplierID}</td>
+                        <td className="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">₹{order.TotalPrice}</td>
+                        <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200">{order.DeliveryDate ? formatDate(order.DeliveryDate) : "N/A"}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
-                <p className="text-slate-500 font-medium">No orders delivered till date.</p>
+              <div className="text-center py-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 border-dashed">
+                <p className="text-slate-500 dark:text-slate-400 font-medium">No orders delivered till date.</p>
               </div>
             )}
           </div>
@@ -387,7 +432,7 @@ const Orders = () => {
       )}
 
       {/* Main Orders Table */}
-      <div className="max-w-7xl mx-auto overflow-x-auto rounded-xl border border-slate-200 shadow-card bg-white">
+      <div className="max-w-7xl mx-auto overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-card bg-white dark:bg-slate-800">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-primary-800 text-white text-xs uppercase tracking-wider font-semibold">
@@ -401,11 +446,11 @@ const Orders = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {orders.length > 0 ? (
-              orders.map((order) => (
-                <tr key={order.OrderID} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-700 font-medium">{order.OrderID}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <tr key={order.OrderID} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-slate-900 transition-colors">
+                  <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200 font-medium">{order.OrderID}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
                     {Array.isArray(order.Medicines) && order.Medicines.length > 0 ? (
                       <ul className="space-y-1">
                         {order.Medicines.map((med, index) => (
@@ -422,9 +467,9 @@ const Orders = () => {
                       <em className="text-slate-400">No medicines</em>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{order.SupplierID}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-slate-800">₹{order.TotalPrice}</td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{order.DeliveryDate ? formatDate(order.DeliveryDate) : "N/A"}</td>
+                  <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200">{order.SupplierID}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">₹{order.TotalPrice}</td>
+                  <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200">{order.DeliveryDate ? formatDate(order.DeliveryDate) : "N/A"}</td>
                   <td className="px-6 py-4 text-center">
                     <input
                       type="checkbox"
@@ -445,8 +490,8 @@ const Orders = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="px-6 py-12 text-center text-slate-500 font-medium bg-slate-50">
-                  No orders found
+                <td colSpan="7" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400 font-medium bg-slate-50 dark:bg-slate-900">
+                  {searchQuery || filterStatus !== "All" ? "No orders match your search and filter criteria." : "No orders found"}
                 </td>
               </tr>
             )}

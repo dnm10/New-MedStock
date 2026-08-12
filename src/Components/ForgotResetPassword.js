@@ -13,7 +13,7 @@ const ResetPassword = () => {
     }
   
     try {
-      const response = await api.post("/reset-password", { email, newPassword });
+      await api.post("/reset-password", { email, newPassword });
       
       toast.success("Password reset successful!");
       setEmail("");
