@@ -12,6 +12,8 @@ const AdminBilling = () => {
   const [previousBills, setPreviousBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [todaySales, setTodaySales] = useState({ totalSales: 0, totalRevenue: 0, paymentBreakdown: [] });
+  const [paymentMethods, setPaymentMethods] = useState({});
 
   const [selectedBill, setSelectedBill] = useState(null);
   const [invoiceItems, setInvoiceItems] = useState([]);
@@ -43,22 +45,35 @@ const AdminBilling = () => {
     }
   };
 
+  // Fetch today's sales summary
+  const fetchTodaySales = async () => {
+    try {
+      const response = await api.get("/sales/summary?range=today");
+      setTodaySales(response.data);
+    } catch (error) {
+      console.error("Error fetching today sales:", error);
+    }
+  };
+
   useEffect(() => {
     fetchDeliveredOrders();
     fetchPreviousBills();
+    fetchTodaySales();
   }, []);
 
   // Generate a bill for an order
-  const generateBill = async (order) => {
+  const generateBill = async (order, paymentType) => {
     try {
       const response = await api.post("/generate-bill", {
         orderID: order.OrderID,
+        paymentType: paymentType || 'Bank Transfer'
       });
   
       if (response.status === 200) {
         toast.success("Bill generated successfully!");
         fetchDeliveredOrders(); // Refresh pending orders
         fetchPreviousBills();   // Refresh billing history
+        fetchTodaySales();      // Refresh sales summary
         viewInvoice(response.data.billID); // Show the invoice in modal
       }
     } catch (error) {
@@ -169,12 +184,23 @@ const AdminBilling = () => {
                         <td className="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">₹{formatPrice(order.TotalPrice)}</td>
                         <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-200">{new Date(order.DeliveryDate).toLocaleDateString()}</td>
                         <td className="px-6 py-4 text-center">
-                          <button 
-                            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
-                            onClick={() => generateBill(order)}
-                          >
-                            Generate Bill
-                          </button>
+                          <div className="flex items-center justify-center space-x-2">
+                            <select
+                              value={paymentMethods[order.OrderID] || 'Bank Transfer'}
+                              onChange={(e) => setPaymentMethods({ ...paymentMethods, [order.OrderID]: e.target.value })}
+                              className="px-2 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded text-sm outline-none"
+                            >
+                              <option value="Bank Transfer">Bank Transfer</option>
+                              <option value="Cash">Cash</option>
+                              <option value="Card">Card</option>
+                            </select>
+                            <button 
+                              className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+                              onClick={() => generateBill(order, paymentMethods[order.OrderID] || 'Bank Transfer')}
+                            >
+                              Generate
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -232,6 +258,36 @@ const AdminBilling = () => {
 
         </div>
       )}
+
+      {/* Today's Sales Summary Panel */}
+      <div className="max-w-7xl mx-auto mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 md:p-8">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">Today's Sales Summary</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-primary-50 dark:bg-slate-700 p-4 rounded-xl text-center">
+            <p className="text-sm font-semibold text-primary-600 dark:text-primary-300">Total Sales</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{todaySales.totalSales}</p>
+          </div>
+          <div className="bg-success-50 dark:bg-slate-700 p-4 rounded-xl text-center">
+            <p className="text-sm font-semibold text-success-600 dark:text-success-400">Total Revenue</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">₹{Number(todaySales.totalRevenue).toFixed(2)}</p>
+          </div>
+          <div className="bg-purple-50 dark:bg-slate-700 p-4 rounded-xl">
+            <p className="text-sm font-semibold text-purple-600 dark:text-purple-300 text-center mb-2">Payment Breakdown</p>
+            <ul className="text-sm text-slate-700 dark:text-slate-200 space-y-1">
+              {todaySales.paymentBreakdown && todaySales.paymentBreakdown.length > 0 ? (
+                todaySales.paymentBreakdown.map((b, i) => (
+                  <li key={i} className="flex justify-between">
+                    <span>{b.payment_method} ({b.count}):</span>
+                    <span className="font-semibold">₹{Number(b.amount).toFixed(2)}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-center text-slate-500">No sales yet</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
 
       {/* Embedded invoice modal */}
       {showInvoice && selectedBill && (

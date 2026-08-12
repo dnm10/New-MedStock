@@ -25,14 +25,16 @@ const Home = () => {
     }
   }, [location]);
 
-  const cardItems = [
-    { id: 'inventory', label: 'Inventory', desc: 'Real-time stock levels, low-stock alerts, and effortless tracking.', icon: <FaBox />, path: '/Inventory' },
-    { id: 'orders', label: 'Orders', desc: 'Streamline procurement and monitor delivery status instantly.', icon: <FaTruck />, path: '/Orders' },
-    { id: 'suppliers', label: 'Suppliers', desc: 'Manage vendor relationships and track historical supply data.', icon: <FaHome />, path: '/Supplier' },
-    { id: 'reports', label: 'Reports', desc: 'Powerful analytics to drive smart, data-driven decisions.', icon: <FaChartBar />, path: '/Reports' },
-    { id: 'billing', label: 'Billing', desc: 'Generate invoices and automatically calculate tax compliance.', icon: <FaMoneyBill />, path: role === 'Admin' ? '/Billing/Admin' : '/Billing/User' },
-    { id: 'notifications', label: 'Notifications', desc: 'Stay updated on essential changes and system alerts.', icon: <FaBell />, path: '/Notifications' },
+  const allCardItems = [
+    { id: 'inventory', label: 'Inventory', desc: 'Real-time stock levels, low-stock alerts, and effortless tracking.', icon: <FaBox />, path: '/Inventory', adminOnly: true },
+    { id: 'orders', label: 'Orders', desc: 'Streamline procurement and monitor delivery status instantly.', icon: <FaTruck />, path: '/Orders', adminOnly: true },
+    { id: 'suppliers', label: 'Suppliers', desc: 'Manage vendor relationships and track historical supply data.', icon: <FaHome />, path: '/Supplier', adminOnly: true },
+    { id: 'reports', label: 'Reports', desc: 'Powerful analytics to drive smart, data-driven decisions.', icon: <FaChartBar />, path: '/Reports', adminOnly: true },
+    { id: 'billing', label: 'Billing', desc: 'Generate invoices and automatically calculate tax compliance.', icon: <FaMoneyBill />, path: role === 'Admin' ? '/Billing/Admin' : '/Billing/User', adminOnly: false },
+    { id: 'notifications', label: 'Notifications', desc: 'Stay updated on essential changes and system alerts.', icon: <FaBell />, path: '/Notifications', adminOnly: false },
   ];
+
+  const cardItems = allCardItems.filter(item => role === 'Admin' || !item.adminOnly);
 
   const handleContactSubmit = (e) => {
     e.preventDefault();

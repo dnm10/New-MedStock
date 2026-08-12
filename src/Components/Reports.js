@@ -3,6 +3,7 @@ import { FaBox, FaChartLine, FaExclamationTriangle, FaTrashAlt, FaPrint } from "
 import { AiOutlineClose } from "react-icons/ai";
 import api from "../api/axiosConfig";
 import toast from 'react-hot-toast';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const Reports = () => {
   const [lowStockItems, setLowStockItems] = useState([]); // Stores low stock items
@@ -13,6 +14,17 @@ const Reports = () => {
     lowStock: 0,
     expiredItems: 0,
   });
+
+  // Sales Analytics State
+  const [salesRange, setSalesRange] = useState("today");
+  const [salesData, setSalesData] = useState({
+    totalSales: 0,
+    totalRevenue: 0,
+    paymentBreakdown: [],
+    userBreakdown: []
+  });
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   useEffect(() => {
     const fetchStockCounts = async () => {
@@ -34,6 +46,18 @@ const Reports = () => {
 
     fetchStockCounts();
   }, []);
+
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const response = await api.get(`/sales/summary/by-user?range=${salesRange}`);
+        setSalesData(response.data);
+      } catch (error) {
+        console.error("Error fetching sales summary:", error);
+      }
+    };
+    fetchSalesData();
+  }, [salesRange]);
 
   // ✅ Corrected: Now handleLowStockClick is placed properly inside the component
   const handleLowStockClick = async () => {
@@ -228,6 +252,84 @@ const Reports = () => {
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 flex flex-col items-center text-center transform transition-all hover:-translate-y-1 hover:shadow-card-hover">
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">📊 Data-Driven Decisions</h3>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">Analyze trends and optimize inventory management for better efficiency.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Sales Analytics Section */}
+      <div className="max-w-7xl mx-auto mb-12">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">📈 Sales Analytics</h2>
+          <select
+            value={salesRange}
+            onChange={(e) => setSalesRange(e.target.value)}
+            className="px-4 py-2 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 font-semibold cursor-pointer"
+          >
+            <option value="today">Today</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 flex flex-col justify-center text-center">
+            <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400 mb-2">Total Orders</h3>
+            <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">{salesData.totalSales}</p>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 flex flex-col justify-center text-center">
+            <h3 className="text-lg font-bold text-slate-500 dark:text-slate-400 mb-2">Total Revenue</h3>
+            <p className="text-4xl font-bold text-success-600 dark:text-success-400">₹{Number(salesData.totalRevenue).toFixed(2)}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">Payment Methods Breakdown</h3>
+            {salesData.paymentBreakdown.length > 0 ? (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={salesData.paymentBreakdown}
+                      dataKey="amount"
+                      nameKey="payment_method"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label
+                    >
+                      {salesData.paymentBreakdown.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `₹${Number(value).toFixed(2)}`} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-slate-400">No data available</div>
+            )}
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">Revenue by User</h3>
+            {salesData.userBreakdown && salesData.userBreakdown.length > 0 ? (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={salesData.userBreakdown} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                    <XAxis dataKey="user_email" tick={{ fontSize: 12 }} />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `₹${Number(value).toFixed(2)}`} />
+                    <Legend />
+                    <Bar dataKey="totalRevenue" fill="#8884d8" name="Revenue (₹)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-slate-400">No data available</div>
+            )}
           </div>
         </div>
       </div>

@@ -13,11 +13,11 @@ const UserBilling = () => {
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [paymentType, setPaymentType] = useState("cash"); 
-  const [todayTotal, setTodayTotal] = useState("0.00");
+  const [todaySales, setTodaySales] = useState({ totalSales: 0, totalRevenue: 0, paymentBreakdown: [] });
 
   useEffect(() => {
     fetchInventory();
-    fetchBills();
+    fetchTodaySales();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -30,27 +30,13 @@ const UserBilling = () => {
     }
   };
 
-  const fetchBills = async () => {
+  const fetchTodaySales = async () => {
     try {
-      const response = await api.get("/get-bills");
-      updateTodayTotal(response.data); 
+      const response = await api.get("/sales/summary?range=today");
+      setTodaySales(response.data);
     } catch (error) {
-      console.error("Error fetching previous bills:", error);
+      console.error("Error fetching today sales:", error);
     }
-  };
-
-  const updateTodayTotal = (bills) => {
-    const today = new Date().toISOString().split("T")[0];
-    const currentUser = localStorage.getItem("username");
-    const todayBills = bills.filter((bill) => {
-      const billDate = bill.date?.split("T")[0];
-      return billDate === today && bill.username === currentUser;
-    });
-    const total = todayBills.reduce((sum, bill) => {
-      const amount = parseFloat(bill.totalAmount);
-      return sum + (isNaN(amount) ? 0 : amount);
-    }, 0);
-    setTodayTotal(total.toFixed(2));
   };
 
   const handleMedicineSelect = (e) => {
@@ -145,6 +131,7 @@ const UserBilling = () => {
       });
 
       toast.success("Bill finalized and saved!");
+      fetchTodaySales(); // Refresh the sales summary panel
       generatePDFInvoice(
         billRes.data.billId || Math.floor(Math.random() * 1000), 
         paymentModeStr, 
@@ -277,9 +264,6 @@ const UserBilling = () => {
         <div className="flex-1 lg:w-1/2 bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 md:p-8 flex flex-col">
           <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Bill Summary</h2>
-            <div className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-bold border border-primary-200">
-              Today's Payout: ₹{todayTotal}
-            </div>
           </div>
 
           <div className="flex-1 overflow-x-auto mb-6 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -343,8 +327,40 @@ const UserBilling = () => {
               Finalize & Pay
             </button>
           </div>
+          </div>
         </div>
       </div>
+
+      {/* Today's Sales Summary Panel */}
+      <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-100 dark:border-slate-700 p-6 md:p-8">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">Today's Sales Summary</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-primary-50 dark:bg-slate-700 p-4 rounded-xl text-center">
+            <p className="text-sm font-semibold text-primary-600 dark:text-primary-300">Total Sales</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{todaySales.totalSales}</p>
+          </div>
+          <div className="bg-success-50 dark:bg-slate-700 p-4 rounded-xl text-center">
+            <p className="text-sm font-semibold text-success-600 dark:text-success-400">Total Revenue</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">₹{Number(todaySales.totalRevenue).toFixed(2)}</p>
+          </div>
+          <div className="bg-purple-50 dark:bg-slate-700 p-4 rounded-xl">
+            <p className="text-sm font-semibold text-purple-600 dark:text-purple-300 text-center mb-2">Payment Breakdown</p>
+            <ul className="text-sm text-slate-700 dark:text-slate-200 space-y-1">
+              {todaySales.paymentBreakdown && todaySales.paymentBreakdown.length > 0 ? (
+                todaySales.paymentBreakdown.map((b, i) => (
+                  <li key={i} className="flex justify-between">
+                    <span>{b.payment_method} ({b.count}):</span>
+                    <span className="font-semibold">₹{Number(b.amount).toFixed(2)}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-center text-slate-500">No sales yet</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };

@@ -319,8 +319,9 @@ app.post("/api/update-inventory", (req, res) => {
 
 
 // Save a new bill
-app.post("/api/save-bill", async (req, res) => {
+app.post("/api/save-bill", verifyToken, async (req, res) => {
   let { billItems, totalAmount, date, username, paymentType } = req.body;
+  const user = req.user;
 
   if (!billItems || !totalAmount || !date || !username) {
     return res.status(400).json({ message: "Missing required fields." });
@@ -353,6 +354,12 @@ app.post("/api/save-bill", async (req, res) => {
     // 2. Save bill
     const sql = `INSERT INTO userRole_billingPage (name, quantity, price) VALUES (?, ?, ?)`;
     const [result] = await conn.query(sql, ["bill", 1, jsonData]);
+
+    // 3. Log to sales table
+    await conn.query(
+      `INSERT INTO sales (user_email, role, payment_method, total_amount, source) VALUES (?, ?, ?, ?, ?)`,
+      [user.email, user.role, paymentType, totalAmount, 'manual']
+    );
 
     await conn.commit();
     res.status(201).json({ message: "Bill saved successfully", billId: result.insertId });
@@ -640,9 +647,10 @@ app.get("/api/get-delivered-orders", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });// Get previous bills
-app.post("/api/generate-bill", async (req, res) => {
+app.post("/api/generate-bill", verifyToken, async (req, res) => {
   try {
-    const { orderID } = req.body;
+    const { orderID, paymentType } = req.body;
+    const user = req.user;
 
     const [order] = await medstockDB.promise().query(
       `SELECT TotalPrice FROM Orders WHERE OrderID = ? AND Delivery_Status = TRUE`,
@@ -666,6 +674,12 @@ app.post("/api/generate-bill", async (req, res) => {
     await medstockDB.promise().query(
       `INSERT INTO Bills (BillID, OrderID, TotalAmount) VALUES (?, ?, ?)`,
       [billID, orderID, totalAmount]
+    );
+
+    // Log to sales table
+    await medstockDB.promise().query(
+      `INSERT INTO sales (user_email, role, payment_method, total_amount, source) VALUES (?, ?, ?, ?, ?)`,
+      [user.email, user.role, paymentType || 'Bank Transfer', totalAmount, 'order']
     );
 
     const [orderItems] = await medstockDB.promise().query(
@@ -1329,4 +1343,82 @@ app.post('/api/change-password', async (req, res) => {
       });
     });
   });
+});
+
+
+// Get sales summary for the logged-in user
+app.get('/api/sales/summary', verifyToken, async (req, res) => {
+  try {
+    const user = req.user;
+    const { range } = req.query;
+    let dateFilter = '';
+    if (range === 'today') dateFilter = 'DATE(sale_date) = CURDATE()';
+    else if (range === 'month') dateFilter = 'MONTH(sale_date) = MONTH(CURDATE()) AND YEAR(sale_date) = YEAR(CURDATE())';
+    else if (range === 'year') dateFilter = 'YEAR(sale_date) = YEAR(CURDATE())';
+    else dateFilter = '1=1';
+
+    const [summary] = await medstockDB.promise().query(
+      SELECT COUNT(*) as totalSales, SUM(total_amount) as totalRevenue FROM sales WHERE user_email = ? AND ,
+      [user.email]
+    );
+
+    const [paymentBreakdown] = await medstockDB.promise().query(
+      SELECT payment_method, COUNT(*) as count, SUM(total_amount) as amount FROM sales WHERE user_email = ? AND  GROUP BY payment_method,
+      [user.email]
+    );
+
+    res.json({
+      totalSales: summary[0].totalSales || 0,
+      totalRevenue: summary[0].totalRevenue || 0,
+      paymentBreakdown
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin endpoint: Get sales summary across all users or a specific user
+app.get('/api/sales/summary/by-user', verifyToken, async (req, res) => {
+  try {
+    const user = req.user;
+    if (user.role !== 'Admin') return res.status(403).json({ message: 'Admin access required' });
+
+    const { range, userId } = req.query;
+    let dateFilter = '';
+    if (range === 'today') dateFilter = 'DATE(sale_date) = CURDATE()';
+    else if (range === 'month') dateFilter = 'MONTH(sale_date) = MONTH(CURDATE()) AND YEAR(sale_date) = YEAR(CURDATE())';
+    else if (range === 'year') dateFilter = 'YEAR(sale_date) = YEAR(CURDATE())';
+    else dateFilter = '1=1';
+
+    let userFilter = '';
+    let queryParams = [];
+    if (userId) {
+      userFilter = 'AND user_email = ?';
+      queryParams.push(userId);
+    }
+
+    const [summary] = await medstockDB.promise().query(
+      SELECT COUNT(*) as totalSales, SUM(total_amount) as totalRevenue FROM sales WHERE  ,
+      queryParams
+    );
+
+    const [paymentBreakdown] = await medstockDB.promise().query(
+      SELECT payment_method, COUNT(*) as count, SUM(total_amount) as amount FROM sales WHERE   GROUP BY payment_method,
+      queryParams
+    );
+
+    const [userBreakdown] = await medstockDB.promise().query(
+      SELECT user_email, COUNT(*) as totalSales, SUM(total_amount) as totalRevenue FROM sales WHERE   GROUP BY user_email,
+      queryParams
+    );
+
+    res.json({
+      totalSales: summary[0].totalSales || 0,
+      totalRevenue: summary[0].totalRevenue || 0,
+      paymentBreakdown,
+      userBreakdown
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
